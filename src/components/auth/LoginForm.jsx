@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import {login} from "../../services/Auth/authService.js";
+import {useAuth} from "../../context/Auth/AuthContext.jsx";
 
 const LoginForm = () => {
     const [formData, setFormData] = useState({
@@ -9,18 +9,15 @@ const LoginForm = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const { loginHandler } = useAuth();
 
     async function onSubmit(event) {
         event.preventDefault()
         setIsLoading(true)
 
         try {
-            const {accessToken , refreshToken} = await login(formData);
-
-            localStorage.setItem("accessToken", accessToken);
-            localStorage.setItem("refreshToken", refreshToken);
-            window.dispatchEvent(new Event('storage'));
+            await loginHandler(formData);
             navigate("/");
         } catch (err) {
             setError(err.response?.data?.message || "Invalid credentials. Pleas try again.");

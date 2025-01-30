@@ -1,12 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/Auth/AuthContext.jsx";
-import {useEffect} from "react";
-import {jwtDecode} from "jwt-decode";
 
 export default function Navbar() {
     const navigate = useNavigate();
     const { user, logoutHandler } = useAuth();
-    const setUser = useAuth().setUser;
 
     const buttonBaseStyles =
         "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50";
@@ -17,20 +14,6 @@ export default function Navbar() {
     const buttonSizes = {
         default: "h-9 px-4 py-2",
     };
-
-    useEffect(() => {
-        const handleStorageChange = () => {
-            const accessToken = localStorage.getItem("accessToken");
-            if(accessToken) {
-                const decoded = jwtDecode(accessToken);
-                setUser({ username: decoded.username});
-            } else {
-                setUser(null);
-            }
-        };
-        window.addEventListener("storage", handleStorageChange);
-        return () => window.removeEventListener("storage", handleStorageChange);
-    }, []);
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm">
@@ -46,26 +29,18 @@ export default function Navbar() {
                     </div>
                     <div className="flex items-center space-x-4">
                         {user ? (
-                            // Show logout button if user is logged in
-                            <button
-                                className={`${buttonBaseStyles} ${buttonVariants.ghost} ${buttonSizes.default}`}
-                                onClick={logoutHandler}
-                            >
-                                Logout
-                            </button>
-                        ) : (
-                            // Show login & register buttons if user is not logged in
                             <>
-                                <button
-                                    className={`${buttonBaseStyles} ${buttonVariants.ghost} ${buttonSizes.default}`}
-                                    onClick={() => navigate("/login")}
-                                >
+                                <span className="text-white">Welcome, {user.username}!</span>
+                                <button className={`${buttonBaseStyles} ${buttonVariants.ghost} ${buttonSizes.default}`} onClick={logoutHandler}>
+                                    Logout
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button className={`${buttonBaseStyles} ${buttonVariants.ghost} ${buttonSizes.default}`} onClick={() => navigate("/login")}>
                                     Login
                                 </button>
-                                <button
-                                    className={`${buttonBaseStyles} ${buttonVariants.default} ${buttonSizes.default}`}
-                                    onClick={() => navigate("/register")}
-                                >
+                                <button className={`${buttonBaseStyles} ${buttonVariants.default} ${buttonSizes.default}`} onClick={() => navigate("/register")}>
                                     Get Started
                                 </button>
                             </>

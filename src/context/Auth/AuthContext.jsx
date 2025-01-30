@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, refreshToken, logout } from "../../services/Auth/authService.js";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
 
@@ -13,19 +13,15 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const initializeAuth = async () => {
             const accessToken = localStorage.getItem("accessToken");
-            const refreshToken = localStorage.getItem("refreshToken");
-            if (accessToken && refreshToken) {
+            if (accessToken) {
                 try {
-                    // verify token validity
-                    const isValid = await refreshToken();
-                    if(!isValid) {
-                        handleLogout();
-                        return;
-                    }
-                    // decode after validation
                     const decodedToken = jwtDecode(accessToken);
-                    setUser({ username: decodedToken.username || decodedToken.sub, email: decodedToken.email });
+                    setUser({ username: decodedToken.username || decodedToken.sub });
 
+                    const isValid = await refreshToken();
+                    if (!isValid) {
+                        handleLogout();
+                    }
                 } catch (error) {
                     console.error("Error decoding token", error);
                     handleLogout();
@@ -42,6 +38,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem("accessToken", tokens.accessToken);
             localStorage.setItem("refreshToken", tokens.refreshToken);
 
+            // **Fix:** Update `user` state immediately
             const decodedUser = jwtDecode(tokens.accessToken);
             setUser({ username: decodedUser.username || decodedUser.sub });
 
