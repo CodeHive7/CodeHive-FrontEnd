@@ -18,10 +18,17 @@ apiClient.interceptors.response.use(
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             const refresh = localStorage.getItem("refreshToken");
-            const {data} = await axios.post("/auth/refresh", {refreshToken: refresh});
-            localStorage.setItem("accessToken", data.accessToken);
-            originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-            return apiClient(originalRequest);
+            try {
+                const {data} = await axios.post("http://localhost:8082/api/auth/refresh", {refreshToken: refresh});
+                localStorage.setItem("accessToken", data.accessToken);
+                originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+                return apiClient(originalRequest);
+            } catch (err) {
+                console.error("Refresh token failed", err);
+                localStorage.clear();
+                window.location.href = "/login";
+                return Promise.reject(err);
+            }
         }
         return Promise.reject(error);
     }

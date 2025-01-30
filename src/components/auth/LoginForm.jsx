@@ -1,18 +1,32 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import {login} from "../../services/Auth/authService.js";
 
 const LoginForm = () => {
-    const [isLoading, setIsLoading] = useState(false)
+    const [formData, setFormData] = useState({
+        username: "",
+        password: "",
+    });
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
     const navigate = useNavigate()
 
     async function onSubmit(event) {
         event.preventDefault()
         setIsLoading(true)
 
-        setTimeout(() => {
-            setIsLoading(false)
-            navigate("/dashboard")
-        }, 3000)
+        try {
+            const {accessToken , refreshToken} = await login(formData);
+
+            localStorage.setItem("accessToken", accessToken);
+            localStorage.setItem("refreshToken", refreshToken);
+            window.dispatchEvent(new Event('storage'));
+            navigate("/");
+        } catch (err) {
+            setError(err.response?.data?.message || "Invalid credentials. Pleas try again.");
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return (
@@ -21,21 +35,25 @@ const LoginForm = () => {
                 <h1 className="text-4xl font-bold tracking-tight text-white">Welcome back!</h1>
             </div>
 
+            {error && <p className="text-red-500 text-center">{error}</p> }
+
             <form onSubmit={onSubmit} className="space-y-6">
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <label htmlFor="email" className="text-gray-400">
-                            Email
+                        <label htmlFor="username" className="text-gray-400">
+                            username
                         </label>
                         <input
-                            id="email"
-                            placeholder="Enter your email"
-                            type="email"
+                            id="username"
+                            placeholder="Enter your username"
+                            type="text"
                             autoCapitalize="none"
-                            autoComplete="email"
+                            autoComplete="username"
                             autoCorrect="off"
                             disabled={isLoading}
                             className="h-12 bg-[#12141F] border-gray-800 focus:border-purple-600 w-full rounded-md px-3 py-1 text-sm text-white placeholder-white"
+                            value={formData.username}
+                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                         />
                     </div>
                     <div className="space-y-2">
@@ -52,10 +70,16 @@ const LoginForm = () => {
                             type="password"
                             disabled={isLoading}
                             className="h-12 bg-[#12141F] border-gray-800 focus:border-purple-600 w-full rounded-md px-3 py-1 text-sm"
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         />
                     </div>
                 </div>
-                <button type="submit" className="w-full h-12 bg-purple-600 hover:bg-purple-700 rounded-md" disabled={isLoading}>
+                <button
+                    type="submit"
+                    className="w-full h-12 bg-purple-600 hover:bg-purple-700 rounded-md"
+                    disabled={isLoading}
+                >
                     {isLoading ? (
                         <div className="flex items-center justify-center">
                             <svg

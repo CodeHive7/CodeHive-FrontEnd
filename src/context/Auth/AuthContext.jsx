@@ -1,9 +1,9 @@
-import {createContext, useContext, useState, useEffect} from "react";
-import {useNavigate} from "react-router-dom";
-import { login , refreshToken, logout} from "../../services/Auth/authService.js";
+import { createContext, useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { login, refreshToken, logout } from "../../services/Auth/authService.js";
+import {jwtDecode} from "jwt-decode";
 
 const AuthContext = createContext();
-
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -12,13 +12,23 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const initializeAuth = async () => {
-            const token = localStorage.getItem("accessToken");
-            if(token) {
-                const isValid = await refreshToken(token);
-                if(isValid) {
-                    setUser({ username: "example" });
-                } else {
-                    localStorage.removeItem("accessToken");
+            const accessToken = localStorage.getItem("accessToken");
+            const refreshToken = localStorage.getItem("refreshToken");
+            if (accessToken && refreshToken) {
+                try {
+                    // verify token validity
+                    const isValid = await refreshToken();
+                    if(!isValid) {
+                        handleLogout();
+                        return;
+                    }
+                    // decode after validation
+                    const decodedToken = jwtDecode(accessToken);
+                    setUser({ username: decodedToken.username || decodedToken.sub, email: decodedToken.email });
+
+                } catch (error) {
+                    console.error("Error decoding token", error);
+                    handleLogout();
                 }
             }
             setLoading(false);
@@ -27,23 +37,35 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const loginHandler = async (credentials) => {
-        const tokens = await login(credentials);
-        localStorage.setItem("accessToken", tokens.accessToken);
-        localStorage.setItem("refreshToken", tokens.refreshToken);
-        setUser({ username: credentials.username });
-        navigate("/dashboard");
+        try {
+            const tokens = await login(credentials);
+            localStorage.setItem("accessToken", tokens.accessToken);
+            localStorage.setItem("refreshToken", tokens.refreshToken);
+
+            const decodedUser = jwtDecode(tokens.accessToken);
+            setUser({ username: decodedUser.username || decodedUser.sub });
+
+            navigate("/");
+        } catch (error) {
+            console.error("Login failed", error);
+            throw error;
+        }
     };
 
-    const logoutHandler = async () => {
-        await logout();
+    const handleLogout = async () => {
+        try {
+            await logout();
+        } catch (error) {
+            console.error("Logout failed", error);
+        }
         setUser(null);
         localStorage.clear();
         navigate("/login");
     };
 
     return (
-        <AuthContext.Provider value={{ user, loginHandler, logoutHandler ,loading }}>
-        {!loading && children}
+        <AuthContext.Provider value={{ user, loginHandler, logoutHandler: handleLogout, loading }}>
+            {!loading && children}
         </AuthContext.Provider>
     );
 };
