@@ -2,13 +2,17 @@ import { Routes, Route } from "react-router-dom";
 import AdminLayout from "../../components/layouts/admin/AdminLayout.jsx";
 import DashboardPage from "../../pages/Admin/DashboardPage.jsx";
 import UsersPage from "../../pages/Admin/UsersPage.jsx";
+import SettingsPage from "../../pages/Admin/SettingsPage.jsx";
 import ProtectedAdminRoute from "./ProtectedAdminRoute.jsx";
+import NotificationsPage from "../../pages/Admin/NotificationsPage.jsx";
+import ProjectsPage from "../../pages/Admin/ProjectsPage.jsx";
+import AnalyticsPage from "../../pages/Admin/AnalysticsPage.jsx";
 
 const AdminRoutes = () => {
     return (
         <Routes>
             <Route
-                path="/admin"
+                path="/"
                 element={
                     <ProtectedAdminRoute>
                         <AdminLayout>
@@ -18,11 +22,51 @@ const AdminRoutes = () => {
                 }
             />
             <Route
-                path="/admin/users"
+                path="/users"
                 element={
                     <ProtectedAdminRoute>
                         <AdminLayout>
                             <UsersPage />
+                        </AdminLayout>
+                    </ProtectedAdminRoute>
+                }
+            />
+            <Route
+                path="/settings"
+                element={
+                    <ProtectedAdminRoute>
+                        <AdminLayout>
+                            <SettingsPage/>
+                        </AdminLayout>
+                    </ProtectedAdminRoute>
+                }
+            />
+            <Route
+                path="/notifications"
+                element={
+                <ProtectedAdminRoute>
+                    <AdminLayout>
+                        <NotificationsPage/>
+                    </AdminLayout>
+                </ProtectedAdminRoute>
+                }
+            />
+            <Route
+                path="/projects"
+                element={
+                    <ProtectedAdminRoute>
+                        <AdminLayout>
+                            <ProjectsPage />
+                        </AdminLayout>
+                    </ProtectedAdminRoute>
+                }
+            />
+            <Route
+                path="analytics"
+                element={
+                    <ProtectedAdminRoute>
+                        <AdminLayout>
+                            <AnalyticsPage />
                         </AdminLayout>
                     </ProtectedAdminRoute>
                 }

@@ -1,15 +1,19 @@
 import { Bell, Search } from "lucide-react";
-import { useAuth } from "../../context/Auth/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
-const DashboardHeader = () => {
-    const navigate = useNavigate();
-    const { user, logoutHandler } = useAuth();
+export default function DashboardHeader() {
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+    const toggleDropdown = () => {
+        setIsDropdownOpen(!isDropdownOpen);
+    };
 
     return (
         <header className="sticky top-0 z-40 border-b border-gray-800 bg-[#0A0B14] text-white">
             <div className="flex h-16 items-center justify-between px-6">
-                <h1 className="text-xl font-semibold">Dashboard</h1>
+                <div className="flex items-center gap-4">
+                    <h1 className="text-xl font-semibold">Dashboard</h1>
+                </div>
                 <div className="flex items-center gap-4">
                     <div className="relative">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
@@ -19,17 +23,33 @@ const DashboardHeader = () => {
                             className="w-64 bg-gray-900 border-gray-800 rounded-md pl-8 h-9 text-sm focus:border-purple-600 focus:ring-0"
                         />
                     </div>
-                    <button className="relative h-9 w-9 rounded-full bg-transparent" onClick={() => navigate("/admin/notifications")}>
-                        <Bell className="h-5 w-5" />
-                        <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-purple-600" />
-                    </button>
-                    <button className="bg-red-600 px-4 py-2 rounded-md" onClick={logoutHandler}>
-                        Logout
-                    </button>
+                    <div className="relative">
+                        <button
+                            onClick={toggleDropdown}
+                            className="relative h-9 w-9 rounded-full bg-transparent inline-flex items-center justify-center text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background hover:bg-accent hover:text-accent-foreground"
+                        >
+                            <Bell className="h-5 w-5" />
+                            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-purple-600" />
+                        </button>
+                        {isDropdownOpen && (
+                            <div className="absolute right-0 mt-2 w-80 bg-white text-black rounded-md shadow-lg z-50">
+                                <div className="p-4">
+                                    <h3 className="text-lg font-semibold">Notifications</h3>
+                                    <hr className="my-2" />
+                                    <div className="flex flex-col gap-1 p-2 hover:bg-gray-100 cursor-pointer">
+                                        <p className="text-sm">New user registered</p>
+                                        <p className="text-xs text-gray-500">2 minutes ago</p>
+                                    </div>
+                                    <div className="flex flex-col gap-1 p-2 hover:bg-gray-100 cursor-pointer">
+                                        <p className="text-sm">Server update completed</p>
+                                        <p className="text-xs text-gray-500">2 hours ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </header>
     );
-};
-
-export default DashboardHeader;
+}
