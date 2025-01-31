@@ -1,8 +1,10 @@
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, LogOut } from "lucide-react";
 import { useState } from "react";
+import {useAuth} from "../../context/Auth/AuthContext.jsx";
 
 export default function DashboardHeader() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const { logoutHandler } = useAuth();
 
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);
@@ -48,6 +50,11 @@ export default function DashboardHeader() {
                             </div>
                         )}
                     </div>
+                    <button
+                        onClick={logoutHandler}
+                        className="relative h-9 w-9 rounded-full bg-transparent inline-flex items-center justify-center text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background hover:bg-accent hover:text-accent-foreground">
+                        <LogOut className="h-5 w-5" />
+                    </button>
                 </div>
             </div>
         </header>

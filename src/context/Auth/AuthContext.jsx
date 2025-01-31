@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, refreshToken, logout } from "../../services/Auth/authService.js";
+import { getAccessToken, clearTokens } from "../../services/Auth/tokenService.js";
 import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
@@ -12,7 +13,7 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const initializeAuth = async () => {
-            const accessToken = localStorage.getItem("accessToken");
+            const accessToken = getAccessToken();
             if (accessToken) {
                 try {
                     const decodedToken = jwtDecode(accessToken);
@@ -24,11 +25,10 @@ export const AuthProvider = ({ children }) => {
 
                     const isValid = await refreshToken();
                     if (!isValid) {
-                        handleLogout();
+                        console.warn("Refresh token failed. User session may expire.");
                     }
                 } catch (error) {
                     console.error("Error decoding token", error);
-                    handleLogout();
                 }
             }
             setLoading(false);
@@ -39,18 +39,18 @@ export const AuthProvider = ({ children }) => {
     const loginHandler = async (credentials) => {
         try {
             const tokens = await login(credentials);
-            localStorage.setItem("accessToken", tokens.accessToken);
-            localStorage.setItem("refreshToken", tokens.refreshToken);
-
             const decodedUser = jwtDecode(tokens.accessToken);
-            setUser({
+
+            const userData = {
                 username: decodedUser.username || decodedUser.sub,
                 roles: decodedUser.roles || [],
                 permissions: decodedUser.permissions || [],
-            });
+            };
+
+            setUser(userData);
 
             setTimeout(() => {
-                if (decodedUser.roles.includes("SUPER_ADMIN")) {
+                if(userData.roles.includes("SUPER_ADMIN")) {
                     navigate("/admin");
                 } else {
                     navigate("/");
@@ -63,14 +63,10 @@ export const AuthProvider = ({ children }) => {
     };
 
     const handleLogout = async () => {
-        try {
-            await logout();
-        } catch (error) {
-            console.error("Logout failed", error);
-        }
-        setUser(null);
-        localStorage.clear();
-        navigate("/login");
+       await logout();
+       setUser(null);
+       clearTokens();
+       navigate("/login");
     };
 
     return (
