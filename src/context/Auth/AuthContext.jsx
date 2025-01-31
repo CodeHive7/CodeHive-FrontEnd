@@ -16,7 +16,11 @@ export const AuthProvider = ({ children }) => {
             if (accessToken) {
                 try {
                     const decodedToken = jwtDecode(accessToken);
-                    setUser({ username: decodedToken.username || decodedToken.sub });
+                    setUser({
+                        username: decodedToken.username || decodedToken.sub,
+                        roles: decodedToken.roles || [],
+                        permissions: decodedToken.permissions || [],
+                    });
 
                     const isValid = await refreshToken();
                     if (!isValid) {
@@ -38,11 +42,20 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem("accessToken", tokens.accessToken);
             localStorage.setItem("refreshToken", tokens.refreshToken);
 
-            // **Fix:** Update `user` state immediately
             const decodedUser = jwtDecode(tokens.accessToken);
-            setUser({ username: decodedUser.username || decodedUser.sub });
+            setUser({
+                username: decodedUser.username || decodedUser.sub,
+                roles: decodedUser.roles || [],
+                permissions: decodedUser.permissions || [],
+            });
 
-            navigate("/");
+            setTimeout(() => {
+                if (decodedUser.roles.includes("SUPER_ADMIN")) {
+                    navigate("/admin");
+                } else {
+                    navigate("/");
+                }
+            }, 100);
         } catch (error) {
             console.error("Login failed", error);
             throw error;
