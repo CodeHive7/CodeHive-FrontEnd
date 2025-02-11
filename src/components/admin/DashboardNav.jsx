@@ -1,8 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Settings, BarChart3, Bell, FolderKanban } from "lucide-react";
+import { LayoutDashboard, Users, Settings, BarChart3, Bell, FolderKanban, Menu } from "lucide-react";
+import { useState } from "react";
 
-const DashboardNav = () => {
+const DashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
     const location = useLocation();
+    const [isOpen, setIsOpen] = useState(false);
+
+    const toggleMenu = () => setIsOpen(!isOpen);
 
     const routes = [
         { label: "Overview", icon: LayoutDashboard, href: "/admin" },
@@ -17,12 +21,19 @@ const DashboardNav = () => {
     ];
 
     return (
-        <aside className="h-screen w-64 border-r border-gray-800 bg-[#0A0B14] text-gray-300">
-            <div className="border-b border-gray-800 px-6 py-4">
+        <aside
+            className={`fixed lg:relative top-0 left-0 h-full w-64 border-r border-gray-800 bg-[#0A0B14] text-gray-300 transform ${
+                isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            } lg:translate-x-0 transition-transform duration-300 ease-in-out`}
+        >
+            <div className="border-b border-gray-800 px-6 py-4 flex justify-between items-center lg:block">
                 <Link to="/" className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg transform rotate-45"></div>
                     <span className="font-bold text-xl text-white">Admin</span>
                 </Link>
+                <button className="lg:hidden text-gray-300" onClick={toggleSidebar}>
+                    <Menu />
+                </button>
             </div>
             <nav className="p-6">
                 <h3 className="text-gray-400">Menu</h3>
