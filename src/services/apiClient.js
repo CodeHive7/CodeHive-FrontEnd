@@ -7,6 +7,7 @@ const apiClient = axios.create({
 });
 
 let isRefreshing = false;
+let refreshPromise = null;
 let failedQueue = [];
 
 const processQueue = (error, token = null) => {
@@ -33,14 +34,10 @@ apiClient.interceptors.response.use(
 
         if (error.response?.status === 401 && !originalRequest._retry) {
             if(isRefreshing) {
-                return new Promise((resolve, reject) => {
-                    failedQueue.push({resolve, reject});
-                })
-                    .then((token) => {
-                        originalRequest.headers.Authorization = `Bearer ${token}`;
-                        return apiClient(originalRequest);
-                    })
-                    .catch((err) => Promise.reject(err));
+                return refreshPromise.then((newAccessToken) => {
+                    originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                    return apiClient(originalRequest);
+                }) ;
             }
 
             originalRequest._retry = true;
