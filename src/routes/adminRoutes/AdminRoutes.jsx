@@ -7,6 +7,7 @@ import ProtectedAdminRoute from "./ProtectedAdminRoute.jsx";
 import NotificationsPage from "../../pages/Admin/NotificationsPage.jsx";
 import ProjectsPage from "../../pages/Admin/ProjectsPage.jsx";
 import AnalyticsPage from "../../pages/Admin/AnalysticsPage.jsx";
+import RolePermissionsPage from "../../pages/Admin/RolePermissionsPage.jsx";
 
 const AdminRoutes = () => {
     return (
@@ -27,6 +28,16 @@ const AdminRoutes = () => {
                     <ProtectedAdminRoute>
                         <AdminLayout>
                             <UsersPage />
+                        </AdminLayout>
+                    </ProtectedAdminRoute>
+                }
+            />
+            <Route
+                path="/permissions"
+                element={
+                    <ProtectedAdminRoute>
+                        <AdminLayout>
+                            <RolePermissionsPage />
                         </AdminLayout>
                     </ProtectedAdminRoute>
                 }

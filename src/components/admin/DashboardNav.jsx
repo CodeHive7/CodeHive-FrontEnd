@@ -13,6 +13,7 @@ const DashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
         { label: "Analytics", icon: BarChart3, href: "/admin/analytics" },
         { label: "Projects", icon: FolderKanban, href: "/admin/projects" },
         { label: "Users", icon: Users, href: "/admin/users" },
+        { label: "Manage Permissions", icon: Settings, href: "/admin/permissions" },
     ];
 
     const resources = [
