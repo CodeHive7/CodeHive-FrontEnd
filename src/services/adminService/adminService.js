@@ -88,5 +88,19 @@ export const createRole = async (roleName,callback) => {
     } catch (error) {
         console.error("Error creating role", error.response?.data || error.message);
     }
+};
+
+export const updateRole = async (roleId, newName, callback) => {
+    try {
+        await apiClient.put(`/admin/roles/${roleId}`, { name: newName });
+        callback();
+    } catch (error) {
+        console.error("Error updating role", error);
+    }
+};
+
+export const deleteRole = async (roleId, cllback) => {
+    await apiClient.delete(`/admin/roles/${roleId}`);
+    cllback();
 }
 

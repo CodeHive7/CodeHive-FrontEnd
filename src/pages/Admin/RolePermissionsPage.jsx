@@ -1,7 +1,15 @@
 import { useState, useEffect } from "react";
-import { fetchRoles, fetchPermissions, assignPermissions, removePermissions, createRole } from "../../services/adminService/adminService.js";
+import {
+    fetchRoles,
+    fetchPermissions,
+    assignPermissions,
+    removePermissions,
+    createRole,
+    updateRole,
+    deleteRole
+} from "../../services/adminService/adminService.js";
 import { useDrop } from "react-dnd";
-import { Trash2, PlusCircle } from "lucide-react";
+import { Trash2, PlusCircle, ChevronDown, ChevronUp, Check, X, Pencil } from "lucide-react";
 import { DndProvider, useDrag } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -100,6 +108,11 @@ const RoleCard = ({ role, refresh }) => {
         }),
     }));
 
+    const [expanded, setExpanded] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [editedRoleName, setEditedRoleName] = useState(role.name);
+    const visiblePermissions = expanded ? role.permissions : role.permissions.slice(0, 5);
+
     const handleAssignPermission = async (permission) => {
         if (!role.permissions.includes(permission)) {
             await assignPermissions(role.id, [permission], refresh);
@@ -110,16 +123,59 @@ const RoleCard = ({ role, refresh }) => {
         await removePermissions(role.id, [permission], refresh);
     };
 
+    const handleUpdateRole = async () => {
+        if (!editedRoleName.trim() || editedRoleName === role.name) {
+            setEditMode(false);
+            return;
+        }
+        await updateRole(role.id, editedRoleName, refresh);
+        setEditMode(false);
+    };
+
+    const handleDeleteRole = async () => {
+        if (window.confirm(`Are you sure you want to delete the role "${role.name}"?`)) {
+            await deleteRole(role.id, refresh);
+        }
+    };
+
     return (
-        <div
-            ref={drop}
-            className={`bg-[#1C1F2E] p-6 rounded-md shadow-md border border-gray-700 transition-all ${
-                isOver ? "border-blue-500 scale-105" : "border-gray-700"
-            }`}
-        >
-            <h2 className="text-lg font-bold text-white mb-3">{role.name}</h2>
-            <div className="flex flex-wrap gap-2">
-                {role.permissions.map((perm) => (
+        <div ref={drop} className={`bg-[#1C1F2E] p-5 rounded-md shadow-md border transition-all ${isOver ? "border-blue-500 scale-105" : "border-gray-700"}`}>
+            <div className="flex justify-between items-center">
+                {editMode ? (
+                    <input
+                        type="text"
+                        value={editedRoleName}
+                        onChange={(e) => setEditedRoleName(e.target.value)}
+                        className="bg-gray-800 text-white px-2 py-1 rounded-md focus:outline-none w-3/4"
+                    />
+                ) : (
+                    <h2 className="text-lg font-bold text-white">{role.name}</h2>
+                )}
+                <div className="flex space-x-2">
+                    {editMode ? (
+                        <>
+                            <button onClick={handleUpdateRole} className="text-green-500 hover:text-green-700">
+                                <Check className="w-5 h-5" />
+                            </button>
+                            <button onClick={() => setEditMode(false)} className="text-red-500 hover:text-red-700">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button onClick={() => setEditMode(true)} className="text-blue-500 hover:text-blue-700">
+                                <Pencil className="w-5 h-5" />
+                            </button>
+                            <button onClick={handleDeleteRole} className="text-red-500 hover:text-red-700">
+                                <Trash2 className="w-5 h-5" />
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mt-3">
+                {visiblePermissions.map((perm) => (
                     <div key={perm} className="bg-green-500/10 text-green-500 px-3 py-1 rounded-md text-sm flex items-center space-x-2">
                         <span>{perm}</span>
                         <button onClick={() => handleRemovePermission(perm)} className="text-red-500 hover:text-red-700">
@@ -128,6 +184,12 @@ const RoleCard = ({ role, refresh }) => {
                     </div>
                 ))}
             </div>
+
+            {role.permissions.length > 5 && (
+                <button className="mt-3 text-blue-500 hover:text-blue-400 flex items-center space-x-1 transition" onClick={() => setExpanded(!expanded)}>
+                    {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+            )}
         </div>
     );
 };
@@ -153,16 +215,10 @@ const CreateRoleModal = ({ onClose, refresh }) => {
                     value={roleName}
                     onChange={(e) => setRoleName(e.target.value)}
                 />
-                <button
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full transition"
-                    onClick={handleCreateRole}
-                >
+                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full transition" onClick={handleCreateRole}>
                     Create Role
                 </button>
-                <button
-                    className="mt-2 text-red-500 hover:text-red-700 w-full text-center transition"
-                    onClick={onClose}
-                >
+                <button className="mt-2 text-red-500 hover:text-red-700 w-full text-center transition" onClick={onClose}>
                     Cancel
                 </button>
             </div>

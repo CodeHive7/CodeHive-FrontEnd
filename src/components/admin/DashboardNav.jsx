@@ -23,9 +23,10 @@ const DashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
 
     return (
         <aside
-            className={`fixed lg:relative top-0 left-0 h-full w-64 border-r border-gray-800 bg-[#0A0B14] text-gray-300 transform ${
-                isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-            } lg:translate-x-0 transition-transform duration-300 ease-in-out`}
+            className={`fixed top-0 left-0 h-full w-64 border-r border-gray-800 bg-[#0A0B14] text-gray-300 transform 
+            ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} 
+            lg:relative lg:translate-x-0 lg:w-64 
+            transition-transform duration-300 ease-in-out z-50`}
         >
             <div className="border-b border-gray-800 px-6 py-4 flex justify-between items-center lg:block">
                 <Link to="/" className="flex items-center gap-2">
