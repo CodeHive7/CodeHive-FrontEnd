@@ -102,5 +102,37 @@ export const updateRole = async (roleId, newName, callback) => {
 export const deleteRole = async (roleId, cllback) => {
     await apiClient.delete(`/admin/roles/${roleId}`);
     cllback();
+};
+
+export const fetchCategories = async () => {
+    const response = await apiClient.get("/admin/categories");
+    return response.data;
+};
+
+export const createCategory = async (categoryName, callback) => {
+    try {
+        await apiClient.post("/admin/categories", { name: categoryName });
+        callback();
+    } catch (error) {
+        console.error("Error creating category", error);
+    }
+};
+
+export const updateCategory = async (categoryId, newName, callback) => {
+    try {
+        await apiClient.put(`/admin/categories/${categoryId}`, { name: newName });
+        callback();
+    } catch (error) {
+        console.error("Error updating category", error);
+    }
+};
+
+export const deleteCategory = async (categoryId, callback) => {
+    try {
+        await apiClient.delete(`/admin/categories/${categoryId}`);
+        callback();
+    } catch (error) {
+        console.error("Error deleting category", error);
+    }
 }
 

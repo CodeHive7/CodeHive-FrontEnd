@@ -3,6 +3,7 @@ import Home from "../pages/Home.jsx";
 import Register from "../pages/Auth/Register.jsx";
 import Login from "../pages/Auth/Login.jsx";
 import AdminRoutes from "./adminRoutes/AdminRoutes.jsx";
+import UserHomePage from "../pages/User/UserHomePage.jsx";
 
 
 const AppRoutes = () => {
@@ -12,6 +13,7 @@ const AppRoutes = () => {
             <Route path="/login" element={<Login/>}/>
             <Route path="/register" element={<Register/>}/>
             <Route path="/admin/*" element={<AdminRoutes/>}/>
+            <Route path="/userHome" element={<UserHomePage/>}/>
         </Routes>
     );
 };

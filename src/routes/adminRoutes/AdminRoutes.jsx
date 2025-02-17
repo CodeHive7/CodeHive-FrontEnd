@@ -8,6 +8,7 @@ import NotificationsPage from "../../pages/Admin/NotificationsPage.jsx";
 import ProjectsPage from "../../pages/Admin/ProjectsPage.jsx";
 import AnalyticsPage from "../../pages/Admin/AnalysticsPage.jsx";
 import RolePermissionsPage from "../../pages/Admin/RolePermissionsPage.jsx";
+import CategoryManagementPage from "../../pages/Admin/CategoryManagementPage.jsx";
 
 const AdminRoutes = () => {
     return (
@@ -38,6 +39,16 @@ const AdminRoutes = () => {
                     <ProtectedAdminRoute>
                         <AdminLayout>
                             <RolePermissionsPage />
+                        </AdminLayout>
+                    </ProtectedAdminRoute>
+                }
+            />
+            <Route
+                path="/categories"
+                element={
+                    <ProtectedAdminRoute>
+                        <AdminLayout>
+                            <CategoryManagementPage />
                         </AdminLayout>
                     </ProtectedAdminRoute>
                 }

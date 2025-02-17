@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
                 if(userData.roles.includes("SUPER_ADMIN")) {
                     navigate("/admin");
                 } else {
-                    navigate("/");
+                    navigate("/userHome");
                 }
             }, 100);
         } catch (error) {
