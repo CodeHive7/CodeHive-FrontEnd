@@ -134,5 +134,29 @@ export const deleteCategory = async (categoryId, callback) => {
     } catch (error) {
         console.error("Error deleting category", error);
     }
-}
+};
+
+
+export const fetchPendingProjects = async () => {
+    const response = await apiClient.get("/project/pending");
+    return response.data;
+};
+
+export const fetchAcceptedProjects = async () => {
+    const response = await apiClient.get(`/project/accepted`);
+    return response.data;
+};
+
+export const fetchRejectedProjects = async () => {
+    const response = await apiClient.get(`/project/rejected`);
+    return response.data;
+};
+
+export const acceptProject = async (projectId) => {
+    await apiClient.post(`/admin/projects/${projectId}/accept`);
+};
+
+export const rejectProject = async (projectId, feedback) => {
+    await apiClient.post(`/admin/projects/${projectId}/reject`, { feedback });
+};
 

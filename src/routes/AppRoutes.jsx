@@ -4,6 +4,7 @@ import Register from "../pages/Auth/Register.jsx";
 import Login from "../pages/Auth/Login.jsx";
 import AdminRoutes from "./adminRoutes/AdminRoutes.jsx";
 import UserHomePage from "../pages/User/UserHomePage.jsx";
+import ProjectDetailsPage from "../pages/User/Projects/ProjectDetailsPage.jsx";
 
 
 const AppRoutes = () => {
@@ -14,6 +15,7 @@ const AppRoutes = () => {
             <Route path="/register" element={<Register/>}/>
             <Route path="/admin/*" element={<AdminRoutes/>}/>
             <Route path="/userHome" element={<UserHomePage/>}/>
+            <Route path="/projects/:projectId" element={<ProjectDetailsPage/>}/>
         </Routes>
     );
 };

@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import {Routes, Route, Outlet} from "react-router-dom";
 import AdminLayout from "../../components/layouts/admin/AdminLayout.jsx";
 import DashboardPage from "../../pages/Admin/DashboardPage.jsx";
 import UsersPage from "../../pages/Admin/UsersPage.jsx";
@@ -9,6 +9,8 @@ import ProjectsPage from "../../pages/Admin/ProjectsPage.jsx";
 import AnalyticsPage from "../../pages/Admin/AnalysticsPage.jsx";
 import RolePermissionsPage from "../../pages/Admin/RolePermissionsPage.jsx";
 import CategoryManagementPage from "../../pages/Admin/CategoryManagementPage.jsx";
+import AcceptedProjectsPage from "../../pages/Admin/AcceptedProjectsPage.jsx";
+import RejectedProjectsPage from "../../pages/Admin/RejectedProjectsPage.jsx";
 
 const AdminRoutes = () => {
     return (
@@ -76,13 +78,17 @@ const AdminRoutes = () => {
             <Route
                 path="/projects"
                 element={
-                    <ProtectedAdminRoute>
-                        <AdminLayout>
-                            <ProjectsPage />
-                        </AdminLayout>
-                    </ProtectedAdminRoute>
-                }
-            />
+                <ProtectedAdminRoute>
+                    <AdminLayout>
+                        <Outlet />
+                    </AdminLayout>
+                </ProtectedAdminRoute>
+            }
+            >
+                <Route index element={<ProjectsPage />} /> {/* Default to Pending Projects */}
+                <Route path="accepted" element={<AcceptedProjectsPage />} /> {/* Accepted Projects */}
+                <Route path="rejected" element={<RejectedProjectsPage />} /> {/* Rejected Projects */}
+            </Route>
             <Route
                 path="analytics"
                 element={

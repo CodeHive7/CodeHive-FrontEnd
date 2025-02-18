@@ -113,30 +113,56 @@ export default function UserHomePage() {
 
             {/* Projects Section */}
             <div className="max-w-6xl mx-auto px-6 py-12">
-                <h2 className="text-3xl font-bold text-white mb-6">Available Projects</h2>
+                <h2 className="text-4xl font-bold text-white mb-8">Browse & Apply For Projects</h2>
 
                 {projects.length === 0 ? (
                     <p className="text-gray-400">No projects available at the moment.</p>
                 ) : (
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {projects.map((project) => (
-                            <div key={project.id} className="bg-[#12141F] p-6 rounded-lg shadow-md border border-gray-700">
-                                <h3 className="text-xl font-semibold">{project.name}</h3>
-                                <p className="text-gray-400 text-sm mt-2">{project.description}</p>
-                                <p className="text-gray-500 text-xs mt-2">Category: {project.category.name}</p>
+                            <div
+                                key={project.id}
+                                className="bg-[#12141F] rounded-lg shadow-lg border border-gray-700 transform hover:scale-105 transition duration-300 overflow-hidden p-6"
+                            >
+                                {/* Project Title */}
+                                <h3 className="text-2xl font-bold text-blue-400">{project.name}</h3>
 
-                                <div className="mt-4 flex justify-between items-center">
-                                    <button
-                                        onClick={() => handleApply(project.id, project.positions[0]?.id)}
-                                        className="bg-green-600 text-white px-4 py-2 rounded-md text-sm"
-                                    >
-                                        Apply
-                                    </button>
+                                {/* Project Description */}
+                                <p className="text-gray-400 mt-2">{project.description}</p>
+
+                                {/* Project Category */}
+                                <p className="text-gray-500 text-sm mt-2">
+                                    <span className="font-semibold text-white">Category:</span> {project.category ? project.category : "Uncategorized"}
+                                </p>
+
+                                {/* Positions & Availability */}
+                                <div className="mt-3">
+                                    <h4 className="text-lg font-semibold text-white mb-2">Open Positions:</h4>
+                                    <ul className="text-gray-300 text-sm space-y-2">
+                                        {project.positions.length > 0 ? (
+                                            project.positions.map((position, index) => (
+                                                <li key={index}
+                                                    className="flex justify-between bg-gray-800 p-2 rounded-md">
+                                                    <span>{position.roleName}</span>
+                                                    <span className="text-yellow-400">
+                                                        {position.quantity} spots left
+                                                    </span>
+                                                </li>
+                                            ))
+                                        ) : (
+                                            <p className="text-gray-400">No open positions.</p>
+                                        )}
+                                    </ul>
+                                </div>
+
+                                {/* View & Apply Button */}
+                                <div className="mt-6">
                                     <Link
                                         to={`/projects/${project.id}`}
-                                        className="text-blue-500 hover:text-blue-400 flex items-center text-sm"
+                                        className="w-full inline-block text-center bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-md text-lg font-semibold hover:shadow-lg transition"
                                     >
-                                        Details <ArrowRight className="w-4 h-4 ml-1" />
+                                        View Details & Apply
+                                        <ArrowRight className="inline-block w-5 h-5 ml-2"/>
                                     </Link>
                                 </div>
                             </div>
@@ -148,13 +174,14 @@ export default function UserHomePage() {
             {/* Create Project Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-                    <div className="relative bg-[#1C1F2E] w-full max-w-5xl h-[90vh] overflow-y-auto rounded-lg shadow-lg border border-gray-700 p-8">
+                    <div
+                        className="relative bg-[#1C1F2E] w-full max-w-5xl h-[90vh] overflow-y-auto rounded-lg shadow-lg border border-gray-700 p-8">
                         {/* Close Button */}
                         <button
                             onClick={() => setIsModalOpen(false)}
                             className="absolute top-5 right-5 text-gray-400 hover:text-white"
                         >
-                            <X className="w-8 h-8" />
+                            <X className="w-8 h-8"/>
                         </button>
 
                         <h2 className="text-3xl font-bold text-white mb-6 text-center">Create a New Project</h2>
@@ -166,7 +193,7 @@ export default function UserHomePage() {
                                 type="text"
                                 placeholder="Project Name"
                                 value={newProject.name}
-                                onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+                                onChange={(e) => setNewProject({...newProject, name: e.target.value})}
                                 className="w-full p-3 mb-4 border bg-gray-800 text-white rounded"
                             />
 
@@ -174,7 +201,7 @@ export default function UserHomePage() {
                             <textarea
                                 placeholder="Project Description"
                                 value={newProject.description}
-                                onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+                                onChange={(e) => setNewProject({...newProject, description: e.target.value})}
                                 className="w-full p-3 mb-4 border bg-gray-800 text-white rounded h-24"
                             />
 
@@ -182,7 +209,7 @@ export default function UserHomePage() {
                             <select
                                 className="w-full p-3 mb-4 border bg-gray-800 text-white rounded"
                                 value={newProject.stage}
-                                onChange={(e) => setNewProject({ ...newProject, stage: e.target.value })}
+                                onChange={(e) => setNewProject({...newProject, stage: e.target.value})}
                             >
                                 <option value="">Select Stage</option>
                                 <option value="NOT_STARTED">Not Started</option>
