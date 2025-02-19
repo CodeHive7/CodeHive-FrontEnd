@@ -142,7 +142,7 @@ export default function ProjectDetailsPage() {
         <div className="min-h-screen bg-[#0A0B14] text-white px-6 py-12">
             {/* Back Button */}
             <div className="max-w-5xl mx-auto mb-6">
-                <Link to="/" className="flex items-center text-gray-400 hover:text-white transition">
+                <Link to="/userHome" className="flex items-center text-gray-400 hover:text-white transition">
                     <ArrowLeft className="w-5 h-5 mr-2" /> Back to Projects
                 </Link>
             </div>
