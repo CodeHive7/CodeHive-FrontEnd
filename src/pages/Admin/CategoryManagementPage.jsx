@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchCategories, createCategory, updateCategory, deleteCategory } from "../../services/adminService/adminService.js";
 import { Trash2, Pencil, PlusCircle, Check, X } from "lucide-react";
+import Swal from "sweetalert2";
 
 export default function CategoryManagementPage() {
     const [categories, setCategories] = useState([]);
@@ -35,9 +36,37 @@ export default function CategoryManagementPage() {
     };
 
     const handleDeleteCategory = async (categoryId) => {
-        if (window.confirm("Are you sure you want to delete this category?")) {
-            await deleteCategory(categoryId, loadCategories);
-        }
+      const result = await Swal.fire({
+          title: "Are you sure ?",
+          text: "This action cannot be undone. If this category is in use , deletion will fail.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, delete it!",
+          cancelButtonText: "No, cancel!",
+      });
+      if(result.isConfirmed) {
+          try {
+              await deleteCategory(categoryId);
+              // only reload categories if deletion was successful
+              await loadCategories();
+
+              Swal.fire({
+                  icon: "success",
+                  title: "Category Deleted",
+                  text: "The category has been deleted successfully.",
+                  timer: 2000,
+                  showConfirmButton: false,
+              });
+          } catch (error) {
+              Swal.fire({
+                  icon: "error",
+                  title: "Deletion Failed",
+                  text: error.response?.data || "This Category is in use and cannot be deleted.",
+              });
+          }
+      }
     };
 
     return (

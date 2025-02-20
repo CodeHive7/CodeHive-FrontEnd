@@ -1,4 +1,5 @@
 import apiClient  from "../apiClient.js";
+import Swal from "sweetalert2";
 
 export const fetchUsers = async () => {
     const { data } = await apiClient.get("/admin/users");
@@ -127,12 +128,12 @@ export const updateCategory = async (categoryId, newName, callback) => {
     }
 };
 
-export const deleteCategory = async (categoryId, callback) => {
+export const deleteCategory = async (categoryId) => {
     try {
         await apiClient.delete(`/admin/categories/${categoryId}`);
-        callback();
     } catch (error) {
         console.error("Error deleting category", error);
+        throw error;
     }
 };
 

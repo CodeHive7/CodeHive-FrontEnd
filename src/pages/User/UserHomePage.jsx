@@ -100,7 +100,7 @@ export default function UserHomePage() {
                             Create Project
                         </button>
                         {/* Dashboard Icon */}
-                        <Link to="/" className="hover:bg-gray-800 p-2 rounded-md">
+                        <Link to="/user" className="hover:bg-gray-800 p-2 rounded-md">
                             <LayoutDashboard className="h-6 w-6 text-white" />
                         </Link>
                         {/* Logout Icon */}
