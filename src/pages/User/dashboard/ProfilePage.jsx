@@ -1,43 +1,66 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getUserProfile, updateUserProfile } from "../../../services/userService/UserService.js";
 import { Pencil, Check, X } from "lucide-react";
 import Swal from "sweetalert2";
 
 export default function ProfilePage() {
     const [isEditing, setIsEditing] = useState(false);
-
-    // Fake user data
     const [userData, setUserData] = useState({
         avatar: "https://i.pravatar.cc/150?img=3", // Fake profile image
-        fullName: "John Doe",
-        email: "johndoe@example.com",
-        username: "john_doe",
-        bio: "Full-Stack Developer | React & Spring Boot Enthusiast",
-        location: "New York, USA",
-        website: "https://johndoe.dev",
+        fullName: "",
+        email: "",
+        username: "",
+        bio: "",
+        location: "",
+        website: "",
     });
 
     const [tempData, setTempData] = useState({ ...userData });
 
-    // Handle input changes
+    useEffect(() => {
+        fetchUserProfile();
+    }, []);
+
+    const fetchUserProfile = async () => {
+        try {
+            const data = await getUserProfile();
+            setUserData({
+                ...data,
+                avatar: "https://i.pravatar.cc/150?img=3", // Fake avatar
+            });
+            setTempData(data);
+        } catch (error) {
+            console.error("Error fetching user profile", error);
+        }
+    };
+
     const handleChange = (e) => {
         setTempData({ ...tempData, [e.target.name]: e.target.value });
     };
 
-    // Save profile changes
-    const handleSave = () => {
-        setUserData(tempData);
-        setIsEditing(false);
-        Swal.fire({
-            icon: "success",
-            title: "Profile Updated",
-            text: "Your profile information has been successfully updated!",
-            timer: 2000,
-            showConfirmButton: false,
-        });
+    const handleSave = async () => {
+        try {
+            await updateUserProfile(tempData);
+            setUserData(tempData);
+            setIsEditing(false);
+            Swal.fire({
+                icon: "success",
+                title: "Profile Updated",
+                text: "Your profile information has been successfully updated!",
+                timer: 2000,
+                showConfirmButton: false,
+            });
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Update Failed",
+                text: "An error occurred while updating your profile. Please try again later.",
+            });
+        }
     };
 
     return (
-        <div className="max-w-3xl mx-auto bg-[#1C1F2E] p-8 rounded-lg shadow-lg border border-gray-700">
+        <div className="max-w-3xl mx-auto bg-[#1C1F2E] p-8 rounded-lg shadow-lg border border-gray-700 mt-10">
             {/* Profile Header */}
             <div className="flex items-center space-x-6 mb-6">
                 <img
@@ -60,75 +83,42 @@ export default function ProfilePage() {
 
             {/* Profile Form */}
             <div className="space-y-4">
-                <div>
-                    <label className="block text-gray-400 text-sm">Full Name</label>
-                    <input
-                        type="text"
-                        name="fullName"
-                        value={tempData.fullName}
-                        onChange={handleChange}
-                        disabled={!isEditing}
-                        className={`w-full p-3 rounded-md border bg-gray-900 text-white border-gray-700 focus:border-purple-600 focus:ring-0 ${
-                            isEditing ? "" : "cursor-not-allowed"
-                        }`}
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-gray-400 text-sm">Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        value={tempData.email}
-                        onChange={handleChange}
-                        disabled={!isEditing}
-                        className={`w-full p-3 rounded-md border bg-gray-900 text-white border-gray-700 focus:border-purple-600 focus:ring-0 ${
-                            isEditing ? "" : "cursor-not-allowed"
-                        }`}
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-gray-400 text-sm">Bio</label>
-                    <textarea
-                        name="bio"
-                        value={tempData.bio}
-                        onChange={handleChange}
-                        disabled={!isEditing}
-                        rows="3"
-                        className={`w-full p-3 rounded-md border bg-gray-900 text-white border-gray-700 focus:border-purple-600 focus:ring-0 ${
-                            isEditing ? "" : "cursor-not-allowed"
-                        }`}
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-gray-400 text-sm">Location</label>
-                    <input
-                        type="text"
-                        name="location"
-                        value={tempData.location}
-                        onChange={handleChange}
-                        disabled={!isEditing}
-                        className={`w-full p-3 rounded-md border bg-gray-900 text-white border-gray-700 focus:border-purple-600 focus:ring-0 ${
-                            isEditing ? "" : "cursor-not-allowed"
-                        }`}
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-gray-400 text-sm">Website</label>
-                    <input
-                        type="text"
-                        name="website"
-                        value={tempData.website}
-                        onChange={handleChange}
-                        disabled={!isEditing}
-                        className={`w-full p-3 rounded-md border bg-gray-900 text-white border-gray-700 focus:border-purple-600 focus:ring-0 ${
-                            isEditing ? "" : "cursor-not-allowed"
-                        }`}
-                    />
-                </div>
+                {[
+                    { label: "Full Name", key: "fullName" },
+                    { label: "Username", key: "username" },
+                    { label: "Email", key: "email", type: "email" },
+                    { label: "Bio", key: "bio", type: "textarea" },
+                    { label: "Location", key: "location" },
+                    { label: "phone number", key: "phoneNumber" },
+                    { label: "Website", key: "website" },
+                ].map(({ label, key, type = "text" }) => (
+                    <div key={key}>
+                        <label className="block text-gray-400 text-sm">{label}</label>
+                        {type === "textarea" ? (
+                            <textarea
+                                name={key}
+                                value={tempData[key] || ""}
+                                onChange={handleChange}
+                                disabled={!isEditing}
+                                rows="3"
+                                className={`w-full p-3 rounded-md border bg-gray-900 text-white border-gray-700 focus:border-purple-600 focus:ring-0 ${
+                                    isEditing ? "" : "cursor-not-allowed"
+                                }`}
+                            />
+                        ) : (
+                            <input
+                                type={type}
+                                name={key}
+                                value={tempData[key] || ""}
+                                onChange={handleChange}
+                                disabled={!isEditing}
+                                className={`w-full p-3 rounded-md border bg-gray-900 text-white border-gray-700 focus:border-purple-600 focus:ring-0 ${
+                                    isEditing ? "" : "cursor-not-allowed"
+                                }`}
+                            />
+                        )}
+                    </div>
+                ))}
 
                 {/* Save Button */}
                 {isEditing && (
