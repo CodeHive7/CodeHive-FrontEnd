@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { User, Briefcase, FolderKanban, ChevronDown, ChevronRight, Settings, Users } from "lucide-react";
-import { useState } from "react";
+import { User, FolderKanban, ChevronDown, ChevronRight, Settings } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 
 const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
     const location = useLocation();
     const [isProjectsOpen, setIsProjectsOpen] = useState(false);
+    const sidebarRef = useRef(null); // Reference to the sidebar
 
     const toggleProjectsMenu = () => setIsProjectsOpen(!isProjectsOpen);
 
@@ -23,8 +24,21 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
         { id: "settings", label: "Settings", icon: Settings, href: "/user/settings" },
     ];
 
+    // Handle click outside of the sidebar to close it
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (isSidebarOpen && sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+                toggleSidebar(); // Close sidebar
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [isSidebarOpen]);
+
     return (
         <aside
+            ref={sidebarRef} // Attach ref to the sidebar
             className={`fixed top-0 left-0 h-full w-64 border-r border-gray-800 bg-[#0A0B14] text-gray-300 transform 
             ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} 
             lg:relative lg:translate-x-0 lg:w-64 
@@ -57,7 +71,11 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                                     <ul className="ml-6 mt-2 space-y-2">
                                         {route.subRoutes.map((subroute) => (
                                             <li key={subroute.id}>
-                                                <Link to={subroute.href} className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-700">
+                                                <Link
+                                                    to={subroute.href}
+                                                    onClick={toggleSidebar} // Close sidebar when a link is clicked
+                                                    className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-700"
+                                                >
                                                     {subroute.label}
                                                 </Link>
                                             </li>
@@ -67,7 +85,11 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                             </li>
                         ) : (
                             <li key={route.id}>
-                                <Link to={route.href} className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-800">
+                                <Link
+                                    to={route.href}
+                                    onClick={toggleSidebar} // Close sidebar when a link is clicked
+                                    className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-800"
+                                >
                                     <route.icon className="h-5 w-5" />
                                     {route.label}
                                 </Link>

@@ -1,57 +1,41 @@
-import { useState } from "react";
-import { FolderKanban, CheckCircle, XCircle, Clock, PlusCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { FolderKanban, CheckCircle, XCircle, Clock, PlusCircle, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { fetchMyProjects } from "../../../services/userService/UserService.js"; // Fetching user projects
 
 export default function MyProjectsPage() {
-    // Fake projects data
-    const [projects] = useState([
-        {
-            id: 1,
-            name: "E-Commerce App",
-            description: "A full-fledged e-commerce platform built with React and Spring Boot.",
-            status: "ACCEPTED",
-        },
-        {
-            id: 2,
-            name: "AI Chatbot",
-            description: "An AI chatbot for customer support, powered by OpenAI.",
-            status: "PENDING",
-        },
-        {
-            id: 3,
-            name: "Social Media App",
-            description: "A modern social media platform with real-time chat features.",
-            status: "REJECTED",
-        },
-        {
-            id: 4,
-            name: "Crypto Wallet",
-            description: "A secure cryptocurrency wallet with multi-chain support.",
-            status: "ACCEPTED",
-        },
-    ]);
+    const [projects, setProjects] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        loadProjects();
+    }, []);
+
+    const loadProjects = async () => {
+        try {
+            const data = await fetchMyProjects(); // Fetch authenticated user's projects
+            setProjects(data);
+        } catch (error) {
+            console.error("Error loading projects", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return <p className="text-gray-400 text-center text-lg">Loading your projects...</p>;
+    }
 
     return (
         <div className="max-w-5xl mx-auto bg-[#1C1F2E] p-8 rounded-lg shadow-lg border border-gray-700">
             {/* Page Header */}
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-semibold text-white">My Projects</h2>
-                <Link to="/user/create-project">
-                    <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition">
-                        <PlusCircle className="w-5 h-5" />
-                        Create New Project
-                    </button>
-                </Link>
-            </div>
+
 
             {/* Projects List */}
             {projects.length > 0 ? (
                 <div className="space-y-6">
                     {projects.map((project) => (
-                        <div
-                            key={project.id}
-                            className="bg-[#222435] p-5 rounded-lg shadow-md border border-gray-700"
-                        >
+                        <div key={project.id} className="bg-[#222435] p-5 rounded-lg shadow-md border border-gray-700">
                             <div className="flex justify-between items-center">
                                 <div>
                                     <h4 className="text-xl font-semibold text-white">{project.name}</h4>
@@ -76,6 +60,16 @@ export default function MyProjectsPage() {
                                         </span>
                                     )}
                                 </div>
+                            </div>
+
+                            {/* See Details Button */}
+                            <div className="mt-4">
+                                <Link
+                                    to={`/projects/${project.id}`}
+                                    className="text-blue-500 hover:text-blue-400 flex items-center gap-1"
+                                >
+                                    See Details <ArrowRight className="w-4 h-4" />
+                                </Link>
                             </div>
                         </div>
                     ))}

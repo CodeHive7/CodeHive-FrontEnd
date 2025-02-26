@@ -33,12 +33,52 @@ export const getUserProfile = async () => {
     }
 };
 
+export const getUserProfileByUsername = async (username) => {
+    try {
+        const response = await apiClient.get(`/user/profile/${username}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching user profile", error);
+        throw error;
+    }
+};
+
 export const updateUserProfile = async (updatedUserProfile) => {
     try {
         const response = await apiClient.put("/user/profile", updatedUserProfile);
         return response.data;
     } catch (error) {
         console.error("Error updating user profile", error);
+        throw error;
+    }
+};
+
+export const fetchMyProjects = async () => {
+    try {
+        const response = await apiClient.get("/project/my-projects");
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching my projects", error);
+        throw error;
+    }
+};
+
+export const fetchAppliedProjects = async () => {
+    try {
+        const response = await apiClient.get("/project/applied-projects");
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching applied projects", error);
+        throw error;
+    }
+};
+
+export const fetchApplicantsForProjects = async () => {
+    try {
+        const response = await apiClient.get("/project/my-applicants");
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching applicants", error);
         throw error;
     }
 };

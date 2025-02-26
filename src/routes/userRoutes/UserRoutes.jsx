@@ -5,6 +5,7 @@ import MyProjectsPage from "../../pages/User/dashboard/MyProjectsPage.jsx";
 import AppliedProjectsPage from "../../pages/User/dashboard/AppliedProjectsPage.jsx";
 import ProjectApplicantsPage from "../../pages/User/dashboard/ProjectApplicantsPage.jsx";
 import ProtectedUserRoute from "./ProtectedUserRoute.jsx";
+import ViewUserProfilePage from "../../pages/User/ViewUserProfile/ViewUserProfilePage.jsx";
 
 const UserRoutes = () => {
     return (
@@ -51,6 +52,13 @@ const UserRoutes = () => {
                         </UserLayout>
                     </ProtectedUserRoute>
                 }
+            />
+            <Route
+                path="/profile/view/:username"
+                element={
+                <UserLayout>
+                    <ViewUserProfilePage />
+                </UserLayout>}
             />
         </Routes>
     );
