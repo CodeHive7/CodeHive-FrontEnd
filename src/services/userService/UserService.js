@@ -82,3 +82,17 @@ export const fetchApplicantsForProjects = async () => {
         throw error;
     }
 };
+
+export const updateApplicationStatus = async (projectId, applicationIds, accept, feedback= "") => {
+    try {
+        const response = await apiClient.put(`/project/${projectId}/applications`, {
+            applicationIds,
+            accept,
+            feedback
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error updating application status", error);
+        throw error;
+    }
+};
