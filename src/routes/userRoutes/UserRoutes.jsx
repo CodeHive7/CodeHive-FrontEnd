@@ -6,6 +6,8 @@ import AppliedProjectsPage from "../../pages/User/dashboard/AppliedProjectsPage.
 import ProjectApplicantsPage from "../../pages/User/dashboard/ProjectApplicantsPage.jsx";
 import ProtectedUserRoute from "./ProtectedUserRoute.jsx";
 import ViewUserProfilePage from "../../pages/User/ViewUserProfile/ViewUserProfilePage.jsx";
+import CreateTaskPage from "../../pages/User/tasks/CreateTaskPage.jsx";
+import AssignedTasksPage from "../../pages/User/tasks/AssignedTasksPage.jsx";
 
 const UserRoutes = () => {
     return (
@@ -59,6 +61,26 @@ const UserRoutes = () => {
                 <UserLayout>
                     <ViewUserProfilePage />
                 </UserLayout>}
+            />
+            <Route
+                path="/create-task"
+                element={
+                <ProtectedUserRoute>
+                    <UserLayout>
+                        <CreateTaskPage />
+                    </UserLayout>
+                </ProtectedUserRoute>
+                }
+            />
+            <Route
+                path="/assigned-tasks"
+                element={
+                    <ProtectedUserRoute>
+                        <UserLayout>
+                            <AssignedTasksPage />
+                        </UserLayout>
+                    </ProtectedUserRoute>
+                }
             />
         </Routes>
     );

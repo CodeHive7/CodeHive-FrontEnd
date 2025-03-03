@@ -1,13 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
-import { User, FolderKanban, ChevronDown, ChevronRight, Settings } from "lucide-react";
+import { User, FolderKanban, ChevronDown, ChevronRight, Settings, ListChecks, PlusCircle } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
     const location = useLocation();
     const [isProjectsOpen, setIsProjectsOpen] = useState(false);
+    const [isTasksOpen, setIsTasksOpen] = useState(false); // State for tasks dropdown
     const sidebarRef = useRef(null); // Reference to the sidebar
 
     const toggleProjectsMenu = () => setIsProjectsOpen(!isProjectsOpen);
+    const toggleTasksMenu = () => setIsTasksOpen(!isTasksOpen); // Toggle tasks dropdown
 
     const routes = [
         { id: "profile", label: "Profile", icon: User, href: "/user/profile" },
@@ -19,6 +21,15 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                 { id: "my-projects", label: "My Projects", href: "/user/my-projects" },
                 { id: "applied-projects", label: "Applied Projects", href: "/user/applied-projects" },
                 { id: "project-applicants", label: "Project Applicants", href: "/user/project-applicants" },
+            ],
+        },
+        {
+            id: "tasks",
+            label: "Tasks",
+            icon: ListChecks,
+            subRoutes: [
+                { id: "create-task", label: "Create Task", icon: PlusCircle, href: "/user/create-task" },
+                { id: "assigned-tasks", label: "Tasks Assigned to Me", href: "/user/assigned-tasks" },
             ],
         },
         { id: "settings", label: "Settings", icon: Settings, href: "/user/settings" },
@@ -57,17 +68,21 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                         route.subRoutes ? (
                             <li key={route.id}>
                                 <button
-                                    onClick={toggleProjectsMenu}
+                                    onClick={route.id === "projects" ? toggleProjectsMenu : toggleTasksMenu}
                                     className="flex items-center justify-between w-full px-3 py-2 rounded-md hover:bg-gray-800"
                                 >
                                     <div className="flex items-center gap-2">
                                         <route.icon className="h-5 w-5" />
                                         {route.label}
                                     </div>
-                                    {isProjectsOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                                    {(route.id === "projects" && isProjectsOpen) || (route.id === "tasks" && isTasksOpen) ? (
+                                        <ChevronDown className="h-4 w-4" />
+                                    ) : (
+                                        <ChevronRight className="h-4 w-4" />
+                                    )}
                                 </button>
 
-                                {isProjectsOpen && (
+                                {((route.id === "projects" && isProjectsOpen) || (route.id === "tasks" && isTasksOpen)) && (
                                     <ul className="ml-6 mt-2 space-y-2">
                                         {route.subRoutes.map((subroute) => (
                                             <li key={subroute.id}>
@@ -76,6 +91,7 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                                                     onClick={toggleSidebar} // Close sidebar when a link is clicked
                                                     className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-700"
                                                 >
+                                                    {subroute.icon && <subroute.icon className="h-4 w-4" />}
                                                     {subroute.label}
                                                 </Link>
                                             </li>

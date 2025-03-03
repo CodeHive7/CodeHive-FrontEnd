@@ -96,3 +96,43 @@ export const updateApplicationStatus = async (projectId, applicationIds, accept,
         throw error;
     }
 };
+
+export const fetchProjectTasks = async (projectId) => {
+    try {
+        const response = await apiClient.get(`/tasks/${projectId}/tasks`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching project tasks", error);
+        throw error;
+    }
+};
+
+export const fetchAssignedTasks = async () => {
+    try {
+        const response = await apiClient.get("/tasks/my-tasks");
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching tasks", error);
+        throw error;
+    }
+};
+
+export  const createTask = async (projectId, taskData) => {
+    try {
+        const response = await apiClient.post(`/tasks/${projectId}/tasks`, taskData);
+        return response.data;
+    } catch (error) {
+        console.error("Error creating task", error);
+        throw error;
+    }
+};
+
+export const updateTaskStatus = async (taskId, status) => {
+    try {
+        const response = await apiClient.put(`/tasks/${taskId}/status`, {status});
+        return response.data;
+    } catch (error) {
+        console.error("Error updating task", error);
+        throw error;
+    }
+};
