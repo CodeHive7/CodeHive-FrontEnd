@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import {useAuth} from "../../context/Auth/AuthContext.jsx";
-import { fetchAllProjects, applyForPosition, createProject, fetchCategories } from "../../services/userService/UserService.js";
-import { LayoutDashboard, LogOut, ArrowRight, PlusCircle, X } from "lucide-react";
+import { useAuth } from "../../context/Auth/AuthContext.jsx";
+import {
+    fetchAllProjects,
+    applyForPosition,
+    createProject,
+    fetchCategories,
+} from "../../services/userService/UserService.js";
+import { LayoutDashboard, LogOut, PlusCircle, X, ChevronRight } from "lucide-react";
 import Swal from "sweetalert2";
 
 export default function UserHomePage() {
@@ -14,13 +19,14 @@ export default function UserHomePage() {
         description: "",
         stage: "",
         websiteUrl: "",
+        problemToFix: "",
         question1: "",
         question2: "",
         selectedCategory: "",
         positions: [{ roleName: "", paid: false, quantity: 1 }],
     });
 
-    const {logoutHandler} = useAuth();
+    const { logoutHandler } = useAuth();
 
     useEffect(() => {
         loadProjects();
@@ -59,15 +65,16 @@ export default function UserHomePage() {
             Swal.fire({
                 icon: "warning",
                 title: "Missing Fields",
-                text: "Please fill in all required fields before submitting .",
-            })
+                text: "Please fill in all required fields before submitting.",
+            });
+            return;
         }
         try {
             await createProject(newProject);
             Swal.fire({
                 icon: "success",
-                title: "Project Created!",
-                text: "Your Project has been created successfully",
+                title: "Hive Created! 🏗️",
+                text: "Your project hive has been built successfully!",
                 timer: 2000,
                 showConfirmButton: false,
             });
@@ -77,33 +84,28 @@ export default function UserHomePage() {
             Swal.fire({
                 icon: "error",
                 title: "Error Creating Project",
-                text:error.response?.data || "An error occurred while creating the project. Please try again.",
+                text: error.response?.data || "An error occurred while creating the project. Please try again.",
             });
         }
     };
-
-
 
     return (
         <div className="min-h-screen bg-[#0A0B14] text-white">
             {/* Header */}
             <header className="sticky top-0 z-40 border-b border-gray-800 bg-[#0A0B14]">
                 <div className="flex h-16 items-center justify-between px-6">
-                    <h1 className="text-2xl font-semibold">Explore Projects</h1>
+                    <h1 className="text-3xl font-bold text-yellow-400">🐝 Welcome to the Hive</h1>
                     <div className="flex items-center gap-4">
-                        {/* Create Project Button */}
                         <button
                             onClick={() => setIsModalOpen(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center"
+                            className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-4 py-2 rounded-md flex items-center"
                         >
                             <PlusCircle className="w-5 h-5 mr-2" />
-                            Create Project
+                            Build a Hive
                         </button>
-                        {/* Dashboard Icon */}
                         <Link to="/user" className="hover:bg-gray-800 p-2 rounded-md">
                             <LayoutDashboard className="h-6 w-6 text-white" />
                         </Link>
-                        {/* Logout Icon */}
                         <button onClick={logoutHandler} className="hover:bg-gray-800 p-2 rounded-md">
                             <LogOut className="h-6 w-6 text-white" />
                         </button>
@@ -113,8 +115,7 @@ export default function UserHomePage() {
 
             {/* Projects Section */}
             <div className="max-w-6xl mx-auto px-6 py-12">
-                <h2 className="text-4xl font-bold text-white mb-8">Browse & Apply For Projects</h2>
-
+                <h2 className="text-4xl font-bold text-white mb-8">Explore Hives &amp; Join the Colony</h2>
                 {projects.length === 0 ? (
                     <p className="text-gray-400">No projects available at the moment.</p>
                 ) : (
@@ -122,31 +123,29 @@ export default function UserHomePage() {
                         {projects.map((project) => (
                             <div
                                 key={project.id}
-                                className="bg-[#12141F] rounded-lg shadow-lg border border-gray-700 transform hover:scale-105 transition duration-300 overflow-hidden p-6"
+                                className="relative bg-[#12141F] rounded-lg shadow-lg border border-yellow-500 transform hover:scale-105 transition duration-300 overflow-hidden p-6"
                             >
-                                {/* Project Title */}
-                                <h3 className="text-2xl font-bold text-blue-400">{project.name}</h3>
-
-                                {/* Project Description */}
+                                <div className="absolute top-0 right-0 bg-yellow-500 px-3 py-1 text-black text-xs font-bold rounded-bl-lg">
+                                    {project.stage || "Ongoing"}
+                                </div>
+                                <h3 className="text-2xl font-bold text-yellow-400">{project.name}</h3>
                                 <p className="text-gray-400 mt-2">{project.description}</p>
-
-                                {/* Project Category */}
                                 <p className="text-gray-500 text-sm mt-2">
-                                    <span className="font-semibold text-white">Category:</span> {project.category ? project.category : "Uncategorized"}
+                                    <span className="font-semibold text-white">Category:</span> {project.category || "Uncategorized"}
                                 </p>
-
-                                {/* Positions & Availability */}
                                 <div className="mt-3">
                                     <h4 className="text-lg font-semibold text-white mb-2">Open Positions:</h4>
                                     <ul className="text-gray-300 text-sm space-y-2">
                                         {project.positions.length > 0 ? (
                                             project.positions.map((position, index) => (
-                                                <li key={index}
-                                                    className="flex justify-between bg-gray-800 p-2 rounded-md">
+                                                <li
+                                                    key={index}
+                                                    className="flex justify-between bg-gray-800 p-2 rounded-md"
+                                                >
                                                     <span>{position.roleName}</span>
                                                     <span className="text-yellow-400">
-                                                        {position.quantity} spots left
-                                                    </span>
+                            {position.quantity} spots left
+                          </span>
                                                 </li>
                                             ))
                                         ) : (
@@ -154,15 +153,13 @@ export default function UserHomePage() {
                                         )}
                                     </ul>
                                 </div>
-
-                                {/* View & Apply Button */}
                                 <div className="mt-6">
                                     <Link
                                         to={`/projects/${project.id}`}
-                                        className="w-full inline-block text-center bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-md text-lg font-semibold hover:shadow-lg transition"
+                                        className="w-full inline-block text-center bg-yellow-500 text-black px-6 py-3 rounded-md text-lg font-semibold hover:shadow-lg transition transform hover:scale-105"
                                     >
-                                        View Details & Apply
-                                        <ArrowRight className="inline-block w-5 h-5 ml-2"/>
+                                        View Details
+                                        <ChevronRight className="inline-block w-5 h-5 ml-2" />
                                     </Link>
                                 </div>
                             </div>
@@ -174,42 +171,32 @@ export default function UserHomePage() {
             {/* Create Project Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-                    <div
-                        className="relative bg-[#1C1F2E] w-full max-w-5xl h-[90vh] overflow-y-auto rounded-lg shadow-lg border border-gray-700 p-8">
-                        {/* Close Button */}
+                    <div className="relative bg-[#1C1F2E] w-full max-w-4xl h-[80vh] overflow-y-auto rounded-lg shadow-lg border border-yellow-500 p-8">
                         <button
                             onClick={() => setIsModalOpen(false)}
                             className="absolute top-5 right-5 text-gray-400 hover:text-white"
                         >
-                            <X className="w-8 h-8"/>
+                            <X className="w-8 h-8" />
                         </button>
-
-                        <h2 className="text-3xl font-bold text-white mb-6 text-center">Create a New Project</h2>
-
-                        {/* Scrollable Content */}
-                        <div className="max-h-[80vh] overflow-y-auto px-4">
-                            {/* Project Name */}
+                        <h2 className="text-3xl font-bold text-yellow-400 mb-6 text-center">🐝 Build Your Hive</h2>
+                        <div className="space-y-4">
                             <input
                                 type="text"
-                                placeholder="Project Name"
+                                placeholder="Hive Name"
                                 value={newProject.name}
-                                onChange={(e) => setNewProject({...newProject, name: e.target.value})}
-                                className="w-full p-3 mb-4 border bg-gray-800 text-white rounded"
+                                onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+                                className="w-full p-3 border bg-gray-800 text-white rounded"
                             />
-
-                            {/* Project Description */}
                             <textarea
-                                placeholder="Project Description"
+                                placeholder="Describe your Hive..."
                                 value={newProject.description}
-                                onChange={(e) => setNewProject({...newProject, description: e.target.value})}
-                                className="w-full p-3 mb-4 border bg-gray-800 text-white rounded h-24"
+                                onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+                                className="w-full p-3 border bg-gray-800 text-white rounded h-24"
                             />
-
-                            {/* Select Project Stage */}
                             <select
-                                className="w-full p-3 mb-4 border bg-gray-800 text-white rounded"
+                                className="w-full p-3 border bg-gray-800 text-white rounded"
                                 value={newProject.stage}
-                                onChange={(e) => setNewProject({...newProject, stage: e.target.value})}
+                                onChange={(e) => setNewProject({ ...newProject, stage: e.target.value })}
                             >
                                 <option value="">Select Stage</option>
                                 <option value="NOT_STARTED">Not Started</option>
@@ -217,50 +204,38 @@ export default function UserHomePage() {
                                 <option value="FINISHED">Finished</option>
                                 <option value="NEEDS_FIXES">Needs Fixes</option>
                             </select>
-
-                            {/* Website URL */}
                             <input
                                 type="text"
                                 placeholder="Website URL (optional)"
                                 value={newProject.websiteUrl}
                                 onChange={(e) => setNewProject({ ...newProject, websiteUrl: e.target.value })}
-                                className="w-full p-3 mb-4 border bg-gray-800 text-white rounded"
+                                className="w-full p-3 border bg-gray-800 text-white rounded"
                             />
-
-                            {/* Problem to Fix */}
                             <textarea
                                 placeholder="What problem does this project solve?"
                                 value={newProject.problemToFix}
                                 onChange={(e) => setNewProject({ ...newProject, problemToFix: e.target.value })}
-                                className="w-full p-3 mb-4 border bg-gray-800 text-white rounded h-24"
+                                className="w-full p-3 border bg-gray-800 text-white rounded h-24"
                             />
-
-                            {/* Project Questions (Up to 2) */}
                             <h3 className="text-white font-semibold text-lg mb-3">Optional Questions for Applicants</h3>
-
-                            {/* First Question */}
                             <input
                                 type="text"
                                 placeholder="Question 1 for applicants (Optional)"
                                 value={newProject.question1}
                                 onChange={(e) => setNewProject({ ...newProject, question1: e.target.value })}
-                                className="w-full p-3 mb-4 border bg-gray-800 text-white rounded"
+                                className="w-full p-3 border bg-gray-800 text-white rounded"
                             />
-
-                            {/* Second Question - Appears Only If First Question Exists */}
                             {newProject.question1 && (
                                 <input
                                     type="text"
                                     placeholder="Question 2 for applicants (Optional)"
                                     value={newProject.question2}
                                     onChange={(e) => setNewProject({ ...newProject, question2: e.target.value })}
-                                    className="w-full p-3 mb-4 border bg-gray-800 text-white rounded"
+                                    className="w-full p-3 border bg-gray-800 text-white rounded"
                                 />
                             )}
-
-                            {/* Select Category */}
                             <select
-                                className="w-full p-3 mb-4 border bg-gray-800 text-white rounded"
+                                className="w-full p-3 border bg-gray-800 text-white rounded"
                                 value={newProject.selectedCategory}
                                 onChange={(e) => setNewProject({ ...newProject, selectedCategory: e.target.value })}
                             >
@@ -271,13 +246,9 @@ export default function UserHomePage() {
                                     </option>
                                 ))}
                             </select>
-
-                            {/* Positions Section */}
                             <h3 className="text-white font-semibold text-lg mb-3">Project Positions</h3>
-
                             {newProject.positions.map((position, index) => (
-                                <div key={index} className="bg-gray-900 p-4 mb-3 rounded-md">
-                                    {/* Role Name */}
+                                <div key={index} className="bg-gray-900 p-4 rounded-md mb-3">
                                     <input
                                         type="text"
                                         placeholder="Role Name"
@@ -289,8 +260,6 @@ export default function UserHomePage() {
                                         }}
                                         className="w-full p-2 mb-2 border bg-gray-800 text-white rounded"
                                     />
-
-                                    {/* Paid Checkbox */}
                                     <label className="flex items-center text-white text-sm">
                                         <input
                                             type="checkbox"
@@ -304,8 +273,6 @@ export default function UserHomePage() {
                                         />
                                         Paid Position
                                     </label>
-
-                                    {/* Quantity */}
                                     <input
                                         type="number"
                                         placeholder="Quantity"
@@ -317,8 +284,6 @@ export default function UserHomePage() {
                                         }}
                                         className="w-full p-2 mt-2 border bg-gray-800 text-white rounded"
                                     />
-
-                                    {/* Remove Position Button */}
                                     <button
                                         onClick={() => {
                                             const updatedPositions = newProject.positions.filter((_, i) => i !== index);
@@ -330,8 +295,6 @@ export default function UserHomePage() {
                                     </button>
                                 </div>
                             ))}
-
-                            {/* Add Position Button */}
                             <button
                                 onClick={() =>
                                     setNewProject({
@@ -344,23 +307,17 @@ export default function UserHomePage() {
                                 + Add Position
                             </button>
                         </div>
-
-                        {/* Submit Button */}
                         <div className="mt-6 text-center">
                             <button
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded text-lg w-full transition"
+                                className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded text-lg w-full transition transform hover:scale-105"
                                 onClick={handleCreateProject}
                             >
-                                Create Project
+                                Create Hive
                             </button>
                         </div>
                     </div>
                 </div>
             )}
-
-
-
-
         </div>
     );
 }

@@ -1,45 +1,38 @@
 export default function Features() {
-    const testimonials = [
+    const features = [
         {
-            avatar: "https://v0.dev/placeholder.svg",
-            name: "Sarah K.",
-            role: "Product Designer",
-            text: "The app helped me streamline my workflow and boost productivity.",
+            icon: "/images/managetasks.jpg",
+            title: "Smart Task Management",
+            description: "Organize your workflow with intuitive task boards, Kanban views, and advanced automation tools.",
         },
         {
-            avatar: "https://v0.dev/placeholder.svg",
-            name: "Michael R.",
-            role: "Developer",
-            text: "Incredible tools that made our team collaboration seamless.",
+            icon: "/images/teamhive.jpg",
+            title: "Seamless Collaboration",
+            description: "Connect with your team, share files, and communicate effortlessly in one unified workspace.",
         },
         {
-            avatar: "https://v0.dev/placeholder.svg",
-            name: "Emily T.",
-            role: "Marketing Lead",
-            text: "Game-changing features that transformed our creative process.",
+            icon: "/images/automatisationhive.jpg",
+            title: "Powerful Automation",
+            description: "Automate repetitive tasks and workflows to boost productivity without extra effort.",
         },
-    ]
+    ];
 
     return (
         <section className="px-4 py-20">
-            <div className="max-w-6xl mx-auto">
-                <h2 className="text-4xl font-bold text-center mb-16">Many tools to express your creativity</h2>
+            <div className="max-w-6xl mx-auto text-center">
+                <h2 className="text-4xl font-bold text-center mb-16">
+                    Smart Tools to <span className="text-yellow-400">Supercharge</span> Your Work
+                </h2>
                 <div className="grid md:grid-cols-3 gap-8">
-                    {testimonials.map((item, i) => (
-                        <div key={i} className="bg-[#12141F] p-6 rounded-lg">
-                            <div className="flex items-center gap-4 mb-4">
-                                <img src={item.avatar || "/placeholder.svg"} alt="" className="w-12 h-12 rounded-full" />
-                                <div>
-                                    <h3 className="font-semibold">{item.name}</h3>
-                                    <p className="text-sm text-gray-400">{item.role}</p>
-                                </div>
-                            </div>
-                            <p className="text-gray-300">{item.text}</p>
+                    {features.map((feature, i) => (
+                        <div key={i} className="bg-[#12141F] p-6 rounded-lg text-center shadow-lg">
+                            <img src={feature.icon} alt={feature.title} className="w-12 h-12 mx-auto mb-4" />
+                            <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                            <p className="text-gray-400">{feature.description}</p>
                         </div>
                     ))}
                 </div>
             </div>
         </section>
-    )
+    );
 }
-

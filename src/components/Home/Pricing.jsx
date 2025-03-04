@@ -15,38 +15,35 @@ export default function Pricing() {
             price: "$79",
             features: ["Unlimited Storage", "24/7 Support", "Unlimited Team Members"],
         },
-    ]
-
-    const buttonBaseStyles = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-    const buttonVariants = {
-        default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-        outline: "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
-    }
-    const buttonSizes = {
-        lg: "h-10 rounded-md px-8",
-    }
+    ];
 
     return (
-        <section className="px-4 py-20 bg-[#0D0E17]">
+        <section className="px-4 py-20 bg-black text-white">
             <div className="max-w-6xl mx-auto text-center">
-                <h2 className="text-4xl font-bold mb-4">Let's find the right plan for your business</h2>
+                <h2 className="text-4xl font-bold mb-4">
+                    Choose the <span className="text-yellow-400">Perfect Plan</span> for Your Business
+                </h2>
                 <p className="text-gray-400 mb-16">
-                    Whether you're just starting out or scaling up, we have a plan that's right for you
+                    Scale effortlessly with plans that fit your needs and team size.
                 </p>
 
                 <div className="grid md:grid-cols-3 gap-8">
                     {plans.map((plan, i) => (
-                        <div key={i} className="bg-[#12141F] p-8 rounded-lg">
+                        <div key={i} className="bg-[#12141F] p-8 rounded-lg border border-yellow-400 shadow-lg">
                             <h3 className="text-2xl font-bold mb-4">{plan.name}</h3>
-                            <div className="text-4xl font-bold mb-6">{plan.price}</div>
+                            <div className="text-4xl font-bold text-yellow-400 mb-6">{plan.price}</div>
                             <ul className="space-y-4 mb-8">
                                 {plan.features.map((feature, j) => (
-                                    <li key={j} className="text-gray-400">
-                                        {feature}
-                                    </li>
+                                    <li key={j} className="text-gray-400">{feature}</li>
                                 ))}
                             </ul>
-                            <button className={`${buttonBaseStyles} ${buttonVariants[i === 1 ? "default" : "outline"]} ${buttonSizes.lg} w-full`}>
+                            <button
+                                className={`w-full px-6 py-3 rounded-md text-lg font-semibold transition-transform transform hover:scale-105 ${
+                                    i === 1
+                                        ? "bg-yellow-400 text-black shadow-lg hover:bg-yellow-500"
+                                        : "border border-yellow-400 text-yellow-400 hover:bg-yellow-500 hover:text-black"
+                                }`}
+                            >
                                 Get Started
                             </button>
                         </div>
@@ -54,5 +51,5 @@ export default function Pricing() {
                 </div>
             </div>
         </section>
-    )
+    );
 }
