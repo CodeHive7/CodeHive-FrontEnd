@@ -136,3 +136,13 @@ export const updateTaskStatus = async (taskId, status) => {
         throw error;
     }
 };
+
+export const fetchAcceptedApplicants = async (projectId) => {
+    try {
+        const response = await apiClient.get(`/project/${projectId}/accepted-applicants`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching accepted applicants", error);
+        throw error;
+    }
+};
