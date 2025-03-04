@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { fetchProjectById, applyForPosition } from "../../../services/userService/UserService.js";
-import { ArrowLeft, Globe, User, Briefcase, CheckCircle } from "lucide-react";
+import { ArrowLeft, Globe, User, Briefcase, CheckCircle, Users } from "lucide-react";
 import { getAccessToken } from "../../../services/Auth/tokenService.js";
 import Swal from "sweetalert2";
 import { jwtDecode } from "jwt-decode";
@@ -62,71 +62,30 @@ export default function ProjectDetailsPage() {
             return;
         }
 
-        const hasQuestion1 = project.question1 && project.question1.trim() !== "";
-        const hasQuestion2 = project.question2 && project.question2.trim() !== "";
-
-        const processApplication = async (answers) => {
-            try {
-                await applyForPosition(projectId, positionId, answers);
-
-                // 🔹 Update position quantity in state immediately
-                setProject((prevProject) => {
-                    const updatedPositions = [...prevProject.positions];
-                    updatedPositions[positionIndex] = {
-                        ...updatedPositions[positionIndex],
-                        quantity: Math.max(0, updatedPositions[positionIndex].quantity - 1),
-                    };
-                    return { ...prevProject, positions: updatedPositions };
-                });
-
-                Swal.fire({
-                    icon: "success",
-                    title: "Application Submitted",
-                    text: "Your application has been successfully submitted!",
-                    timer: 2000,
-                    showConfirmButton: false,
-                });
-            } catch (error) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Application Failed",
-                    text: error.response?.data || "An error occurred while applying. Please try again later.",
-                });
-            }
-        };
-
-        if (hasQuestion1 || hasQuestion2) {
-            Swal.fire({
-                title: "Answer the Questions",
-                html: `
-                    ${hasQuestion1 ? `<p class="text-left text-black font-semibold">${project.question1}</p>
-                    <input id="answer1" class="swal2-input" placeholder="Your answer" required>` : ''}
-                    
-                    ${hasQuestion2 ? `<p class="text-left text-black font-semibold">${project.question2}</p>
-                    <input id="answer2" class="swal2-input" placeholder="Your answer" required>` : ''}
-                `,
-                showCancelButton: true,
-                confirmButtonText: "Submit Application",
-                cancelButtonText: "Cancel",
-                focusConfirm: false,
-                preConfirm: () => {
-                    const answer1 = document.getElementById("answer1")?.value.trim() || "";
-                    const answer2 = document.getElementById("answer2")?.value.trim() || "";
-
-                    if ((hasQuestion1 && !answer1) || (hasQuestion2 && !answer2)) {
-                        Swal.showValidationMessage("Please answer all required questions.");
-                        return false;
-                    }
-
-                    return { answer1, answer2 };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    processApplication(result.value);
-                }
+        try {
+            await applyForPosition(projectId, positionId);
+            setProject((prevProject) => {
+                const updatedPositions = [...prevProject.positions];
+                updatedPositions[positionIndex] = {
+                    ...updatedPositions[positionIndex],
+                    quantity: Math.max(0, updatedPositions[positionIndex].quantity - 1),
+                };
+                return { ...prevProject, positions: updatedPositions };
             });
-        } else {
-            processApplication({ answer1: "", answer2: "" });
+
+            Swal.fire({
+                icon: "success",
+                title: "Application Submitted",
+                text: "You have successfully applied for this position!",
+                timer: 2000,
+                showConfirmButton: false,
+            });
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Application Failed",
+                text: error.response?.data || "An error occurred while applying. Please try again later.",
+            });
         }
     };
 
@@ -139,28 +98,33 @@ export default function ProjectDetailsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#0A0B14] text-white px-6 py-12">
+        <div className="min-h-screen bg-gradient-to-b from-[#0A0B14] to-[#12141F] text-white px-6 py-12">
             {/* Back Button */}
             <div className="max-w-5xl mx-auto mb-6">
-                <Link to="/userHome" className="flex items-center text-gray-400 hover:text-white transition">
+                <Link to="/userHome" className="flex items-center text-yellow-400 hover:text-yellow-300 transition">
                     <ArrowLeft className="w-5 h-5 mr-2" /> Back to Projects
                 </Link>
             </div>
 
             {/* Project Details Container */}
-            <div className="max-w-5xl mx-auto bg-[#181A28] p-10 rounded-xl shadow-lg border border-gray-700">
+            <div className="max-w-5xl mx-auto bg-[#181A28] p-10 rounded-xl shadow-lg border border-yellow-500 relative">
+                {/* Bee Themed Header */}
+                <div className="absolute top-5 right-5 w-14 h-14 bg-yellow-500 rounded-full flex items-center justify-center shadow-md">
+                    <Users className="w-6 h-6 text-black" />
+                </div>
+
                 {/* Project Header */}
-                <div className="pb-6 border-b border-gray-700">
+                <div className="pb-6 border-b border-yellow-500">
                     <h1 className="text-4xl font-bold text-white">{project.name}</h1>
                     <p className="text-gray-400 mt-2">
-                        <span className="font-semibold text-white">Category:</span> {project.category || "Uncategorized"}
+                        <span className="font-semibold text-yellow-400">Category:</span> {project.category || "Uncategorized"}
                     </p>
                 </div>
 
                 {/* Creator & Status */}
-                <div className="mt-6 flex items-center gap-8">
+                <div className="mt-6 flex flex-wrap items-center gap-6">
                     <div className="flex items-center gap-2 text-gray-400">
-                        <User className="w-5 h-5 text-white" />
+                        <User className="w-5 h-5 text-yellow-400" />
                         <span><strong>Created By:</strong> {project.creatorName?.toUpperCase() || "Unknown"}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-400">
@@ -170,7 +134,7 @@ export default function ProjectDetailsPage() {
                 </div>
 
                 {/* Project Description */}
-                <div className="mt-6 bg-[#222435] p-5 rounded-lg">
+                <div className="mt-6 bg-[#222435] p-5 rounded-lg shadow-md border border-gray-700">
                     <h3 className="text-xl font-semibold text-white mb-2">Project Description</h3>
                     <p className="text-gray-300">{project.description}</p>
                 </div>
@@ -179,7 +143,7 @@ export default function ProjectDetailsPage() {
                 {project.websiteUrl && (
                     <div className="mt-6">
                         <a href={project.websiteUrl} target="_blank" rel="noopener noreferrer"
-                           className="flex items-center text-blue-500 hover:underline">
+                           className="flex items-center text-yellow-400 hover:underline">
                             <Globe className="w-5 h-5 mr-2" /> Visit Project Website
                         </a>
                     </div>
@@ -192,10 +156,10 @@ export default function ProjectDetailsPage() {
                     {project.positions.length > 0 ? (
                         <div className="grid md:grid-cols-2 gap-6">
                             {project.positions.map((position) => (
-                                <div key={position.id} className="bg-[#222435] p-5 rounded-lg shadow-md border border-gray-700">
+                                <div key={position.id} className="bg-[#222435] p-5 rounded-lg shadow-md border border-yellow-500">
                                     <div className="flex justify-between items-center">
-                                        <h4 className="text-lg font-semibold text-white">{position.roleName}</h4>
-                                        <span className="text-yellow-400">{position.quantity} spots left</span>
+                                        <h4 className="text-lg font-semibold text-yellow-400">{position.roleName}</h4>
+                                        <span className="text-yellow-300">{position.quantity} spots left</span>
                                     </div>
                                     <p className="text-gray-400 text-sm mt-1 flex items-center">
                                         <Briefcase className="w-4 h-4 mr-1 text-gray-500" />
@@ -207,7 +171,7 @@ export default function ProjectDetailsPage() {
                                         onClick={() => handleApply(position.id)}
                                         disabled={position.quantity === 0}
                                         className={`w-full mt-4 px-4 py-2 rounded-lg text-md font-semibold transition ${
-                                            position.quantity === 0 ? "bg-gray-600 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 text-white"
+                                            position.quantity === 0 ? "bg-gray-600 cursor-not-allowed" : "bg-yellow-500 hover:bg-yellow-400 text-black"
                                         }`}
                                     >
                                         {position.quantity === 0 ? "No Spots Left" : "Apply Now"}
