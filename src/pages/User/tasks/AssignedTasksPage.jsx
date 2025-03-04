@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { fetchAssignedTasks, updateTaskStatus } from "../../../services/userService/UserService";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { ClipboardList, CheckCircle, Loader, XCircle, Info } from "lucide-react";
+import { ClipboardList, CheckCircle, Loader, XCircle, Info, AlertTriangle } from "lucide-react";
 import Swal from "sweetalert2";
 
 const TaskTypes = { TASK: "TASK" };
@@ -10,7 +10,7 @@ const TaskTypes = { TASK: "TASK" };
 export default function AssignedTasksPage() {
     const [tasks, setTasks] = useState({ TODO: [], DOING: [], DONE: [] });
     const [loading, setLoading] = useState(true);
-    const [selectedTask, setSelectedTask] = useState(null); // Track clicked task for modal
+    const [selectedTask, setSelectedTask] = useState(null);
 
     useEffect(() => {
         loadTasks();
@@ -32,23 +32,34 @@ export default function AssignedTasksPage() {
     const handleStatusChange = async (taskId, status) => {
         try {
             await updateTaskStatus(taskId, status);
-            Swal.fire({ icon: "success", title: "Task Updated", text: `Task moved to ${status}.` });
+            Swal.fire({
+                icon: "success",
+                title: "✅ Task Updated!",
+                text: `Task successfully moved to ${status}.`,
+                timer: 2000,
+                showConfirmButton: false,
+            });
             loadTasks();
         } catch (error) {
-            Swal.fire({ icon: "error", title: "Update Failed", text: "Failed to update task status." });
+            Swal.fire({
+                icon: "error",
+                title: "❌ Update Failed",
+                text: "Failed to update task status. Please try again.",
+            });
         }
     };
 
     return (
         <DndProvider backend={HTML5Backend}>
-            <div className="p-6 bg-[#1C1F2E] rounded-lg shadow-lg border border-gray-700">
-                <h2 className="text-3xl font-semibold text-white mb-6 flex items-center gap-2">
-                    <ClipboardList className="w-6 h-6" /> Tasks Assigned to Me
+            <div className="max-w-5xl mx-auto bg-gradient-to-b from-[#0A0B14] to-[#12141F] p-8 rounded-xl shadow-lg border border-yellow-500 mt-10">
+                <h2 className="text-3xl font-bold text-white flex items-center gap-2">
+                    <ClipboardList className="w-6 h-6 text-yellow-400" /> Tasks Assigned to Me
                 </h2>
+
                 {loading ? (
-                    <p className="text-gray-400 text-center text-lg">Loading tasks...</p>
+                    <p className="text-gray-400 text-center text-lg mt-6">Loading tasks...</p>
                 ) : (
-                    <div className="grid grid-cols-3 gap-6">
+                    <div className="grid grid-cols-3 gap-6 mt-6">
                         {Object.entries(tasks).map(([status, taskList]) => (
                             <TaskColumn key={status} status={status} tasks={taskList} onDropTask={handleStatusChange} setSelectedTask={setSelectedTask} />
                         ))}
@@ -68,9 +79,14 @@ function TaskColumn({ status, tasks, onDropTask, setSelectedTask }) {
     });
 
     return (
-        <div ref={drop} className={`p-4 rounded-lg shadow-md border border-gray-600 min-h-[300px] ${isOver ? "bg-gray-800" : "bg-[#222435]"}`}>
-            <h3 className={`text-xl font-semibold text-white mb-4 flex items-center gap-2 ${status === "TODO" ? "text-yellow-400" : status === "DOING" ? "text-blue-400" : "text-green-400"}`}>
-                {status === "TODO" ? <XCircle className="w-5 h-5" /> : status === "DOING" ? <Loader className="w-5 h-5" /> : <CheckCircle className="w-5 h-5" />} {status}
+        <div
+            ref={drop}
+            className={`p-4 rounded-lg shadow-md border border-gray-600 min-h-[300px] transition ${isOver ? "bg-gray-800" : "bg-[#222435]"} ${
+                status === "TODO" ? "border-yellow-500" : status === "DOING" ? "border-blue-500" : "border-green-500"
+            }`}
+        >
+            <h3 className={`text-xl font-bold text-white mb-4 flex items-center gap-2`}>
+                {status === "TODO" ? <XCircle className="w-5 h-5 text-yellow-400" /> : status === "DOING" ? <Loader className="w-5 h-5 text-blue-400" /> : <CheckCircle className="w-5 h-5 text-green-400" />} {status}
             </h3>
             {tasks.length > 0 ? (
                 <div className="space-y-4">
@@ -79,7 +95,7 @@ function TaskColumn({ status, tasks, onDropTask, setSelectedTask }) {
                     ))}
                 </div>
             ) : (
-                <p className="text-gray-400 text-sm">No tasks</p>
+                <p className="text-gray-400 text-sm">No tasks in this column.</p>
             )}
         </div>
     );
@@ -96,10 +112,12 @@ function TaskCard({ task, setSelectedTask }) {
         <div
             ref={drag}
             onClick={() => setSelectedTask(task)}
-            className={`p-4 rounded-md shadow-md border border-gray-600 cursor-pointer transition-transform transform hover:scale-105 hover:shadow-lg ${isDragging ? "opacity-50" : "opacity-100"} bg-gray-900`}
+            className={`p-4 rounded-md shadow-md border border-gray-700 cursor-pointer transition transform hover:scale-105 hover:shadow-lg ${isDragging ? "opacity-50" : "opacity-100"} ${
+                task.priority === "HIGH" ? "bg-red-500" : task.priority === "MEDIUM" ? "bg-yellow-500" : "bg-green-500"
+            } text-black font-semibold`}
         >
-            <h4 className="text-white text-lg font-semibold flex items-center gap-2">
-                {task.title} <Info className="w-4 h-4 text-gray-400" />
+            <h4 className="text-lg flex items-center gap-2">
+                {task.title} <Info className="w-4 h-4 text-black opacity-75" />
             </h4>
         </div>
     );
@@ -111,7 +129,7 @@ function TaskModal({ task, onClose }) {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-[#1C1F2E] p-6 rounded-lg shadow-lg border border-gray-700 w-96 text-white relative">
                 <button onClick={onClose} className="absolute top-2 right-2 text-gray-400 hover:text-gray-300">&times;</button>
-                <h3 className="text-2xl font-semibold mb-4">{task.title}</h3>
+                <h3 className="text-2xl font-bold mb-4">{task.title}</h3>
                 <p className="text-gray-300">{task.description}</p>
                 <div className="mt-4">
                     <p className="text-sm text-gray-400">Priority:

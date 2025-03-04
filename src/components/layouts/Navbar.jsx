@@ -1,27 +1,28 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/Auth/AuthContext.jsx";
+import { Home, LogOut, UserCircle, UserPlus } from "lucide-react";
 
 export default function Navbar() {
     const navigate = useNavigate();
     const { user, logoutHandler } = useAuth();
 
     const buttonBaseStyles =
-        "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50";
+        "inline-flex items-center justify-center rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-yellow-400 disabled:pointer-events-none disabled:opacity-50";
     const buttonVariants = {
-        default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        default: "bg-yellow-500 text-black hover:bg-yellow-600 shadow-md",
+        ghost: "text-white hover:bg-gray-800",
     };
     const buttonSizes = {
-        default: "h-9 px-4 py-2",
+        default: "h-10 px-4 py-2",
     };
 
-    // Handler for the new Home icon (conditional navigation)
+    // Handler for Home navigation
     const handleHomeClick = () => {
         if (!user) {
             navigate("/");
-            return
+            return;
         }
-        if (user.roles.includes("SUPER_ADMIN")  || user.roles.includes("ADMIN")) {
+        if (user.roles.includes("SUPER_ADMIN") || user.roles.includes("ADMIN")) {
             navigate("/admin");
         } else {
             navigate("/userHome");
@@ -29,92 +30,57 @@ export default function Navbar() {
     };
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm">
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0A0B14] shadow-lg border-b border-yellow-500">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Left side (Logo) */}
-                    <div className="flex-shrink-0">
-                        <button
-                            className="flex items-center"
-                            onClick={() => navigate("/")}
-                        >
-                            <svg
-                                className="h-8 w-8 text-purple-600"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                            >
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-                            </svg>
-                            <span className="ml-2 text-xl font-bold">CodeHive</span>
-                        </button>
-                    </div>
+                    <button
+                        className="flex items-center"
+                        onClick={() => navigate("/")}
+                    >
+                        <img src="/images/beelogo.png" alt="BeeHive Logo" className="h-8 w-8" />
+                        <span className="ml-2 text-xl font-bold text-yellow-400">BeeHive</span>
+                    </button>
 
-                    {/* Right side (navigation buttons) */}
+                    {/* Right side (Navigation buttons) */}
                     <div className="flex items-center space-x-4">
-
-                        {/* Home icon to route to userHome or admin dashboard */}
+                        {/* Home Icon */}
                         <button
-                            className={`
-                ${buttonBaseStyles} 
-                ${buttonVariants.ghost} 
-                ${buttonSizes.default}
-              `}
+                            className={`${buttonBaseStyles} ${buttonVariants.ghost} ${buttonSizes.default}`}
                             onClick={handleHomeClick}
                         >
-                            {/* You can replace this with any icon you want */}
-                            <svg
-                                className="h-5 w-5"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M3 9.75l7.5-6 7.5 6M4.5 9.75v9a1.5 1.5 0 001.5 1.5h3m9-10.5v10.5a1.5 1.5 0 01-1.5 1.5h-3m-9 0h9"
-                                />
-                            </svg>
+                            <Home className="h-5 w-5 text-yellow-400" />
                             <span className="ml-2">Home</span>
                         </button>
 
-                        {/* If user is logged in, show welcome & logout */}
+                        {/* If user is logged in, show profile & logout */}
                         {user ? (
                             <>
                                 <span className="text-white">Welcome, {user.username}!</span>
                                 <button
-                                    className={`
-                    ${buttonBaseStyles} 
-                    ${buttonVariants.ghost} 
-                    ${buttonSizes.default}
-                  `}
+                                    className={`${buttonBaseStyles} ${buttonVariants.ghost} ${buttonSizes.default}`}
                                     onClick={logoutHandler}
                                 >
-                                    Logout
+                                    <LogOut className="h-5 w-5 text-red-400" />
+                                    <span className="ml-2">Logout</span>
                                 </button>
                             </>
                         ) : (
-                            /* If no user, show Login & Get Started buttons */
+                            /* If no user, show Login & Register buttons */
                             <>
                                 <button
-                                    className={`
-                    ${buttonBaseStyles} 
-                    ${buttonVariants.ghost} 
-                    ${buttonSizes.default}
-                  `}
+                                    className={`${buttonBaseStyles} ${buttonVariants.ghost} ${buttonSizes.default}`}
                                     onClick={() => navigate("/login")}
                                 >
-                                    Login
+                                    <UserCircle className="h-5 w-5 text-blue-400" />
+                                    <span className="ml-2">Login</span>
                                 </button>
                                 <button
-                                    className={`
-                    ${buttonBaseStyles} 
-                    ${buttonVariants.default} 
-                    ${buttonSizes.default}
-                  `}
+                                    className={`${buttonBaseStyles} ${buttonVariants.default} ${buttonSizes.default}`}
                                     onClick={() => navigate("/register")}
                                 >
-                                    Get Started
+                                    <UserPlus className="h-5 w-5" />
+                                    <span className="ml-2">Get Started</span>
                                 </button>
                             </>
                         )}
