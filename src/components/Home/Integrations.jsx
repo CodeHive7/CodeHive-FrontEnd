@@ -1,26 +1,95 @@
+import React from "react";
+
 export default function Integrations() {
     const integrations = [
-        { logo: "/images/slack.png", name: "Slack" },
-        { logo: "/images/trello.png", name: "Trello" },
-        { logo: "/images/google-drive.png", name: "Google Drive" },
-        { logo: "/images/figma.png", name: "Figma" },
-        { logo: "/images/github.png", name: "GitHub" },
-        { logo: "/images/notion.png", name: "Notion" },
+        {
+            name: "Slack",
+            logo: (
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
+                    <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313z" fill="#E01E5A"/>
+                    <path d="M8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312z" fill="#36C5F0"/>
+                    <path d="M18.958 8.834a2.528 2.528 0 0 1 2.52-2.521 2.528 2.528 0 0 1 2.522 2.521 2.528 2.528 0 0 1-2.521 2.521h-2.521v-2.52zM17.687 8.834a2.528 2.528 0 0 1-2.521 2.521 2.528 2.528 0 0 1-2.522-2.521V2.522A2.528 2.528 0 0 1 15.166 0a2.528 2.528 0 0 1 2.521 2.522v6.312z" fill="#2EB67D"/>
+                    <path d="M15.166 18.958a2.528 2.528 0 0 1 2.521 2.52A2.528 2.528 0 0 1 15.166 24a2.528 2.528 0 0 1-2.522-2.522v-2.52h2.522zM15.166 17.687a2.528 2.528 0 0 1-2.522-2.522 2.528 2.528 0 0 1 2.522-2.521h6.312A2.528 2.528 0 0 1 24 15.166a2.528 2.528 0 0 1-2.522 2.521h-6.312z" fill="#ECB22E"/>
+                </svg>
+            )
+        },
+        {
+            name: "Trello",
+            logo: (
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
+                    <rect width="24" height="24" rx="3" fill="#0079BF"/>
+                    <rect x="5" y="5" width="6" height="9" rx="1" fill="white"/>
+                    <rect x="13" y="5" width="6" height="14" rx="1" fill="white"/>
+                </svg>
+            )
+        },
+        {
+            name: "Google Drive",
+            logo: (
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
+                    <path d="M4.5716 14.3109L0.860352 21.1577C0.667188 21.5156 0.667188 21.9322 0.860352 22.2901L7.71709 10.0004L4.5716 14.3109Z" fill="#0066DA"/>
+                    <path d="M15.4298 7.71516L8.57678 0.855234C8.2218 0.667758 7.80789 0.667758 7.45291 0.855234L15.4298 15.4285L23.4067 7.45879C23.2121 7.10673 22.7982 6.85174 22.3845 6.85174H16.2923L15.4298 7.71516Z" fill="#00AC47"/>
+                    <path d="M7.71709 10.0002L15.4298 15.4283L16.2923 14.5649V22.5493C16.2923 22.9584 16.5499 23.367 16.9019 23.5616L0.860352 21.1576C0.667188 21.5154 0.667188 21.932 0.860352 22.29L23.1397 22.5493C23.3339 22.1916 23.3339 21.7749 23.1397 21.417L15.4298 7.71492L7.71709 10.0002Z" fill="#EA4335"/>
+                    <path d="M15.4298 7.71516L23.1397 21.417C23.3329 21.7749 23.3329 22.1916 23.1397 22.5494C23.3339 22.1916 23.3339 21.7749 23.1397 21.417L15.4298 7.71516Z" fill="#00832D"/>
+                    <path d="M23.1397 22.5491C23.3329 22.1914 23.3329 21.7747 23.1397 21.4168L15.4298 7.71484L15.4298 15.4281L23.1397 22.5491Z" fill="#2684FC"/>
+                </svg>
+            )
+        },
+        {
+            name: "Figma",
+            logo: (
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
+                    <path d="M8 24C10.2091 24 12 22.2091 12 20V16H8C5.79086 16 4 17.7909 4 20C4 22.2091 5.79086 24 8 24Z" fill="#0ACF83"/>
+                    <path d="M4 12C4 9.79086 5.79086 8 8 8H12V16H8C5.79086 16 4 14.2091 4 12Z" fill="#A259FF"/>
+                    <path d="M4 4C4 1.79086 5.79086 0 8 0H12V8H8C5.79086 8 4 6.20914 4 4Z" fill="#F24E1E"/>
+                    <path d="M12 0H16C18.2091 0 20 1.79086 20 4C20 6.20914 18.2091 8 16 8H12V0Z" fill="#FF7262"/>
+                    <path d="M20 12C20 14.2091 18.2091 16 16 16C13.7909 16 12 14.2091 12 12C12 9.79086 13.7909 8 16 8C18.2091 8 20 9.79086 20 12Z" fill="#1ABCFE"/>
+                </svg>
+            )
+        },
+        {
+            name: "GitHub",
+            logo: (
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
+                    <path d="M12 0C5.374 0 0 5.373 0 12C0 17.302 3.438 21.8 8.207 23.387C8.806 23.498 9 23.126 9 22.81V20.576C5.662 21.302 4.967 19.16 4.967 19.16C4.421 17.773 3.634 17.404 3.634 17.404C2.545 16.659 3.717 16.675 3.717 16.675C4.922 16.759 5.556 17.912 5.556 17.912C6.626 19.746 8.363 19.216 9.048 18.909C9.155 18.134 9.466 17.604 9.81 17.305C7.145 17 4.343 15.971 4.343 11.374C4.343 10.063 4.812 8.993 5.579 8.153C5.455 7.85 5.044 6.629 5.696 4.977C5.696 4.977 6.704 4.655 8.997 6.207C9.954 5.941 10.98 5.808 12 5.803C13.02 5.808 14.047 5.941 15.006 6.207C17.297 4.655 18.303 4.977 18.303 4.977C18.956 6.63 18.545 7.851 18.421 8.153C19.191 8.993 19.656 10.064 19.656 11.374C19.656 15.983 16.849 16.998 14.177 17.295C14.607 17.667 15 18.397 15 19.517V22.81C15 23.129 15.192 23.504 15.801 23.386C20.566 21.797 24 17.3 24 12C24 5.373 18.627 0 12 0Z" fill="white"/>
+                </svg>
+            )
+        },
+        {
+            name: "Notion",
+            logo: (
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
+                    <path d="M4.22092 2.99854C5.02412 2.99854 5.59752 2.95454 6.27192 2.68934L17.3431 0.0421387C17.9869 -0.134061 18.5867 0.0861387 18.8519 0.582939L20.547 3.97414C20.7519 4.33854 20.6679 4.79214 20.3159 5.05734L19.0319 6.07214V20.6713C19.0319 21.7741 18.3575 22.8065 17.2271 23.1269L6.07992 25.8625C5.58712 25.9905 4.92672 26.0345 4.61052 25.8449C4.27032 25.6553 3.92072 25.1577 3.92072 24.3281V4.29854C3.92072 3.59974 3.97412 2.99854 4.22092 2.99854ZM17.6271 4.47574L6.68712 6.82934V23.4953L17.2711 20.9917V6.07214L16.8223 6.43654C16.6071 6.61614 16.1559 6.70414 15.8839 6.61614L11.7575 5.49054C11.3959 5.40254 11.1367 5.05734 11.1367 4.69294C11.1367 4.59494 11.1583 4.49754 11.2013 4.40994L12.2783 2.28614C12.4159 2.02094 12.7359 1.89894 13.0551 1.98654L17.6271 4.47574Z" fill="white"/>
+                </svg>
+            )
+        },
     ];
 
     return (
-        <section className="px-4 py-20">
+        <section className="px-4 py-20 bg-black text-white">
             <div className="max-w-6xl mx-auto text-center">
                 <h2 className="text-4xl font-bold mb-16">
                     Works with Your <span className="text-yellow-400">Favorite Tools</span>
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
                     {integrations.map((item, i) => (
-                        <div key={i} className="bg-[#12141F] p-6 rounded-lg aspect-square flex items-center justify-center">
-                            <img src={item.logo} alt={item.name} className="w-12 h-12" />
+                        <div
+                            key={i}
+                            className="bg-[#12141F] p-6 rounded-lg aspect-square flex items-center justify-center hover:border hover:border-yellow-400 transition-all"
+                        >
+                            <div className="w-12 h-12">{item.logo}</div>
+                            <span className="sr-only">{item.name}</span>
                         </div>
                     ))}
                 </div>
+
+                <p className="mt-16 text-gray-400 max-w-lg mx-auto">
+                    Seamlessly connect with the tools you already use. Our platform integrates with your workflow for maximum productivity.
+                </p>
+
+                <button className="mt-8 px-8 py-3 bg-yellow-500 text-black font-semibold rounded-full hover:bg-yellow-400 transition-all">
+                    Explore Integrations
+                </button>
             </div>
         </section>
     );
