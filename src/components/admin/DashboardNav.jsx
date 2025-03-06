@@ -1,5 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Settings, BarChart3, Bell, FolderKanban, Menu, ChevronDown, ChevronRight } from "lucide-react";
+import {
+    LayoutDashboard, Users, Settings, Bell, FolderKanban, BarChart3, Menu, ChevronDown, ChevronRight
+} from "lucide-react";
 import { useState } from "react";
 
 const DashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
@@ -33,25 +35,28 @@ const DashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
 
     return (
         <aside
-            className={`fixed top-0 left-0 h-full w-64 border-r border-gray-800 bg-[#0A0B14] text-gray-300 transform 
+            className={`fixed top-0 left-0 h-full w-64 border-r border-yellow-500 bg-[#0A0B14] text-gray-300 transform 
             ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} 
             lg:relative lg:translate-x-0 lg:w-64 
-            transition-transform duration-300 ease-in-out z-50`}
+            transition-transform duration-300 ease-in-out z-50 shadow-lg`}
         >
             {/* Sidebar Header */}
-            <div className="border-b border-gray-800 px-6 py-4 flex justify-between items-center lg:block">
+            <div className="border-b border-yellow-500 px-6 py-4 flex justify-between items-center lg:block">
                 <Link to="/" className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg transform rotate-45"></div>
-                    <span className="font-bold text-xl text-white">Admin</span>
+                    {/* Bee Logo */}
+                    <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center shadow-md">
+                        🐝
+                    </div>
+                    <span className="font-bold text-xl text-yellow-400">Admin</span>
                 </Link>
-                <button className="lg:hidden text-gray-300" onClick={toggleSidebar}>
+                <button className="lg:hidden text-yellow-400" onClick={toggleSidebar}>
                     <Menu />
                 </button>
             </div>
 
             {/* Sidebar Navigation */}
             <nav className="p-6">
-                <h3 className="text-gray-400">Menu</h3>
+                <h3 className="text-yellow-400 uppercase text-sm">Menu</h3>
                 <ul className="mt-3 space-y-2">
                     {routes.map((route) =>
                         route.subRoutes ? (
@@ -59,14 +64,14 @@ const DashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                                 <button
                                     onClick={toggleProjectsMenu}
                                     className={`flex items-center justify-between w-full px-3 py-2 rounded-md ${
-                                        isProjectsOpen ? "bg-gray-800 text-white" : "hover:bg-gray-800"
-                                    }`}
+                                        isProjectsOpen ? "bg-yellow-500/20 text-yellow-400" : "hover:bg-yellow-500/10"
+                                    } transition`}
                                 >
                                     <div className="flex items-center gap-2">
-                                        <route.icon className="h-5 w-5" />
+                                        <route.icon className="h-5 w-5 text-yellow-400" />
                                         {route.label}
                                     </div>
-                                    {isProjectsOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                                    {isProjectsOpen ? <ChevronDown className="h-4 w-4 text-yellow-400" /> : <ChevronRight className="h-4 w-4 text-yellow-400" />}
                                 </button>
 
                                 {isProjectsOpen && (
@@ -76,8 +81,8 @@ const DashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                                                 <Link
                                                     to={subroute.href}
                                                     className={`flex items-center gap-2 px-3 py-2 rounded-md ${
-                                                        location.pathname === subroute.href ? "bg-gray-700 text-white" : "hover:bg-gray-700"
-                                                    }`}
+                                                        location.pathname === subroute.href ? "bg-yellow-500 text-black" : "hover:bg-yellow-500/20"
+                                                    } transition`}
                                                 >
                                                     {subroute.label}
                                                 </Link>
@@ -91,10 +96,10 @@ const DashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                                 <Link
                                     to={route.href}
                                     className={`flex items-center gap-2 px-3 py-2 rounded-md ${
-                                        location.pathname === route.href ? "bg-gray-800 text-white" : "hover:bg-gray-800"
-                                    }`}
+                                        location.pathname === route.href ? "bg-yellow-500 text-black" : "hover:bg-yellow-500/10"
+                                    } transition`}
                                 >
-                                    <route.icon className="h-5 w-5" />
+                                    <route.icon className="h-5 w-5 text-yellow-400" />
                                     {route.label}
                                 </Link>
                             </li>
@@ -103,17 +108,17 @@ const DashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                 </ul>
 
                 {/* Resources Section */}
-                <h3 className="text-gray-400 mt-6">Resources</h3>
+                <h3 className="text-yellow-400 mt-6 uppercase text-sm">Resources</h3>
                 <ul className="mt-3 space-y-2">
                     {resources.map((resource) => (
                         <li key={resource.id}>
                             <Link
                                 to={resource.href}
                                 className={`flex items-center gap-2 px-3 py-2 rounded-md ${
-                                    location.pathname === resource.href ? "bg-gray-800 text-white" : "hover:bg-gray-800"
-                                }`}
+                                    location.pathname === resource.href ? "bg-yellow-500 text-black" : "hover:bg-yellow-500/10"
+                                } transition`}
                             >
-                                <resource.icon className="h-5 w-5" />
+                                <resource.icon className="h-5 w-5 text-yellow-400" />
                                 {resource.label}
                             </Link>
                         </li>

@@ -32,10 +32,10 @@ export default function ViewUserProfilePage() {
     }
 
     return (
-        <div className="max-w-3xl mx-auto bg-[#1C1F2E] p-8 rounded-lg shadow-lg border border-gray-700 mt-10">
+        <div className="max-w-3xl mx-auto bg-gradient-to-b from-[#0A0B14] to-[#12141F] p-8 rounded-xl shadow-lg border border-yellow-500 mt-10 relative">
             {/* Back Button */}
-            <Link to="/user/project-applicants" className="text-blue-500 hover:text-blue-400 flex items-center gap-1 mb-6">
-                <ArrowLeft className="w-5 h-5" /> Back to Applicants
+            <Link to="/user/project-applicants" className="flex items-center text-yellow-400 hover:text-yellow-300 transition mb-6">
+                <ArrowLeft className="w-5 h-5 mr-2" /> Back to Applicants
             </Link>
 
             {/* Profile Header */}
@@ -43,7 +43,7 @@ export default function ViewUserProfilePage() {
                 <img
                     src="https://i.pravatar.cc/150?img=3"
                     alt="Profile"
-                    className="w-24 h-24 rounded-full border-4 border-purple-600 shadow-lg"
+                    className="w-24 h-24 rounded-full border-4 border-yellow-500 shadow-md"
                 />
                 <div>
                     <h2 className="text-3xl font-semibold text-white">{userData.fullName}</h2>

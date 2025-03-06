@@ -36,103 +36,126 @@ export default function CategoryManagementPage() {
     };
 
     const handleDeleteCategory = async (categoryId) => {
-      const result = await Swal.fire({
-          title: "Are you sure ?",
-          text: "This action cannot be undone. If this category is in use , deletion will fail.",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#d33",
-          cancelButtonColor: "#3085d6",
-          confirmButtonText: "Yes, delete it!",
-          cancelButtonText: "No, cancel!",
-      });
-      if(result.isConfirmed) {
-          try {
-              await deleteCategory(categoryId);
-              // only reload categories if deletion was successful
-              await loadCategories();
+        const result = await Swal.fire({
+            title: "Are you sure?",
+            text: "This action cannot be undone. If this category is in use, deletion will fail.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "No, cancel!",
+        });
+        if(result.isConfirmed) {
+            try {
+                await deleteCategory(categoryId);
+                await loadCategories();
 
-              Swal.fire({
-                  icon: "success",
-                  title: "Category Deleted",
-                  text: "The category has been deleted successfully.",
-                  timer: 2000,
-                  showConfirmButton: false,
-              });
-          } catch (error) {
-              Swal.fire({
-                  icon: "error",
-                  title: "Deletion Failed",
-                  text: error.response?.data || "This Category is in use and cannot be deleted.",
-              });
-          }
-      }
+                Swal.fire({
+                    icon: "success",
+                    title: "Category Deleted",
+                    text: "The category has been deleted successfully.",
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+            } catch (error) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Deletion Failed",
+                    text: error.response?.data || "This Category is in use and cannot be deleted.",
+                });
+            }
+        }
     };
 
     return (
-        <div className="p-6 max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-white mb-4">Category Management</h1>
+        <div className="space-y-6">
+            <h2 className="text-3xl font-bold text-white mb-6">🐝 Category Management</h2>
 
             {/* Add Category */}
-            <div className="flex gap-2 mb-4">
-                <input
-                    type="text"
-                    placeholder="New Category Name"
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    className="bg-gray-800 text-white px-4 py-2 rounded-md flex-1"
-                />
-                <button onClick={handleCreateCategory} className="bg-green-600 text-white px-4 py-2 rounded-md flex items-center">
-                    <PlusCircle className="w-5 h-5 mr-1" /> Add
-                </button>
+            <div className="bg-[#1C1F2E] border border-yellow-500 rounded-lg shadow-md p-6">
+                <div className="flex flex-row items-center justify-between pb-4">
+                    <h3 className="text-sm font-medium text-gray-400">Add New Category</h3>
+                    <PlusCircle className="h-5 w-5 text-yellow-400" />
+                </div>
+
+                <div className="flex gap-3">
+                    <input
+                        type="text"
+                        placeholder="New Category Name"
+                        value={newCategory}
+                        onChange={(e) => setNewCategory(e.target.value)}
+                        className="bg-gray-800 text-white px-4 py-2 rounded-md flex-1 border border-gray-700 focus:border-yellow-500 focus:outline-none"
+                    />
+                    <button
+                        onClick={handleCreateCategory}
+                        className="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-md flex items-center transition-colors"
+                    >
+                        <PlusCircle className="w-5 h-5 mr-2" /> Add Category
+                    </button>
+                </div>
             </div>
 
             {/* Categories List */}
-            <div className="bg-[#1C1F2E] p-6 rounded-md shadow-md border border-gray-700">
-                <h2 className="text-lg font-bold text-white mb-4">Existing Categories</h2>
-                <ul>
-                    {categories.map((category) => (
-                        <li key={category.id} className="flex justify-between items-center p-2 border-b border-gray-700">
-                            {editingCategory === category.id ? (
-                                <input
-                                    type="text"
-                                    value={editedCategoryName}
-                                    onChange={(e) => setEditedCategoryName(e.target.value)}
-                                    className="bg-gray-800 text-white px-2 py-1 rounded-md flex-1"
-                                />
-                            ) : (
-                                <span className="text-white">{category.name}</span>
-                            )}
-                            <div className="flex space-x-2">
+            <div className="bg-[#1C1F2E] border border-yellow-500 rounded-lg shadow-md">
+                <div className="p-6 pb-2">
+                    <h3 className="text-sm font-medium text-gray-400">Existing Categories</h3>
+                </div>
+                <div className="p-6 pt-2">
+                    <ul className="divide-y divide-gray-700">
+                        {categories.map((category) => (
+                            <li key={category.id} className="flex justify-between items-center py-3">
                                 {editingCategory === category.id ? (
-                                    <>
-                                        <button onClick={handleUpdateCategory} className="text-green-500 hover:text-green-700">
-                                            <Check className="w-5 h-5" />
-                                        </button>
-                                        <button onClick={() => setEditingCategory(null)} className="text-red-500 hover:text-red-700">
-                                            <X className="w-5 h-5" />
-                                        </button>
-                                    </>
+                                    <input
+                                        type="text"
+                                        value={editedCategoryName}
+                                        onChange={(e) => setEditedCategoryName(e.target.value)}
+                                        className="bg-gray-800 text-white px-4 py-2 rounded-md flex-1 border border-gray-700 focus:border-yellow-500 focus:outline-none"
+                                        autoFocus
+                                    />
                                 ) : (
-                                    <>
-                                        <button
-                                            onClick={() => {
-                                                setEditingCategory(category.id);
-                                                setEditedCategoryName(category.name);
-                                            }}
-                                            className="text-blue-500 hover:text-blue-700"
-                                        >
-                                            <Pencil className="w-5 h-5" />
-                                        </button>
-                                        <button onClick={() => handleDeleteCategory(category.id)} className="text-red-500 hover:text-red-700">
-                                            <Trash2 className="w-5 h-5" />
-                                        </button>
-                                    </>
+                                    <span className="text-white text-lg">{category.name}</span>
                                 )}
-                            </div>
-                        </li>
-                    ))}
-                </ul>
+                                <div className="flex space-x-3">
+                                    {editingCategory === category.id ? (
+                                        <>
+                                            <button onClick={handleUpdateCategory} className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-full">
+                                                <Check className="w-4 h-4" />
+                                            </button>
+                                            <button onClick={() => setEditingCategory(null)} className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-full">
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button
+                                                onClick={() => {
+                                                    setEditingCategory(category.id);
+                                                    setEditedCategoryName(category.name);
+                                                }}
+                                                className="p-2 bg-yellow-500 hover:bg-yellow-400 text-black rounded-full"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteCategory(category.id)}
+                                                className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-full"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            </li>
+                        ))}
+
+                        {categories.length === 0 && (
+                            <li className="py-4 text-center text-gray-400">
+                                No categories found. Create one to get started.
+                            </li>
+                        )}
+                    </ul>
+                </div>
             </div>
         </div>
     );

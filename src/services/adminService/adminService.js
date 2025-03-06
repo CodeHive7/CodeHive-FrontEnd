@@ -161,3 +161,18 @@ export const rejectProject = async (projectId, feedback) => {
     await apiClient.post(`/admin/projects/${projectId}/reject`, { feedback });
 };
 
+export const fetchDashboardStats = async () => {
+    try {
+        const response = await apiClient.get("/admin/dashboard/stats");
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+        return {
+            totalUsers: 0,
+            activeProjects: 0,
+            totalApplicants: 0,
+            pendingApplications: 0,
+        };
+    }
+};
+
