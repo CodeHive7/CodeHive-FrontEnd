@@ -11,9 +11,7 @@ const Register = () => {
             {/* Logo */}
             <div className="p-6">
                 <Link to="/">
-                    <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg transform rotate-45 shadow-lg">
-                        <div className="w-full h-full bg-[#0A0B14] transform rotate-45 translate-x-1 translate-y-1" />
-                    </div>
+                    <img src="/images/beelogo.png" alt="Hive Logo" className="w-10 h-10" />
                 </Link>
             </div>
 

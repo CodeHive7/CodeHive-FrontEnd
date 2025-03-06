@@ -39,7 +39,7 @@ export default function Navbar() {
                         onClick={() => navigate("/")}
                     >
                         <img src="/images/beelogo.png" alt="BeeHive Logo" className="h-8 w-8" />
-                        <span className="ml-2 text-xl font-bold text-yellow-400">BeeHive</span>
+                        <span className="ml-2 text-xl font-bold text-yellow-400">CodeHive</span>
                     </button>
 
                     {/* Right side (Navigation buttons) */}
