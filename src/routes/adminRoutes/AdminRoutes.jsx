@@ -11,6 +11,7 @@ import RolePermissionsPage from "../../pages/Admin/RolePermissionsPage.jsx";
 import CategoryManagementPage from "../../pages/Admin/CategoryManagementPage.jsx";
 import AcceptedProjectsPage from "../../pages/Admin/AcceptedProjectsPage.jsx";
 import RejectedProjectsPage from "../../pages/Admin/RejectedProjectsPage.jsx";
+import AdminProjectDetailsPage from "../../pages/Admin/Projects/AdminProjectDetailsPage.jsx";
 
 const AdminRoutes = () => {
     return (
@@ -23,6 +24,16 @@ const AdminRoutes = () => {
                             <DashboardPage />
                         </AdminLayout>
                     </ProtectedAdminRoute>
+                }
+            />
+            <Route
+                path="/projects/:projectId"
+                element={
+                <ProtectedAdminRoute>
+                    <AdminLayout>
+                        <AdminProjectDetailsPage />
+                    </AdminLayout>
+                </ProtectedAdminRoute>
                 }
             />
             <Route
@@ -88,6 +99,7 @@ const AdminRoutes = () => {
                 <Route index element={<ProjectsPage />} /> {/* Default to Pending Projects */}
                 <Route path="accepted" element={<AcceptedProjectsPage />} /> {/* Accepted Projects */}
                 <Route path="rejected" element={<RejectedProjectsPage />} /> {/* Rejected Projects */}
+                <Route path=":projectId" element={<AdminProjectDetailsPage />} /> {/* Project Details */}
             </Route>
             <Route
                 path="analytics"
