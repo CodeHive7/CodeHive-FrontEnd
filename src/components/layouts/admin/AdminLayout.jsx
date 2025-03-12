@@ -11,7 +11,7 @@ const AdminLayout = ({ children }) => {
     };
 
     return (
-        <div className="flex h-screen bg-[#0A0B14]">
+        <div className="flex min-h-screen bg-[#0A0B14]">
             {/* Sidebar */}
             <aside
                 className={`fixed inset-y-0 left-0 transform transition-transform duration-300 ease-in-out z-50
@@ -35,8 +35,9 @@ const AdminLayout = ({ children }) => {
             {/* Sidebar Toggle Button */}
             <button
                 onClick={toggleSidebar}
-                className="absolute top-1/2 transform -translate-y-1/2 left-64 bg-yellow-500 text-black p-2 rounded-full shadow-md transition-all duration-300
-                hover:bg-yellow-400 lg:hidden"
+                className="fixed top-20 left-64 bg-yellow-500 text-black p-2 rounded-full shadow-md transition-all duration-300
+                hover:bg-yellow-400 lg:hidden z-50"
+                style={{ transform: isSidebarOpen ? 'translateX(0)' : 'translateX(-64px)' }}
             >
                 {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
             </button>
