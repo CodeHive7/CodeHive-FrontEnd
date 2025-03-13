@@ -7,7 +7,7 @@ import {
     createProject,
     fetchCategories,
 } from "../../services/userService/UserService.js";
-import { LayoutDashboard, LogOut, PlusCircle, X, ChevronRight } from "lucide-react";
+import { LayoutDashboard, LogOut, PlusCircle, X, ChevronRight, Users, Calendar } from "lucide-react";
 import Swal from "sweetalert2";
 
 export default function UserHomePage() {
@@ -25,6 +25,7 @@ export default function UserHomePage() {
         selectedCategory: "",
         positions: [{ roleName: "", paid: false, quantity: 1 }],
     });
+    const [expandedDescriptions, setExpandedDescriptions] = useState({});
 
     const { logoutHandler } = useAuth();
 
@@ -89,6 +90,35 @@ export default function UserHomePage() {
         }
     };
 
+    const toggleDescription = (projectId) => {
+        setExpandedDescriptions(prev => ({
+            ...prev,
+            [projectId]: !prev[projectId]
+        }));
+    };
+
+    // Get stage badge color
+    const getStageBadgeColor = (stage) => {
+        switch(stage) {
+            case "NOT_STARTED": return "bg-blue-500";
+            case "IN_DEVELOPMENT": return "bg-yellow-500";
+            case "FINISHED": return "bg-green-500";
+            case "NEEDS_FIXES": return "bg-red-500";
+            default: return "bg-purple-500";
+        }
+    };
+
+    // Get stage display name
+    const getStageDisplayName = (stage) => {
+        switch(stage) {
+            case "NOT_STARTED": return "Not Started";
+            case "IN_DEVELOPMENT": return "In Development";
+            case "FINISHED": return "Completed";
+            case "NEEDS_FIXES": return "Needs Fixes";
+            default: return stage || "Ongoing";
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#0A0B14] text-white">
             {/* Header */}
@@ -114,58 +144,142 @@ export default function UserHomePage() {
             </header>
 
             {/* Projects Section */}
-            <div className="max-w-6xl mx-auto px-6 py-12">
-                <h2 className="text-4xl font-bold text-white mb-8">Explore Hives &amp; Join the Colony</h2>
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+                <h2 className="text-3xl sm:text-4xl font-bold text-white mb-8 text-center">
+                    <span className="relative inline-block">
+                        <span className="relative z-10">Explore Hives &amp; Join the Colony</span>
+                        <span className="absolute bottom-1 left-0 w-full h-3 bg-yellow-500 opacity-20 rounded"></span>
+                    </span>
+                </h2>
+
                 {projects.length === 0 ? (
-                    <p className="text-gray-400">No projects available at the moment.</p>
+                    <div className="text-center py-20">
+                        <div className="inline-block p-6 bg-gray-800 rounded-full mb-4">
+                            <span className="text-4xl">🐝</span>
+                        </div>
+                        <p className="text-gray-400 text-xl">No hives available at the moment.</p>
+                        <p className="text-gray-500 mt-2">Be the first to create one!</p>
+                    </div>
                 ) : (
-                    <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className={`honeycomb-grid grid gap-6 sm:gap-8 mx-auto
+                        ${projects.length === 1 ? 'grid-cols-1 w-4/5' : 
+                          projects.length === 2 ? 'grid-cols-2' : 
+                              'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
                         {projects.map((project) => (
                             <div
                                 key={project.id}
-                                className="relative bg-[#12141F] rounded-lg shadow-lg border border-yellow-500 transform hover:scale-105 transition duration-300 overflow-hidden p-6"
+                                className="honeycomb-cell group bg-gradient-to-br from-[#12141F] to-[#191c2e] rounded-lg overflow-hidden shadow-lg border-l-2 border-r-2 border-yellow-500/30 transform transition-all duration-300 hover:scale-[1.02]"
                             >
-                                <div className="absolute top-0 right-0 bg-yellow-500 px-3 py-1 text-black text-xs font-bold rounded-bl-lg">
-                                    {project.stage || "Ongoing"}
+                                {/* Hexagonal design elements */}
+                                <div className="absolute -left-3 -top-3 w-12 h-12 bg-yellow-500/20 rounded-full"></div>
+                                <div className="absolute -right-4 -bottom-4 w-14 h-14 bg-yellow-500/10 rounded-full"></div>
+
+                                {/* Stage badge */}
+                                <div className={`absolute top-0 right-0 ${getStageBadgeColor(project.stage)} px-3 py-1 text-black text-xs font-bold rounded-bl-lg`}>
+                                    {getStageDisplayName(project.stage)}
                                 </div>
-                                <h3 className="text-2xl font-bold text-yellow-400">{project.name}</h3>
-                                <p className="text-gray-400 mt-2">{project.description}</p>
-                                <p className="text-gray-500 text-sm mt-2">
-                                    <span className="font-semibold text-white">Category:</span> {project.category || "Uncategorized"}
-                                </p>
-                                <div className="mt-3">
-                                    <h4 className="text-lg font-semibold text-white mb-2">Open Positions:</h4>
-                                    <ul className="text-gray-300 text-sm space-y-2">
-                                        {project.positions.length > 0 ? (
-                                            project.positions.map((position, index) => (
-                                                <li
-                                                    key={index}
-                                                    className="flex justify-between bg-gray-800 p-2 rounded-md"
-                                                >
-                                                    <span>{position.roleName}</span>
-                                                    <span className="text-yellow-400">
-                            {position.quantity} spots left
-                          </span>
-                                                </li>
-                                            ))
-                                        ) : (
-                                            <p className="text-gray-400">No open positions.</p>
+
+                                <div className="p-6">
+                                    {/* Header */}
+                                    <h3 className="text-2xl font-bold text-yellow-400 group-hover:text-yellow-300 transition-colors">
+                                        {project.name}
+                                    </h3>
+
+                                    {/* Category */}
+                                    <p className="text-gray-400 text-sm mt-1">
+                                        <span className="bg-gray-800 px-2 py-1 rounded text-xs">
+                                            {project.category || "Uncategorized"}
+                                        </span>
+                                    </p>
+
+                                    {/* Description */}
+                                    <div className="mt-3 text-gray-300">
+                                        {project.description && (
+                                            <p className="relative">
+                                                {project.description.length > 120 && !expandedDescriptions[project.id]
+                                                    ? project.description.substring(0, 120) + "..."
+                                                    : project.description}
+
+                                                {project.description.length > 120 && (
+                                                    <button
+                                                        onClick={() => toggleDescription(project.id)}
+                                                        className="text-yellow-400 hover:underline ml-1 text-sm"
+                                                    >
+                                                        {expandedDescriptions[project.id] ? "Show less" : "Read more"}
+                                                    </button>
+                                                )}
+                                            </p>
                                         )}
-                                    </ul>
-                                </div>
-                                <div className="mt-6">
+                                    </div>
+
+                                    {/* Project info */}
+                                    <div className="flex justify-between items-center mt-4 text-sm">
+                                        <div className="flex items-center">
+                                            <Users className="w-4 h-4 text-yellow-400 mr-1" />
+                                            <span>{project.positions.reduce((sum, pos) => sum + (parseInt(pos.quantity) || 0), 0)} positions</span>
+                                        </div>
+                                        <div className="flex items-center text-gray-400">
+                                            <Calendar className="w-4 h-4 mr-1" />
+                                            <span>Created recently</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Positions */}
+                                    <div className="mt-4">
+                                        <h4 className="text-sm font-semibold text-yellow-400 mb-2 flex items-center">
+                                            <span className="mr-2">Open Roles</span>
+                                            <div className="h-px bg-yellow-500/30 flex-grow"></div>
+                                        </h4>
+
+                                            {project.positions.length > 0 ? (
+                                                <div className="flex felx-wrap gap-2 mt-3 max-h-32 overflow-y-auto">
+                                                    {project.positions.map((position, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="inline-flex items-center bg-gray-800/70 border border-yellow-500/30 px-2 py-1 rounded-full text-xs sm:text-sm transition-all hover:bg-gray-700/70 hover:border-yellow-500/50 group mb-1"
+                                                    >
+                                                        <div className="w-2 h-2 rounded-full bg-yellow-400 mr-1"></div>
+                                                        <span className="truncate max-w-[100px] sm:max-w-[150px]">{position.roleName}</span>
+                                                        <div className="flex items-center ml-1 px-1 py-0.5 bg-gray-900/50 rounded-full">
+                                                            <span className="text-yellow-400 text-xs">
+                                                                {position.quantity} spots
+                                                            </span>
+                                                        </div>
+                                                            {position.paid && (
+                                                                <span className="ml-1 bg-green-900/60 text-green-300 text-xs px-1 py-0.5 rounded-full">
+                                                                    $
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-gray-400 text-sm">No open positions</p>
+                                            )}
+
+                                    </div>
+
+                                    {/* Action Button */}
                                     <Link
                                         to={`/projects/${project.id}`}
-                                        className="w-full inline-block text-center bg-yellow-500 text-black px-6 py-3 rounded-md text-lg font-semibold hover:shadow-lg transition transform hover:scale-105"
+                                        className="mt-5 w-full inline-flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2.5 rounded-md text-base font-semibold transition-all group-hover:shadow-lg"
                                     >
                                         View Details
-                                        <ChevronRight className="inline-block w-5 h-5 ml-2" />
+                                        <ChevronRight className="w-5 h-5 ml-1 group-hover:ml-2 transition-all" />
                                     </Link>
                                 </div>
                             </div>
                         ))}
                     </div>
                 )}
+
+                {/* Honeycomb decoration (visible on larger screens) */}
+                <div className="hidden lg:block absolute -right-20 top-1/3 opacity-10 pointer-events-none">
+                    <div className="honeycomb-decor w-48 h-48 border-2 border-yellow-500 rotate-12"></div>
+                </div>
+                <div className="hidden lg:block absolute -left-16 bottom-1/4 opacity-5 pointer-events-none">
+                    <div className="honeycomb-decor w-36 h-36 border-2 border-yellow-500 -rotate-12"></div>
+                </div>
             </div>
 
             {/* Create Project Modal */}
