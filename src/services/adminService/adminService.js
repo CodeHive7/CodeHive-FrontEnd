@@ -1,5 +1,5 @@
 import apiClient  from "../apiClient.js";
-import Swal from "sweetalert2";
+
 
 export const fetchUsers = async () => {
     const { data } = await apiClient.get("/admin/users");
