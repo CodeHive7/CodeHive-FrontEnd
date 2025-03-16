@@ -120,7 +120,7 @@ export default function UserHomePage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0A0B14] text-white">
+        <div className="min-h-screen bg-[#0A0B14] text-white overflow-x-hidden relative">
             {/* Header */}
             <header className="sticky top-0 z-40 border-b border-gray-800 bg-[#0A0B14]">
                 <div className="flex h-16 items-center justify-between px-6">
@@ -144,7 +144,7 @@ export default function UserHomePage() {
             </header>
 
             {/* Projects Section */}
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 overflow-hidden">
                 <h2 className="text-3xl sm:text-4xl font-bold text-white mb-8 text-center">
                     <span className="relative inline-block">
                         <span className="relative z-10">Explore Hives &amp; Join the Colony</span>
@@ -232,14 +232,14 @@ export default function UserHomePage() {
                                         </h4>
 
                                             {project.positions.length > 0 ? (
-                                                <div className="flex felx-wrap gap-2 mt-3 max-h-32 overflow-y-auto">
+                                                <div className="flex felx-wrap gap-2 mt-3 max-h-40 overflow-y-auto">
                                                     {project.positions.map((position, index) => (
                                                     <div
                                                         key={index}
                                                         className="inline-flex items-center bg-gray-800/70 border border-yellow-500/30 px-2 py-1 rounded-full text-xs sm:text-sm transition-all hover:bg-gray-700/70 hover:border-yellow-500/50 group mb-1"
                                                     >
                                                         <div className="w-2 h-2 rounded-full bg-yellow-400 mr-1"></div>
-                                                        <span className="truncate max-w-[100px] sm:max-w-[150px]">{position.roleName}</span>
+                                                        <span className="truncate max-w-[80px] sm:max-w-[120px]">{position.roleName}</span>
                                                         <div className="flex items-center ml-1 px-1 py-0.5 bg-gray-900/50 rounded-full">
                                                             <span className="text-yellow-400 text-xs">
                                                                 {position.quantity} spots
@@ -274,10 +274,10 @@ export default function UserHomePage() {
                 )}
 
                 {/* Honeycomb decoration (visible on larger screens) */}
-                <div className="hidden lg:block absolute -right-20 top-1/3 opacity-10 pointer-events-none">
+                <div className="hidden lg:block absolute right-0 top-1/3 opacity-10 pointer-events-none">
                     <div className="honeycomb-decor w-48 h-48 border-2 border-yellow-500 rotate-12"></div>
                 </div>
-                <div className="hidden lg:block absolute -left-16 bottom-1/4 opacity-5 pointer-events-none">
+                <div className="hidden lg:block absolute left-0 bottom-1/4 opacity-5 pointer-events-none">
                     <div className="honeycomb-decor w-36 h-36 border-2 border-yellow-500 -rotate-12"></div>
                 </div>
             </div>
