@@ -47,7 +47,7 @@ import { useState, useEffect } from "react";
                                         <p className="text-gray-400 text-lg">You haven't applied to any projects yet</p>
                                         <p className="text-gray-500 text-sm mt-1">Start exploring opportunities in the projects section</p>
                                         <Link
-                                            to="/projects"
+                                            to="/userHome"
                                             className="mt-4 px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-black font-medium rounded-md transition-colors flex items-center gap-2"
                                         >
                                             Browse Projects <ArrowRight className="w-4 h-4" />
