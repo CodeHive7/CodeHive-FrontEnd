@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { fetchProjectById, applyForPosition } from "../../../services/userService/UserService.js";
 import { ArrowLeft, Globe, User, Briefcase, CheckCircle, Users, Calendar, Loader2, Clock, XCircle } from "lucide-react";
 import { getAccessToken } from "../../../services/Auth/tokenService.js";
@@ -11,6 +11,7 @@ export default function ProjectDetailsPage() {
     const [project, setProject] = useState(null);
     const [loading, setLoading] = useState(true);
     const [loggedInUsername, setLoggedInUsername] = useState("");
+    const navigate = useNavigate();
 
     useEffect(() => {
         loadProject();
@@ -186,12 +187,12 @@ export default function ProjectDetailsPage() {
             <header className="sticky top-0 z-40 border-b border-gray-800 bg-[#0A0B14]">
                 <div className="flex h-16 items-center justify-between px-6">
                     <h1 className="text-3xl font-bold text-yellow-400">🐝 Hive Details</h1>
-                    <Link
-                        to="/userHome"
-                        className="flex items-center text-yellow-400 hover:text-yellow-300 transition"
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="flex items-center text-yellow-400 hover:text-yellow-300 transition cursor-pointer"
                     >
-                        <ArrowLeft className="w-5 h-5 mr-2" /> Back to Hives
-                    </Link>
+                        <ArrowLeft className="w-5 h-5 mr-2" /> Return
+                    </button>
                 </div>
             </header>
 
