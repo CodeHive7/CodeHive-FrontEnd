@@ -146,3 +146,23 @@ export const fetchAcceptedApplicants = async (projectId) => {
         throw error;
     }
 };
+
+export const getProjectMessages = async (projectId) => {
+    try {
+        const response = await apiClient.get(`/chat/${projectId}/messages`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching project messages", error);
+        throw error;
+    }
+};
+
+export const sendProjectMessage = async (projectId, content) => {
+    try {
+        const response = await apiClient.post(`/chat/${projectId}/messages`, {content});
+        return response.data;
+    } catch (error) {
+        console.error("Error sending message", error);
+        throw error;
+    }
+};
