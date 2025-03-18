@@ -7,7 +7,7 @@ import {
     createProject,
     fetchCategories,
 } from "../../services/userService/UserService.js";
-import { LayoutDashboard, LogOut, PlusCircle, X, ChevronRight, Users, Calendar } from "lucide-react";
+import { LayoutDashboard, LogOut, PlusCircle, X, ChevronRight, Users, Calendar, MessageSquare } from "lucide-react";
 import Swal from "sweetalert2";
 
 export default function UserHomePage() {
@@ -133,6 +133,11 @@ export default function UserHomePage() {
                             <PlusCircle className="w-5 h-5 mr-2" />
                             Build a Hive
                         </button>
+                        {/* Chat Button */}
+                        <Link to="/user/messages" className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md flex items-center transition-colors">
+                            <MessageSquare className="w-5 h-5 mr-2" />
+                            <span className="hidden md:inline">Chat</span>
+                        </Link>
                         <Link to="/user" className="hover:bg-gray-800 p-2 rounded-md">
                             <LayoutDashboard className="h-6 w-6 text-white" />
                         </Link>
