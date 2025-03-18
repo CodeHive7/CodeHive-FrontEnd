@@ -8,12 +8,15 @@ import ProtectedUserRoute from "./ProtectedUserRoute.jsx";
 import ViewUserProfilePage from "../../pages/User/ViewUserProfile/ViewUserProfilePage.jsx";
 import CreateTaskPage from "../../pages/User/tasks/CreateTaskPage.jsx";
 import AssignedTasksPage from "../../pages/User/tasks/AssignedTasksPage.jsx";
+import ProjectChatPage from "../../pages/User/chat/ProjectChatPage.jsx";
+import MessagesHubPage from "../../pages/User/chat/MessagesHubPage.jsx";
 
 const UserRoutes = () => {
     return (
         <Routes>
             {/* Redirect /user to /user/profile */}
             <Route path="/" element={<Navigate to="/user/profile" replace />} />
+            
 
             <Route
                 path="/profile"
@@ -82,6 +85,23 @@ const UserRoutes = () => {
                     </ProtectedUserRoute>
                 }
             />
+            <Route
+                path="/projects/:projectId/chat"
+                element={
+                    <ProtectedUserRoute>
+                            <ProjectChatPage />
+                    </ProtectedUserRoute>
+                }
+            />
+            <Route
+                path="/messages"
+                element={
+                    <ProtectedUserRoute>
+                            < MessagesHubPage/>
+                    </ProtectedUserRoute>
+                }
+            />
+            
         </Routes>
     );
 };
