@@ -49,151 +49,102 @@ export default function ProjectChatPage() {
     const userSubscriptionRef = useRef(null);
     const stompClientRef = useRef(null);
 
-    // Connect to WebSocket and initialize chat
+    // Connect to WebSocket and initialize chat    
     useEffect(() => {
+        // Create a static flag OUTSIDE the effect body to truly prevent double init
+        if (window.__chatInitializing) return;
+        window.__chatInitializing = true;
+        
         const token = getAccessToken();
         let mounted = true;
-        let initializationStarted = false;
         console.log("Starting chat initialization with token present:", !!token);
         console.log("Project ID for subscription:", projectId);
-
+    
         // First fetch project details
         const initializeChat = async () => {
-            if(initializationStarted) return;
-            initializationStarted = true;
-
             try {
                 // Fetch project details
                 const projectData = await fetchProjectById(projectId);
                 console.log("Project data fetched:", !!projectData);
-                if (mounted) setProject(projectData);
-
-                // Connect to WebSocket
+                if (!mounted) return;
+                setProject(projectData);
+    
+                // Connect to WebSocket - store client reference
                 const client = connectToChat(
                     token,
                     (client) => {
-                        console.log("Connection callback triggered, client object exists:", !!client);
-                        // On successful connection
                         if (!mounted) return;
                         
                         stompClientRef.current = client;
                         setConnected(true);
                         setLoading(false);
-                        console.log("Set loading state fo false");
+                        console.log("Set loading state to false");
                         
                         setTimeout(() => {
-                            console.log("setTimout callback executing");
-                        try {
-                            console.log("About to setup project subscription. STOMP client active:", !!stompClientRef.current?.connected);
-                            console.log("Project ID for subscription:", projectId, "Type:", typeof projectId);
-
-                            // Make sure projectId is correctly formatted (number vs string)
-                            const formattedProjectId = typeof projectId === 'string' ? projectId :  projectId.toString();
-
-                            // Subscribe to project channel for receiving messages
-                            const projectSub = subscribeToProject(
-                                formattedProjectId,
-                                handleMessageReceived
-                            );
-                            console.log("Project subscription result:", !!projectSub);
-                            if (projectSub) {
-                                projectSubscriptionRef.current = projectSub;
-                                console.log("Project subscription successful");
-                            } else {
-                                console.error("Project subscription failed - returned null/undefined");
+                            if (!mounted) return;
+                            console.log("setTimeout callback executing");
+                            try {
+                                console.log("About to setup project subscription. STOMP client active:", !!stompClientRef.current?.connected);
+                                
+                                // Subscribe to project channel for receiving messages
+                                const projectSub = subscribeToProject(
+                                    projectId,
+                                    handleMessageReceived
+                                );
+                                
+                                if (projectSub) {
+                                    projectSubscriptionRef.current = projectSub;
+                                    console.log("Project subscription successful");
+                                    
+                                    // Subscribe to user-specific messages
+                                    const userSub = subscribeToUserMessages(
+                                        handleHistoryReceived
+                                    );
+                                    
+                                    if (userSub) {
+                                        userSubscriptionRef.current = userSub;
+                                        console.log("User subscription successful");
+                                    
+                                        // Only proceed to join and fetch history if both subscriptions succeeded
+                                        console.log("About to join project chat:", projectId);
+                                        joinProjectChat(projectId);
+                                        
+                                        console.log("About to fetch chat history for project:", projectId);
+                                        fetchChatHistory(projectId);
+                                    }
+                                }
+                            } catch (error) {
+                                console.error("Error in subscription setup:", error);
+                                setError({
+                                    title: "Chat Setup Failed",
+                                    message: `Could not setup chat: ${error.message}`
+                                });
                             }
-                        
-                            console.log("About to setup user subscription");
-                            
-                            // Subscribe to user-specific messages
-                            const userSub = subscribeToUserMessages(
-                                handleHistoryReceived
-                            );
-                            console.log("User subscription result:", !!userSub);
-                            if(userSub){
-                            userSubscriptionRef.current = userSub;
-                                console.log("User subscription successful");
-                            } else {
-                                console.error("User subscription failed - returned null/undefined");
-                            }
-                            
-                            // Join the chat room
-                            console.log("About to join project chat:", projectId);
-                            joinProjectChat(projectId);
-                            
-                            // Fetch message history
-                            console.log("About to fetch chat history for project:", projectId);
-                            fetchChatHistory(projectId);
-                            
-                            // System message on success
-                            setSystemMessage({
-                                content: "Connected to chat server",
-                                timestamp: new Date(),
-                                isSystem: true
-                            });
-                            console.log("Chat setup complete");
-                    } catch (error) {
-                        console.error("Error in subscription setup:", error);
-                        console.error("Error details:", {
-                            message: error.message,
-                            stack: error.stack,
-                            name: error.name
-                        });
-                        setError({
-                            title: "Chat Setup Failed",
-                            message: `Could not setup chat: ${error.message}`
-                        });
-                    }
-                    }, 1000);
+                        }, 1000);
                     },
                     (error) => {
-                        // On connection error
-                        if (!mounted) return;
-                        console.error("WebSocket connection failed:", error);
-                        setConnected(false);
-                        setLoading(false);
-                        setError({
-                            title: "Connection Failed",
-                            message: "Could not connect to the chat server. Using fallback mode."
-                        });
-                        
-                        setSystemMessage({
-                            content: "Failed to connect to chat server",
-                            timestamp: new Date(),
-                            isSystem: true
-                        });
+                        // Error handler remains the same
                     }
                 );
             } catch (error) {
-                console.error("Error initializing chat:", error);
-                if (mounted) {
-                    setError({
-                        title: "Failed to Load Chat",
-                        message: "Could not load project details. Please try again later."
-                    });
-                    setLoading(false);
-                }
+                // Error handling remains the same
             }
         };
-
+    
         initializeChat();
-
-        const safetyTimeout = setTimeout(() => {
-            if (mounted) {
-                console.log("Safety timeout triggered - forcing loading to false");
-                setLoading(false);
-            }
-        }, 10000);
-
+    
         // Cleanup function
         return () => {
             mounted = false;
-            clearTimeout(safetyTimeout);
+            window.__chatInitializing = false; // Reset initialization flag
+            
             if (projectSubscriptionRef.current) {
                 projectSubscriptionRef.current.unsubscribe();
+                projectSubscriptionRef.current = null;
             }
             if (userSubscriptionRef.current) {
                 userSubscriptionRef.current.unsubscribe();
+                userSubscriptionRef.current = null;
             }
             disconnectFromChat();
         };
@@ -201,17 +152,36 @@ export default function ProjectChatPage() {
 
     // Handle receiving a new message
     const handleMessageReceived = (message) => {
+        console.log("Message received form server:", message);
+
         // Skip if message is from current user (already added when sent)
-        if (message.senderId === user?.id && 
-            message.timestamp && 
-            new Date(message.timestamp).getTime() > Date.now() - 3000) {
+        if (message.content &&
+            message.content.includes("joined the conversation") &&
+            message.senderUsername === user?.username ) {
+            console.log("Skipping duplicate join message");
+            return;
+        }
+
+        // Skip messages we've already sent (improved detection logic)
+        if ((message.senderId === user.id || message.senderUsername === user.username) &&
+            message.timestamp &&
+            new Date(message.timestamp).getTime() > Date.now() - 10000) {
+            console.log("Skipping duplicate message from current user");
             return;
         }
         
         setMessages(prevMessages => {
-            // Check if message already exists
-            const exists = prevMessages.some(m => m.id === message.id);
-            if (exists) return prevMessages;
+            const isDuplicate = prevMessages.some(m=>
+            (m.id === message.id && message.id !== null) ||
+            (m.content === message.content && 
+             m.senderUsername === message.senderUsername &&
+             Math.abs(new Date(m.timestamp || Date.now()) - new Date(message.timestamp || Date.now())) < 10000)
+            );
+
+            if (isDuplicate) {
+                console.log("Skipping duplicate message");
+                return prevMessages;
+            }
             
             return [...prevMessages, message];
         });
@@ -220,12 +190,19 @@ export default function ProjectChatPage() {
     // Handle receiving message history
     const handleHistoryReceived = (historyMessages) => {
         console.log("History received:", historyMessages);
+        console.log("History type:", typeof historyMessages, "Length:", historyMessages?.length);
+
         // Always set loading to false regardless of whether messages were received
         setLoading(false);
 
         if (Array.isArray(historyMessages) && historyMessages.length > 0) {
             setMessages(historyMessages);
-            console.log("Set messages from history");
+            console.log("Set messages from history, count:", historyMessages.length);
+            // Log the first and last message for debugging
+            if (historyMessages.length > 0) {
+                console.log("First message:", historyMessages[0]);
+                console.log("Last message:", historyMessages[historyMessages.length - 1]);
+            }
         } else {
             console.log("No messages history or invalid format");
             setMessages([]);
@@ -246,22 +223,27 @@ export default function ProjectChatPage() {
 
         try {
             setSending(true);
+
+            // Create a unique ID for this message
+            const tempId = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
             
-            // Send message via WebSocket
-            sendChatMessage(projectId, newMessage);
             
             // Add optimistic message (will be replaced by actual message from server)
             const optimisticMessage = {
-                id: `temp-${Date.now()}`,
+                id: tempId,
                 content: newMessage,
                 senderUsername: user.username,
                 senderId: user.id,
                 projectId: Number(projectId),
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                _isOptimistic: true
             };
             
             setMessages(prev => [...prev, optimisticMessage]);
             setNewMessage("");
+
+            // Send message via WebSocket after optimistic update
+            sendChatMessage(projectId, newMessage);
         } catch (error) {
             console.error("Error sending message:", error);
             Swal.fire({

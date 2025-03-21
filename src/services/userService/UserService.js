@@ -155,9 +155,8 @@ export const fetchAcceptedApplicants = async (projectId) => {
 
 
 export const connectToChat = (token, onConnected , onError) => {
-    if (stompClient) {
-        if (stompClient.connected) return stompClient;
-        stompClient.deactivate();
+    if (stompClient && stompClient.connected) {
+        return stompClient;
     }
 
     const socket = new SockJS('http://localhost:8082/ws-chat');
@@ -219,7 +218,7 @@ export const subscribeToProject = (projectId, OnMessageReceived) => {
         return null;
     }
 
-    const subscriptionKey = `/topic/project.${projectId}`;
+    const subscriptionKey = `/topic/project/${projectId}`;
     // If already subscribed , just add new callback
     if (subscribers.has(subscriptionKey)) {
         const callbacks = subscribers.get(subscriptionKey).callbacks;
@@ -233,7 +232,6 @@ export const subscribeToProject = (projectId, OnMessageReceived) => {
         console.log("Received message on project subscription", message);
         try {
         const receivedMessage = JSON.parse(message.body);
-
         // Call all registered callbacks for this subscription
         const callbacks = subscribers.get(subscriptionKey).callbacks;
         callbacks.forEach(callback => callback(receivedMessage));
@@ -243,7 +241,7 @@ export const subscribeToProject = (projectId, OnMessageReceived) => {
     });
 
     subscribers.set(subscriptionKey, {
-        subscription: subscription,
+        subscription,
         callbacks: [OnMessageReceived]
       });
 
@@ -258,8 +256,8 @@ export const sendChatMessage = (projectId, content) => {
     stompClient.publish({
       destination: '/app/chat.sendMessage',
       body: JSON.stringify({
-        projectId: projectId,
-        content: content
+        projectId,
+        content
       })
     });
 };
@@ -305,16 +303,24 @@ export const subscribeToUserMessages = (onHistoryReceived) => {
 // Request message history
 export const fetchChatHistory = (projectId) => {
     if (!stompClient || !stompClient.connected) {
-      throw new Error('WebSocket not connected');
+        console.error('Cannot fetch history: WebSocket not connected');
+        return false;
     }
   
-    stompClient.publish({
-      destination: '/app/chat.fetchMessages',
-      body: JSON.stringify({
-        projectId: projectId,
-        content: ""
-      })
-    });
+    try {
+        console.log(`Requesting chat history for project ${projectId}`);
+        stompClient.publish({
+        destination: '/app/chat.fetchMessages',
+        body: JSON.stringify({
+            projectId: projectId,
+            content: ""
+        })
+        });
+        return true;
+    } catch (error) {
+        console.error("Error fetching chat history", error);
+        return false;
+    }
 };
 
 export const getProjectMessages = async (projectId) => {
@@ -329,7 +335,7 @@ export const getProjectMessages = async (projectId) => {
 
 export const sendProjectMessage = async (projectId, content) => {
     try {
-        const response = await apiClient.post(`/chat/${projectId}/messages`, {content});
+        const response = await apiClient.post(`/chat/${projectId}/messages`, { content });
         return response.data;
     } catch (error) {
         console.error("Error sending message", error);
