@@ -10,11 +10,22 @@ import {
     AlertCircle,
     Info,
     ChevronRight,
-    MessageSquare
+    MessageSquare,
+    Wifi,
+    WifiOff
 } from "lucide-react";
 import Swal from "sweetalert2"; 
-import { getProjectMessages, sendProjectMessage } from "../../../services/userService/UserService.js";
 import { fetchProjectById } from "../../../services/userService/UserService.js";
+import { 
+    connectToChat, 
+    disconnectFromChat, 
+    subscribeToProject, 
+    sendChatMessage, 
+    joinProjectChat,
+    subscribeToUserMessages,
+    fetchChatHistory
+} from "../../../services/userService/UserService.js";
+import { getAccessToken } from "../../../services/Auth/tokenService.js";
 
 export default function ProjectChatPage() {
     const { projectId } = useParams();
@@ -26,73 +37,163 @@ export default function ProjectChatPage() {
     const [project, setProject] = useState(null);
     const [sending, setSending] = useState(false);
     const [error, setError] = useState(null);
+    const [connected, setConnected] = useState(false);
     const messagesEndRef = useRef(null);
     const chatContainerRef = useRef(null);
     const [showProjectInfo, setShowProjectInfo] = useState(false);
+    const [systemMessage, setSystemMessage] = useState(null);
+    
+    
+    // References to keep track of subscriptions
+    const projectSubscriptionRef = useRef(null);
+    const userSubscriptionRef = useRef(null);
+    const stompClientRef = useRef(null);
 
-    // Fetch project details and messages
+    // Connect to WebSocket and initialize chat
     useEffect(() => {
-        const fetchProjectAndMessages = async () => {
+        const token = getAccessToken();
+        let mounted = true;
+
+        // First fetch project details
+        const initializeChat = async () => {
             try {
-                setLoading(true);
-                setError(null);
-                
                 // Fetch project details
                 const projectData = await fetchProjectById(projectId);
-                setProject(projectData);
-                
-                // Fetch messages
-                const messagesData = await getProjectMessages(projectId);
-                // Ensure messages is always an array
-                setMessages(Array.isArray(messagesData) ? messagesData : []);
+                if (mounted) setProject(projectData);
+
+                // Connect to WebSocket
+                const client = connectToChat(
+                    token,
+                    (client) => {
+                        console.log("Connection callback triggered");
+                        // On successful connection
+                        if (!mounted) return;
+                        
+                        stompClientRef.current = client;
+                        setConnected(true);
+                        setLoading(false);
+                        console.log("Set loading state fo false");
+                        
+                        try {
+                            console.log("Setting up project subscription");
+                        // Subscribe to project channel for receiving messages
+                        projectSubscriptionRef.current = subscribeToProject(
+                            projectId,
+                            handleMessageReceived
+                        );
+                        
+                        // Subscribe to user-specific messages
+                        console.log("Setting up user messages subscription");
+                        userSubscriptionRef.current = subscribeToUserMessages(
+                            handleHistoryReceived
+                        );
+                        
+                        // Join the chat room
+                        console.log("Joining project chat");
+                        joinProjectChat(projectId);
+                        
+                        // Fetch message history
+                        console.log("Fetching chat history");
+                        fetchChatHistory(projectId);
+                        
+                        setSystemMessage({
+                            content: "Connected to chat server",
+                            timestamp: new Date(),
+                            isSystem: true
+                        });
+                        console.log("Chat initialization complete");
+                    } catch (error) {
+                        console.error("Error in connection setup:", error);
+                        setLoading(false);
+                        setError({
+                            title: "Chat Setup Failed",
+                            message: "Could not setup chat. Please try again later."
+                        });
+                    }
+                    },
+                    (error) => {
+                        // On connection error
+                        if (!mounted) return;
+                        console.error("WebSocket connection failed:", error);
+                        setConnected(false);
+                        setLoading(false);
+                        setError({
+                            title: "Connection Failed",
+                            message: "Could not connect to the chat server. Using fallback mode."
+                        });
+                        
+                        setSystemMessage({
+                            content: "Failed to connect to chat server",
+                            timestamp: new Date(),
+                            isSystem: true
+                        });
+                    }
+                );
             } catch (error) {
-                console.error("Error fetching data:", error);
-                
-                // Check for Hibernate TransientObjectException
-                const errorMsg = error.response?.data || "";
-                if (errorMsg.includes("TransientObjectException") && 
-                    errorMsg.includes("User")) {
-                    setError({
-                        title: "Chat System Setup Error",
-                        message: "The chat system is still being configured for this project. Please try again later."
-                    });
-                } else {
+                console.error("Error initializing chat:", error);
+                if (mounted) {
                     setError({
                         title: "Failed to Load Chat",
-                        message: "Could not load chat messages. Please refresh and try again."
+                        message: "Could not load project details. Please try again later."
                     });
+                    setLoading(false);
                 }
-                
-                // Initialize with empty array on error
-                setMessages([]);
-            } finally {
-                setLoading(false);
             }
         };
 
-        fetchProjectAndMessages();
+        initializeChat();
 
-        // Poll for new messages every 30 seconds
-        const intervalId = setInterval(() => {
-            if (!error) {
-                fetchNewMessages();
+        const safetyTimeout = setTimeout(() => {
+            if (mounted) {
+                console.log("Safety timeout triggered - forcing loading to false");
+                setLoading(false);
             }
-        }, 30000);
+        }, 10000);
 
-        return () => clearInterval(intervalId);
+        // Cleanup function
+        return () => {
+            mounted = false;
+            clearTimeout(safetyTimeout);
+            if (projectSubscriptionRef.current) {
+                projectSubscriptionRef.current.unsubscribe();
+            }
+            if (userSubscriptionRef.current) {
+                userSubscriptionRef.current.unsubscribe();
+            }
+            disconnectFromChat();
+        };
     }, [projectId]);
 
-    // Fetch only new messages
-    const fetchNewMessages = async () => {
-        if (!messages.length) return;
+    // Handle receiving a new message
+    const handleMessageReceived = (message) => {
+        // Skip if message is from current user (already added when sent)
+        if (message.senderId === user?.id && 
+            message.timestamp && 
+            new Date(message.timestamp).getTime() > Date.now() - 3000) {
+            return;
+        }
         
-        try {
-            const latestMessages = await getProjectMessages(projectId);
-            if (Array.isArray(latestMessages) && latestMessages.length > messages.length) {
-                setMessages(latestMessages);
-            }
-        } catch (error) {
-            console.error("Error fetching new messages:", error);
+        setMessages(prevMessages => {
+            // Check if message already exists
+            const exists = prevMessages.some(m => m.id === message.id);
+            if (exists) return prevMessages;
+            
+            return [...prevMessages, message];
+        });
+    };
+
+    // Handle receiving message history
+    const handleHistoryReceived = (historyMessages) => {
+        console.log("History received:", historyMessages);
+        // Always set loading to false regardless of whether messages were received
+        setLoading(false);
+
+        if (Array.isArray(historyMessages) && historyMessages.length > 0) {
+            setMessages(historyMessages);
+            console.log("Set messages from history");
+        } else {
+            console.log("No messages history or invalid format");
+            setMessages([]);
         }
     };
 
@@ -103,10 +204,58 @@ export default function ProjectChatPage() {
         }
     }, [messages]);
 
-    // Group messages by date
+    // Handle sending a new message
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!newMessage.trim() || !connected) return;
+
+        try {
+            setSending(true);
+            
+            // Send message via WebSocket
+            sendChatMessage(projectId, newMessage);
+            
+            // Add optimistic message (will be replaced by actual message from server)
+            const optimisticMessage = {
+                id: `temp-${Date.now()}`,
+                content: newMessage,
+                senderUsername: user.username,
+                senderId: user.id,
+                projectId: Number(projectId),
+                timestamp: new Date().toISOString()
+            };
+            
+            setMessages(prev => [...prev, optimisticMessage]);
+            setNewMessage("");
+        } catch (error) {
+            console.error("Error sending message:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Failed to Send",
+                text: error.message || "Your message couldn't be sent. Please try again.",
+                confirmButtonColor: "#EAB308"
+            });
+        } finally {
+            setSending(false);
+        }
+    };
+
+    // Group messages by date - keep existing implementation
     const groupMessagesByDate = () => {
         const grouped = {};
-        if (!Array.isArray(messages)) return grouped;
+        const allMessages = [...messages];
+        
+        // Add system message at the top if it exists
+        if (systemMessage) {
+            const date = systemMessage.timestamp;
+            const dateStr = date.toLocaleDateString();
+            
+            if (!grouped[dateStr]) {
+                grouped[dateStr] = [];
+            }
+            
+            grouped[dateStr].push(systemMessage);
+        }
         
         messages.forEach(message => {
             if (!message.timestamp) return;
@@ -123,6 +272,8 @@ export default function ProjectChatPage() {
         
         return grouped;
     };
+
+    // Keep the rest of your utility functions
 
     // Format timestamp to readable format
     const formatTime = (timestamp) => {
@@ -144,60 +295,23 @@ export default function ProjectChatPage() {
         return dateStr;
     };
 
-    // Handle sending a new message
-    const handleSendMessage = async (e) => {
-        e.preventDefault();
-        if (!newMessage.trim()) return;
-
-        try {
-            setSending(true);
-            setError(null);
-            const response = await sendProjectMessage(projectId, newMessage);
-            
-            // Add the new message to the list
-            setMessages(prev => Array.isArray(prev) ? [...prev, response] : [response]);
-            setNewMessage("");
-        } catch (error) {
-            console.error("Error sending message:", error);
-            
-            // Check for Hibernate TransientObjectException
-            const errorMsg = error.response?.data || "";
-            if (errorMsg.includes("TransientObjectException") && 
-                errorMsg.includes("User")) {
-                Swal.fire({
-                    icon: "warning",
-                    title: "Chat System Setup",
-                    text: "The chat system is still being configured. Your message will be saved once setup is complete.",
-                    confirmButtonColor: "#EAB308"
-                });
-            } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "Failed to Send",
-                    text: "Your message couldn't be sent. Please try again.",
-                    confirmButtonColor: "#EAB308"
-                });
-            }
-        } finally {
-            setSending(false);
-        }
-    };
-
     // Determine if a message was sent by the current user
     const isCurrentUser = (senderUsername) => {
         return user?.username === senderUsername;
     };
 
     // Check if message is part of a sequence from same sender
-    const isSequentialMessage = (message, index) => {
+    const isSequentialMessage = (message, index, messages) => {
         if (index === 0) return false;
         const prevMessage = messages[index - 1];
+        if (message.isSystem || prevMessage.isSystem) return false;
         return message.senderUsername === prevMessage.senderUsername;
     };
 
+    // Main render
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#0A0B14] to-[#12141F] text-white flex flex-col">
-            {/* Header */}
+            {/* Header - updated to show connection state */}
             <header className="sticky top-0 z-40 border-b border-yellow-500/30 bg-[#0A0B14]/95 backdrop-blur-sm shadow-md">
                 <div className="flex h-16 items-center px-6">
                     <Link to={`/user/messages`} className="mr-4 hover:text-yellow-400 flex items-center">
@@ -217,6 +331,17 @@ export default function ProjectChatPage() {
                                     <Users className="h-4 w-4 mr-1 text-yellow-400" />
                                     <span className="text-xs text-gray-300">Team Chat</span>
                                 </div>
+                                
+                                {/* Connection indicator */}
+                                <div className={`ml-2 px-2 py-1 rounded-full flex items-center ${
+                                    connected ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
+                                }`}>
+                                    {connected ? (
+                                        <><Wifi className="h-3 w-3 mr-1" /> <span className="text-xs">Live</span></>
+                                    ) : (
+                                        <><WifiOff className="h-3 w-3 mr-1" /> <span className="text-xs">Offline</span></>
+                                    )}
+                                </div>
                             </div>
                             
                             <button
@@ -230,7 +355,7 @@ export default function ProjectChatPage() {
                     )}
                 </div>
                 
-                {/* Project Info Panel (Collapsible) */}
+                {/* Project Info Panel - keep existing implementation */}
                 {showProjectInfo && !loading && project && (
                     <div className="bg-[#181A28] border-t border-gray-800 px-6 py-3 animate-fadeDown">
                         <div className="flex justify-between items-center">
@@ -260,7 +385,7 @@ export default function ProjectChatPage() {
                 )}
             </header>
 
-            {/* Chat container */}
+            {/* Chat container - updated to render system messages */}
             <div 
                 className="flex-grow flex flex-col p-4 max-w-4xl mx-auto w-full"
                 ref={chatContainerRef}
@@ -274,7 +399,7 @@ export default function ProjectChatPage() {
                                     <MessageSquare className="h-6 w-6 text-yellow-500" />
                                 </div>
                             </div>
-                            <p className="text-gray-400 mt-4">Loading conversation...</p>
+                            <p className="text-gray-400 mt-4">Connecting to chat...</p>
                         </div>
                     </div>
                 ) : error ? (
@@ -299,7 +424,7 @@ export default function ProjectChatPage() {
                             </button>
                         </div>
                     </div>
-                ) : !Array.isArray(messages) || messages.length === 0 ? (
+                ) : !loading && (!Array.isArray(messages) || messages.length === 0) ? (
                     <div className="flex-grow flex flex-col items-center justify-center text-gray-400">
                         <div className="bg-gray-800/50 rounded-full p-8 mb-4 animate-pulse">
                             <MessageSquare className="h-12 w-12 text-yellow-500" />
@@ -327,7 +452,18 @@ export default function ProjectChatPage() {
                                 </div>
                                 
                                 {dateMessages.map((message, index) => {
-                                    const isSequential = isSequentialMessage(message, messages.indexOf(message));
+                                    // Handle system messages differently
+                                    if (message.isSystem) {
+                                        return (
+                                            <div key={`system-${index}`} className="flex justify-center my-3">
+                                                <div className="bg-gray-800/50 px-3 py-1 rounded-full text-xs text-gray-400">
+                                                    {message.content}
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+                                    
+                                    const isSequential = isSequentialMessage(message, index, dateMessages);
                                     const isCurrentUserMessage = isCurrentUser(message.senderUsername);
                                     
                                     return (
@@ -370,7 +506,7 @@ export default function ProjectChatPage() {
                     </div>
                 )}
 
-                {/* Message input */}
+                {/* Message input - updated to show connection status */}
                 {!error && (
                     <form 
                         onSubmit={handleSendMessage}
@@ -379,18 +515,18 @@ export default function ProjectChatPage() {
                         <div className="flex bg-[#181A28] rounded-lg overflow-hidden shadow-lg border border-gray-800 focus-within:border-yellow-500/50 transition-all">
                             <input
                                 type="text"
-                                placeholder="Type your message..."
+                                placeholder={connected ? "Type your message..." : "Connecting to chat server..."}
                                 value={newMessage}
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 className="flex-grow bg-transparent px-4 py-3 text-white focus:outline-none"
-                                disabled={sending}
+                                disabled={sending || !connected}
                                 autoComplete="off"
                             />
                             <button
                                 type="submit"
-                                disabled={sending || !newMessage.trim()}
+                                disabled={sending || !newMessage.trim() || !connected}
                                 className={`px-5 bg-yellow-500 text-black flex items-center justify-center transition-all
-                                    ${sending || !newMessage.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-yellow-600 active:bg-yellow-700'}`}
+                                    ${(sending || !newMessage.trim() || !connected) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-yellow-600 active:bg-yellow-700'}`}
                             >
                                 {sending ? (
                                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -400,7 +536,9 @@ export default function ProjectChatPage() {
                             </button>
                         </div>
                         <p className="text-gray-500 text-xs mt-2 text-center">
-                            Press Enter to send your message
+                            {connected 
+                                ? "Press Enter to send your message" 
+                                : "Waiting for connection..."}
                         </p>
                     </form>
                 )}
