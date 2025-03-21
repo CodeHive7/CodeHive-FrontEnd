@@ -219,7 +219,7 @@ export const subscribeToProject = (projectId, OnMessageReceived) => {
         return null;
     }
 
-    const subscriptionKey = `/topic/project/${projectId}`;
+    const subscriptionKey = `/topic/project.${projectId}`;
     // If already subscribed , just add new callback
     if (subscribers.has(subscriptionKey)) {
         const callbacks = subscribers.get(subscriptionKey).callbacks;
@@ -227,12 +227,19 @@ export const subscribeToProject = (projectId, OnMessageReceived) => {
         return subscribers.get(subscriptionKey).subscription;
     }
 
+    console.log(`Subscribing to ${subscriptionKey}`);
+
     const subscription = stompClient.subscribe(subscriptionKey, (message) => {
+        console.log("Received message on project subscription", message);
+        try {
         const receivedMessage = JSON.parse(message.body);
 
         // Call all registered callbacks for this subscription
         const callbacks = subscribers.get(subscriptionKey).callbacks;
         callbacks.forEach(callback => callback(receivedMessage));
+        } catch (error) {
+            console.error("Error parsing project message", error);
+        }
     });
 
     subscribers.set(subscriptionKey, {
@@ -261,14 +268,19 @@ export const joinProjectChat = (projectId) => {
     if (!stompClient || !stompClient.connected) {
       throw new Error('WebSocket not connected');
     }
-  
-    stompClient.publish({
-      destination: '/app/chat.join',
-      body: JSON.stringify({
-        projectId: projectId,
-        content: ""
-      })
-    });
+
+    try {
+        console.log(`Sending join message for project ${projectId}`);
+        stompClient.publish({
+        destination: '/app/chat.join',
+        body: JSON.stringify({
+            projectId: projectId,
+            content: ""
+        })
+        });
+} catch (error) {
+    console.error("Error joining project chat", error);
+}
 };
 
 // Subscribe to user-specific messages (like history)
@@ -278,7 +290,7 @@ export const subscribeToUserMessages = (onHistoryReceived) => {
       return null;
     }
   
-    return stompClient.subscribe('/user/queue/messages', (message) => {
+    return stompClient.subscribe('/user/queue.messages', (message) => {
         console.log("Received messages", message);
         try {
             const messages = message.body ? JSON.parse(message.body) : [];
