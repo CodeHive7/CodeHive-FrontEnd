@@ -27,6 +27,27 @@ import {
 } from "../../../services/userService/UserService.js";
 import { getAccessToken } from "../../../services/Auth/tokenService.js";
 
+const MessageSkeleton = ({ align = "left" }) => (
+    <div className={`mb-3 flex ${align === "right" ? "justify-end" : "justify-start"}`}>
+        <div
+            className={`max-w-[70%] rounded-2xl px-4 py-3 animate-pulse 
+                ${align === "right" 
+                    ? 'bg-yellow-500/30' 
+                    : 'bg-gray-800/50 border border-gray-800/50'
+                }`}
+        >
+            {align === "left" && (
+                <div className="h-4 w-20 bg-gray-700 rounded mb-2"></div>
+            )}
+            <div className="h-4 w-full bg-gray-700 rounded mb-1"></div>
+            <div className="h-4 w-3/4 bg-gray-700 rounded"></div>
+            <div className="flex justify-end mt-2">
+                <div className="h-3 w-10 bg-gray-700 rounded mt-1"></div>
+            </div>
+    </div>
+</div>
+);
+
 export default function ProjectChatPage() {
     const { projectId } = useParams();
     const { user } = useAuth();
@@ -42,6 +63,7 @@ export default function ProjectChatPage() {
     const chatContainerRef = useRef(null);
     const [showProjectInfo, setShowProjectInfo] = useState(false);
     const [systemMessage, setSystemMessage] = useState(null);
+    const [loadingMessages , setLoadingMessages] = useState(false);
     
     
     // References to keep track of subscriptions
@@ -78,6 +100,7 @@ export default function ProjectChatPage() {
                         stompClientRef.current = client;
                         setConnected(true);
                         setLoading(false);
+                        setLoadingMessages(true);
                         console.log("Set loading state to false");
                         
                         setTimeout(() => {
@@ -111,7 +134,7 @@ export default function ProjectChatPage() {
                                         fetchChatHistory(projectId);
 
                                         const historyTimeout = setTimeout(async () => {
-                                            if (mounted && loading) {
+                                            if (mounted && loadingMessages) {
                                                 console.log("WebSocket history not received , trying HTTP fallback");
                                                 try {
                                                     const response = await fetch(`http://localhost:8082/api/chat/${projectId}/messages`, {
@@ -128,14 +151,12 @@ export default function ProjectChatPage() {
                                                 const httpMessages = await getProjectMessages(projectId);
 
                                                 if (mounted) {
-                                                    console.log("Got messages via HTTP:", httpMessages);
                                                     setMessages(httpMessages || []);
-                                                    setLoading(false);
+                                                    setLoadingMessages(false);
                                                 }
                                             } catch (error) {
-                                                console.error("HTTP fallback also failed: ", error);
                                                 if (mounted) {
-                                                     setLoading(false);
+                                                     setLoadingMessages(false);
                                                      setMessages([]);
                                                 }
 
@@ -169,6 +190,7 @@ export default function ProjectChatPage() {
             if (mounted) {
                 console.log("Safety timeout triggered - stopping loading");
                 setLoading(false);
+                setLoadingMessages(false);
 
                 // If still no messages , set empty array
                 setMessages(prevMessages => {
@@ -245,6 +267,8 @@ export default function ProjectChatPage() {
         historyMessages.forEach((msg, index) => {
             console.log(`Message ${index} timestamp:`, msg.timestamp);
         });
+
+        setLoadingMessages(false);
 
         // Always set loading to false regardless of whether messages were received
         setLoading(false);
@@ -442,7 +466,7 @@ export default function ProjectChatPage() {
                 )}
             </header>
 
-            {/* Chat container - updated to render system messages */}
+                        {/* Chat container - updated to render system messages */}
             <div 
                 className="flex-grow flex flex-col p-4 max-w-4xl mx-auto w-full"
                 ref={chatContainerRef}
@@ -481,7 +505,31 @@ export default function ProjectChatPage() {
                             </button>
                         </div>
                     </div>
-                ) : !loading && (!Array.isArray(messages) || messages.length === 0) ? (
+                ) : loadingMessages ? (
+                    <div className="flex-grow flex flex-col">
+                        <div className="mb-4 flex items-center justify-center">
+                            <div className="h-px bg-gray-800 flex-grow"></div>
+                            <span className="px-3 py-1 bg-gray-800/70 text-gray-400 text-xs rounded-full mx-2">
+                                Loading messages...
+                            </span>
+                            <div className="h-px bg-gray-800 flex-grow"></div>
+                        </div>
+                        
+                        {/* Show skeleton messages while loading */}
+                        <MessageSkeleton align="left" />
+                        <MessageSkeleton align="right" />
+                        <MessageSkeleton align="left" />
+                        <MessageSkeleton align="right" />
+                        
+                        {/* Show loading indicator at the bottom */}
+                        <div className="flex justify-center my-4">
+                            <div className="bg-gray-800/70 px-4 py-2 rounded-lg flex items-center">
+                                <div className="h-4 w-4 border-2 border-yellow-500/20 border-t-yellow-500 rounded-full animate-spin mr-2"></div>
+                                <span className="text-sm text-gray-300">Retrieving conversation history...</span>
+                            </div>
+                        </div>
+                    </div>
+                ) : !Array.isArray(messages) || messages.length === 0 ? (
                     <div className="flex-grow flex flex-col items-center justify-center text-gray-400">
                         <div className="bg-gray-800/50 rounded-full p-8 mb-4 animate-pulse">
                             <MessageSquare className="h-12 w-12 text-yellow-500" />
@@ -562,7 +610,7 @@ export default function ProjectChatPage() {
                         <div ref={messagesEndRef} />
                     </div>
                 )}
-
+            
                 {/* Message input - updated to show connection status */}
                 {!error && (
                     <form 
