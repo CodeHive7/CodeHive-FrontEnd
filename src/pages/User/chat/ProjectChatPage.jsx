@@ -53,19 +53,26 @@ export default function ProjectChatPage() {
     useEffect(() => {
         const token = getAccessToken();
         let mounted = true;
+        let initializationStarted = false;
+        console.log("Starting chat initialization with token present:", !!token);
+        console.log("Project ID for subscription:", projectId);
 
         // First fetch project details
         const initializeChat = async () => {
+            if(initializationStarted) return;
+            initializationStarted = true;
+
             try {
                 // Fetch project details
                 const projectData = await fetchProjectById(projectId);
+                console.log("Project data fetched:", !!projectData);
                 if (mounted) setProject(projectData);
 
                 // Connect to WebSocket
                 const client = connectToChat(
                     token,
                     (client) => {
-                        console.log("Connection callback triggered");
+                        console.log("Connection callback triggered, client object exists:", !!client);
                         // On successful connection
                         if (!mounted) return;
                         
@@ -74,42 +81,70 @@ export default function ProjectChatPage() {
                         setLoading(false);
                         console.log("Set loading state fo false");
                         
+                        setTimeout(() => {
+                            console.log("setTimout callback executing");
                         try {
-                            console.log("Setting up project subscription");
-                        // Subscribe to project channel for receiving messages
-                        projectSubscriptionRef.current = subscribeToProject(
-                            projectId,
-                            handleMessageReceived
-                        );
+                            console.log("About to setup project subscription. STOMP client active:", !!stompClientRef.current?.connected);
+                            console.log("Project ID for subscription:", projectId, "Type:", typeof projectId);
+
+                            // Make sure projectId is correctly formatted (number vs string)
+                            const formattedProjectId = typeof projectId === 'string' ? projectId :  projectId.toString();
+
+                            // Subscribe to project channel for receiving messages
+                            const projectSub = subscribeToProject(
+                                formattedProjectId,
+                                handleMessageReceived
+                            );
+                            console.log("Project subscription result:", !!projectSub);
+                            if (projectSub) {
+                                projectSubscriptionRef.current = projectSub;
+                                console.log("Project subscription successful");
+                            } else {
+                                console.error("Project subscription failed - returned null/undefined");
+                            }
                         
-                        // Subscribe to user-specific messages
-                        console.log("Setting up user messages subscription");
-                        userSubscriptionRef.current = subscribeToUserMessages(
-                            handleHistoryReceived
-                        );
-                        
-                        // Join the chat room
-                        console.log("Joining project chat");
-                        joinProjectChat(projectId);
-                        
-                        // Fetch message history
-                        console.log("Fetching chat history");
-                        fetchChatHistory(projectId);
-                        
-                        setSystemMessage({
-                            content: "Connected to chat server",
-                            timestamp: new Date(),
-                            isSystem: true
-                        });
-                        console.log("Chat initialization complete");
+                            console.log("About to setup user subscription");
+                            
+                            // Subscribe to user-specific messages
+                            const userSub = subscribeToUserMessages(
+                                handleHistoryReceived
+                            );
+                            console.log("User subscription result:", !!userSub);
+                            if(userSub){
+                            userSubscriptionRef.current = userSub;
+                                console.log("User subscription successful");
+                            } else {
+                                console.error("User subscription failed - returned null/undefined");
+                            }
+                            
+                            // Join the chat room
+                            console.log("About to join project chat:", projectId);
+                            joinProjectChat(projectId);
+                            
+                            // Fetch message history
+                            console.log("About to fetch chat history for project:", projectId);
+                            fetchChatHistory(projectId);
+                            
+                            // System message on success
+                            setSystemMessage({
+                                content: "Connected to chat server",
+                                timestamp: new Date(),
+                                isSystem: true
+                            });
+                            console.log("Chat setup complete");
                     } catch (error) {
-                        console.error("Error in connection setup:", error);
-                        setLoading(false);
+                        console.error("Error in subscription setup:", error);
+                        console.error("Error details:", {
+                            message: error.message,
+                            stack: error.stack,
+                            name: error.name
+                        });
                         setError({
                             title: "Chat Setup Failed",
-                            message: "Could not setup chat. Please try again later."
+                            message: `Could not setup chat: ${error.message}`
                         });
                     }
+                    }, 1000);
                     },
                     (error) => {
                         // On connection error
