@@ -288,7 +288,7 @@ export const subscribeToUserMessages = (onHistoryReceived) => {
       return null;
     }
   
-    return stompClient.subscribe('/user/queue.messages', (message) => {
+    return stompClient.subscribe('/user/queue/messages', (message) => {
         console.log("Received messages", message);
         try {
             const messages = message.body ? JSON.parse(message.body) : [];
@@ -342,3 +342,4 @@ export const sendProjectMessage = async (projectId, content) => {
         throw error;
     }
 };
+
