@@ -15,7 +15,7 @@ import {
     WifiOff
 } from "lucide-react";
 import Swal from "sweetalert2"; 
-import { fetchProjectById } from "../../../services/userService/UserService.js";
+import { fetchProjectById, getProjectMessages } from "../../../services/userService/UserService.js";
 import { 
     connectToChat, 
     disconnectFromChat, 
@@ -97,9 +97,7 @@ export default function ProjectChatPage() {
                                     console.log("Project subscription successful");
                                     
                                     // Subscribe to user-specific messages
-                                    const userSub = subscribeToUserMessages(
-                                        handleHistoryReceived
-                                    );
+                                    const userSub = subscribeToUserMessages(handleHistoryReceived);
                                     
                                     if (userSub) {
                                         userSubscriptionRef.current = userSub;
@@ -111,8 +109,42 @@ export default function ProjectChatPage() {
                                         
                                         console.log("About to fetch chat history for project:", projectId);
                                         fetchChatHistory(projectId);
-                                    }
+
+                                        const historyTimeout = setTimeout(async () => {
+                                            if (mounted && loading) {
+                                                console.log("WebSocket history not received , trying HTTP fallback");
+                                                try {
+                                                    const response = await fetch(`http://localhost:8082/api/chat/${projectId}/messages`, {
+                                                        method: "GET",
+                                                        headers: {
+                                                            'Authorization': `Bearer ${token}`,
+                                                            'Content-Type': 'application/json'
+                                                        }
+                                                });
+
+                                                if (!response.ok) {
+                                                    throw new Error(`HTTP error: ${response.status}`);
+                                                }
+                                                const httpMessages = await getProjectMessages(projectId);
+
+                                                if (mounted) {
+                                                    console.log("Got messages via HTTP:", httpMessages);
+                                                    setMessages(httpMessages || []);
+                                                    setLoading(false);
+                                                }
+                                            } catch (error) {
+                                                console.error("HTTP fallback also failed: ", error);
+                                                if (mounted) {
+                                                     setLoading(false);
+                                                     setMessages([]);
+                                                }
+
+                                            }
+                                        }
+                                    }, 4000);
+                                    window.__historyTimeoutRef = historyTimeout;
                                 }
+                            }
                             } catch (error) {
                                 console.error("Error in subscription setup:", error);
                                 setError({
@@ -132,11 +164,31 @@ export default function ProjectChatPage() {
         };
     
         initializeChat();
+
+        const safetyTimeout = setTimeout(() => {
+            if (mounted) {
+                console.log("Safety timeout triggered - stopping loading");
+                setLoading(false);
+
+                // If still no messages , set empty array
+                setMessages(prevMessages => {
+                    if (!prevMessages || prevMessages.length === 0) {
+                        return [];
+                    }
+                    return prevMessages;
+                });
+            }
+        }, 7000);
     
         // Cleanup function
         return () => {
             mounted = false;
-            window.__chatInitializing = false; // Reset initialization flag
+            clearTimeout(safetyTimeout);
+            if (window.__historyTimeoutRef) {
+                clearTimeout(window.__historyTimeoutRef);
+                window.__historyTimeoutRef = null;
+            } 
+            window.__chatInitializing = false; // Reset initializer
             
             if (projectSubscriptionRef.current) {
                 projectSubscriptionRef.current.unsubscribe();
@@ -152,7 +204,7 @@ export default function ProjectChatPage() {
 
     // Handle receiving a new message
     const handleMessageReceived = (message) => {
-        console.log("Message received form server:", message);
+        console.log("handleMessageReceived - raw message:", message);
 
         // Skip if message is from current user (already added when sent)
         if (message.content &&
@@ -189,8 +241,10 @@ export default function ProjectChatPage() {
 
     // Handle receiving message history
     const handleHistoryReceived = (historyMessages) => {
-        console.log("History received:", historyMessages);
-        console.log("History type:", typeof historyMessages, "Length:", historyMessages?.length);
+        console.log("handleHistoryReceived - raw history:", historyMessages);
+        historyMessages.forEach((msg, index) => {
+            console.log(`Message ${index} timestamp:`, msg.timestamp);
+        });
 
         // Always set loading to false regardless of whether messages were received
         setLoading(false);
@@ -211,6 +265,7 @@ export default function ProjectChatPage() {
 
     // Scroll to bottom when messages change
     useEffect(() => {
+        console.log("Current messages state:", messages);
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
@@ -260,33 +315,18 @@ export default function ProjectChatPage() {
     // Group messages by date - keep existing implementation
     const groupMessagesByDate = () => {
         const grouped = {};
-        const allMessages = [...messages];
-        
-        // Add system message at the top if it exists
-        if (systemMessage) {
-            const date = systemMessage.timestamp;
-            const dateStr = date.toLocaleDateString();
-            
-            if (!grouped[dateStr]) {
-                grouped[dateStr] = [];
-            }
-            
-            grouped[dateStr].push(systemMessage);
-        }
-        
         messages.forEach(message => {
-            if (!message.timestamp) return;
-            
-            const date = new Date(message.timestamp);
-            const dateStr = date.toLocaleDateString();
-            
+            if (!message.timestamp) {
+                console.warn("Message with missing timestamp:", message);
+                return;
+            }
+            const dateStr = new Date(message.timestamp).toLocaleDateString();
             if (!grouped[dateStr]) {
                 grouped[dateStr] = [];
             }
-            
             grouped[dateStr].push(message);
         });
-        
+        console.log("Grouped messages by data:", grouped);
         return grouped;
     };
 
