@@ -343,3 +343,122 @@ export const sendProjectMessage = async (projectId, content) => {
     }
 };
 
+// Skills Api
+export const getAllSkills = async () => {
+    try {
+        const response = await apiClient.get("/skills");
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching skills", error);
+        throw error;
+    }
+};
+
+export const getUserSkills = async () => {
+    try {
+        const response = await apiClient.get("/skills/user");
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching user skills", error);
+        throw error;
+    }
+};
+
+export const addSkillToUser = async (skillName) => {
+    try {
+        const response = await apiClient.post("/skills/user", { name: skillName });
+        return response.data;
+    } catch (error) {
+        console.error("Error adding skill", error);
+        throw error;
+    }
+};
+
+export const removeSkillFromUser = async (skillId) => {
+    try {
+        await apiClient.delete(`/skills/user/${skillId}`);
+    } catch (error) {
+        
+    }
+}
+
+// Experience API
+export const getUserExperiences = async () => {
+    try {
+        const response = await apiClient.get("/experiences");
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching user experiences", error);
+        throw error;
+    }
+};
+
+export const createExperience = async (experienceData) => {
+    try {
+      const response = await apiClient.post("/experiences", experienceData);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating experience", error);
+      throw error;
+    }
+};
+
+export const updateExperience = async (id, experienceData) => {
+    try {
+      const response = await apiClient.put(`/experiences/${id}`, experienceData);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating experience", error);
+      throw error;
+    }
+};
+
+export const deleteExperience = async (id) => {
+  try {
+    await apiClient.delete(`/experiences/${id}`);
+  } catch (error) {
+    console.error("Error deleting experience", error);
+    throw error;
+  }
+};
+
+// Education API
+export const getUserEducations = async () => {
+  try {
+    const response = await apiClient.get("/educations");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user educations", error);
+    throw error;
+  }
+};
+
+
+export const createEducation = async (educationData) => {
+    try {
+      const response = await apiClient.post("/educations", educationData);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating education", error);
+      throw error;
+    }
+};
+
+export const updateEducation = async (id, educationData) => {
+    try {
+      const response = await apiClient.put(`/educations/${id}`, educationData);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating education", error);
+      throw error;
+    }
+};
+
+export const deleteEducation = async (id) => {
+    try {
+      await apiClient.delete(`/educations/${id}`);
+    } catch (error) {
+      console.error("Error deleting education", error);
+      throw error;
+    }
+};
