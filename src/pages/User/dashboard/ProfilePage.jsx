@@ -5,9 +5,13 @@ import {
   getAllSkills, 
   getUserSkills, 
   addSkillToUser, 
-  removeSkillFromUser 
+  removeSkillFromUser,
+  createExperience,
+  updateExperience,
+  deleteExperience
 } from "../../../services/userService/UserService.js";
-import { Pencil, Check, X, Camera, User, Loader2, MapPin, Phone, Globe, Mail, Plus, Tag } from "lucide-react";
+import { Pencil, Check, X, Camera, User, Loader2, MapPin, Phone, Globe, Mail, Plus, Tag, Calendar, Briefcase, Building } from "lucide-react";
+import { format } from "date-fns/fp";
 import Swal from "sweetalert2";
 
 export default function ProfilePage() {
@@ -117,8 +121,25 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     try {
-      await updateUserProfile(tempData);
-      setUserData(tempData);
+      await updateUserProfile({
+        fullName: tempData.fullName,
+        email: tempData.email,
+        username: tempData.username,
+        bio: tempData.bio,
+        location: tempData.location,
+        phoneNumber: tempData.phoneNumber,
+        website: tempData.website
+      });
+      const experiencePromises = tempData.experiences.map(async (exp) => {
+        if (exp.id) {
+          return updateExperience(exp.id, exp);
+        } else {
+          return createExperience(exp);
+        }
+      });
+
+      await Promise.all(experiencePromises);
+      await fetchUserProfile();
       setIsEditing(false);
       Swal.fire({
         icon: "success",
@@ -133,10 +154,20 @@ export default function ProfilePage() {
       Swal.fire({
         icon: "error",
         title: "Update Failed",
-        text: "An error occurred while updating your profile. Please try again.",
+        text: error.response?.date || "An error occurred while updating your profile. Please try again.",
         background: "#1C1F2E",
         color: "#ffffff"
       });
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "Present";
+
+    try {
+      return format(new Date(dateString), "MMM yyyy");
+    } catch {
+      return dateString;
     }
   };
 
@@ -162,15 +193,52 @@ export default function ProfilePage() {
     setTempData({ ...tempData, experiences: [...tempData.experiences, { ...defaultExperience }] });
   };
   
-  const removeExperience = (index) => {
+  const removeExperience = async (index) => {
     const exp = [...tempData.experiences];
-    exp.splice(index, 1);
-    setTempData({ ...tempData, experiences: exp });
+    const experienceToRemove = exp[index];
+
+    try {
+      if (experienceToRemove.id) {
+        await deleteExperience(experienceToRemove.id);
+      }
+
+      exp.splice(index, 1);
+      setTempData({ ...tempData, experiences: exp });
+
+      Swal.fire({
+        icon: "success",
+        title: "Experience Removed",
+        timer: 1500,
+        showConfirmButton: false,
+        background: "#1C1F2E",
+        color: "#ffffff"
+      });
+    } catch (error) {
+      console.error("Error removing experience", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to remove experience. Please try again.",
+        background: "#1C1F2E",
+        color: "#ffffff"
+      });
+    }
   };
   
   const handleExperienceChange = (index, e) => {
     const exp = [...tempData.experiences];
-    exp[index] = { ...exp[index], [e.target.name]: e.target.value };
+    const fieldName = e.target.name;
+    let value = e.target.value;
+
+    if (fieldName === "currentlyWorking") {
+      value = e.target.checked;
+
+      if (value === true) {
+        exp[index].endDate = null;
+      }
+    }
+
+    exp[index] = { ...exp[index], [fieldName]: value };
     setTempData({ ...tempData, experiences: exp });
   };
 
@@ -453,76 +521,136 @@ export default function ProfilePage() {
                 </button>
               </div>
 
+
               {/* Experiences Section */}
               <div className="mt-8">
-                <h3 className="text-xl font-bold text-white mb-4">Experiences</h3>
+                <h3 className="text-xl font-bold text-white mb-4">Work Experience</h3>
                 {tempData.experiences.map((exp, index) => (
-                  <div key={index} className="border border-yellow-500 rounded-lg p-4 mb-4">
+                  <div key={index} className="border border-yellow-500/30 rounded-lg p-4 mb-4 bg-black/10">
                     <div className="flex justify-between mb-2">
                       <span className="text-yellow-500 font-medium">Experience #{index + 1}</span>
-                      <button onClick={() => removeExperience(index)} className="text-red-500">Remove</button>
+                      <button 
+                        onClick={() => removeExperience(index)} 
+                        className="text-red-400 hover:text-red-300 transition-colors"
+                      >
+                        Remove
+                      </button>
                     </div>
-                    <input
-                      type="text"
-                      name="title"
-                      placeholder="Title"
-                      value={exp.title}
-                      onChange={(e) => handleExperienceChange(index, e)}
-                      className="w-full p-2 mb-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
-                    />
-                    <input
-                      type="text"
-                      name="company"
-                      placeholder="Company"
-                      value={exp.company}
-                      onChange={(e) => handleExperienceChange(index, e)}
-                      className="w-full p-2 mb-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
-                    />
-                    <input
-                      type="text"
-                      name="location"
-                      placeholder="Location"
-                      value={exp.location}
-                      onChange={(e) => handleExperienceChange(index, e)}
-                      className="w-full p-2 mb-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
-                    />
-                    <input
-                      type="date"
-                      name="startDate"
-                      placeholder="Start Date"
-                      value={exp.startDate}
-                      onChange={(e) => handleExperienceChange(index, e)}
-                      className="w-full p-2 mb-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
-                    />
-                    <input
-                      type="date"
-                      name="endDate"
-                      placeholder="End Date"
-                      value={exp.endDate}
-                      onChange={(e) => handleExperienceChange(index, e)}
-                      className="w-full p-2 mb-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
-                    />
-                    <textarea
-                      name="description"
-                      placeholder="Description"
-                      value={exp.description}
-                      onChange={(e) => handleExperienceChange(index, e)}
-                      rows="2"
-                      className="w-full p-2 mb-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
-                    />
-                    <input
-                      type="text"
-                      name="employmentType"
-                      placeholder="Employment Type"
-                      value={exp.employmentType}
-                      onChange={(e) => handleExperienceChange(index, e)}
-                      className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
-                    />
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-gray-400 text-xs mb-1">Job Title*</label>
+                        <input
+                          type="text"
+                          name="title"
+                          placeholder="e.g. Software Engineer"
+                          value={exp.title || ""}
+                          onChange={(e) => handleExperienceChange(index, e)}
+                          className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-gray-400 text-xs mb-1">Company*</label>
+                        <input
+                          type="text"
+                          name="company"
+                          placeholder="e.g. Google"
+                          value={exp.company || ""}
+                          onChange={(e) => handleExperienceChange(index, e)}
+                          className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-gray-400 text-xs mb-1">Location</label>
+                        <input
+                          type="text"
+                          name="location"
+                          placeholder="e.g. New York, NY"
+                          value={exp.location || ""}
+                          onChange={(e) => handleExperienceChange(index, e)}
+                          className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-gray-400 text-xs mb-1">Employment Type</label>
+                        <select
+                          name="employmentType"
+                          value={exp.employmentType || ""}
+                          onChange={(e) => handleExperienceChange(index, e)}
+                          className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
+                        >
+                          <option value="">Select Type</option>
+                          <option value="Full-time">Full-time</option>
+                          <option value="Part-time">Part-time</option>
+                          <option value="Contract">Contract</option>
+                          <option value="Freelance">Freelance</option>
+                          <option value="Internship">Internship</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-gray-400 text-xs mb-1">Start Date*</label>
+                        <input
+                          type="date"
+                          name="startDate"
+                          value={exp.startDate || ""}
+                          onChange={(e) => handleExperienceChange(index, e)}
+                          className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="flex flex-col">
+                        <label className="block text-gray-400 text-xs mb-1">End Date</label>
+                        <input
+                          type="date"
+                          name="endDate"
+                          value={exp.endDate || ""}
+                          onChange={(e) => handleExperienceChange(index, e)}
+                          className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
+                          disabled={exp.currentlyWorking}
+                        />
+                        <div className="mt-2 flex items-center">
+                          <input
+                            type="checkbox"
+                            id={`currentlyWorking-${index}`}
+                            name="currentlyWorking"
+                            checked={exp.currentlyWorking || false}
+                            onChange={(e) => handleExperienceChange(index, e)}
+                            className="mr-2 rounded border-yellow-500/30 text-yellow-500 focus:ring-yellow-500/50"
+                          />
+                          <label htmlFor={`currentlyWorking-${index}`} className="text-gray-400 text-xs">
+                            I currently work here
+                          </label>
+                        </div>
+                      </div>
+                      
+                      <div className="md:col-span-2">
+                        <label className="block text-gray-400 text-xs mb-1">Description</label>
+                        <textarea
+                          name="description"
+                          placeholder="Describe your responsibilities and achievements"
+                          value={exp.description || ""}
+                          onChange={(e) => handleExperienceChange(index, e)}
+                          rows="3"
+                          className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
+                        />
+                      </div>
+                    </div>
                   </div>
                 ))}
-                <button onClick={addExperience} className="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-md">
+                <button 
+                  onClick={addExperience} 
+                  className="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-md flex items-center gap-1 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
                   Add Experience
-                </button>
+                 </button>
               </div>
 
               {/* Skills Section */}
@@ -607,6 +735,53 @@ export default function ProfilePage() {
               ) : (
                 <div className="text-center text-gray-400 py-4">
                   Click "Edit Profile" to update your information
+                </div>
+              )}
+              {!isEditing && userData.experiences && userData.experiences.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-xl font-semibold text-white mb-4">Work Experience</h3>
+                  <div className="space-y-6">
+                    {userData.experiences.map((exp, index) => (
+                      <div key={exp.id || index} className="relative pl-8 border-l-2 border-yellow-500/30">
+                        {/* Position dot */}
+                        <div className="absolute w-4 h-4 bg-yellow-500 rounded-full -left-[9px] top-0"></div>
+                        
+                        {/* Experience content */}
+                        <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-4">
+                          <div className="flex flex-wrap justify-between items-start mb-2">
+                            <h4 className="text-yellow-400 font-bold text-lg">{exp.title}</h4>
+                            <div className="text-gray-400 text-sm flex items-center">
+                              <Calendar className="w-3 h-3 mr-1" />
+                              <span>{formatDate(exp.startDate)} - {formatDate(exp.endDate)}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            <div className="text-white/80 text-sm flex items-center">
+                              <Building className="w-3 h-3 mr-1" />
+                              <span>{exp.company}</span>
+                            </div>
+                            {exp.location && (
+                              <div className="text-gray-400 text-sm flex items-center">
+                                <MapPin className="w-3 h-3 mr-1" />
+                                <span>{exp.location}</span>
+                              </div>
+                            )}
+                            {exp.employmentType && (
+                              <div className="text-gray-400 text-sm flex items-center">
+                                <Briefcase className="w-3 h-3 mr-1" />
+                                <span>{exp.employmentType}</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {exp.description && (
+                            <p className="text-gray-300 text-sm whitespace-pre-line">{exp.description}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
