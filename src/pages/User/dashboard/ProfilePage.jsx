@@ -1,24 +1,43 @@
 import { useState, useEffect, useRef } from "react";
-import { 
-  getUserProfile, 
-  updateUserProfile, 
-  getAllSkills, 
-  getUserSkills, 
-  addSkillToUser, 
+import {
+  getUserProfile,
+  updateUserProfile,
+  getAllSkills,
+  addSkillToUser,
   removeSkillFromUser,
   createExperience,
   updateExperience,
-  deleteExperience
+  deleteExperience,
+  createEducation,
+  updateEducation,
+  deleteEducation
 } from "../../../services/userService/UserService.js";
-import { Pencil, Check, X, Camera, User, Loader2, MapPin, Phone, Globe, Mail, Plus, Tag, Calendar, Briefcase, Building } from "lucide-react";
+import {
+  Pencil,
+  Check,
+  X,
+  Camera,
+  User,
+  Loader2,
+  MapPin,
+  Phone,
+  Globe,
+  Mail,
+  Plus,
+  Tag,
+  Calendar,
+  Briefcase,
+  Building
+} from "lucide-react";
 import { format } from "date-fns/fp";
 import Swal from "sweetalert2";
 
 export default function ProfilePage() {
+  // Default objects for new entries
   const defaultEducation = { institution: "", degree: "", fieldOfStudy: "", startDate: "", endDate: "", description: "", currentlyStudying: false };
   const defaultExperience = { title: "", company: "", location: "", startDate: "", endDate: "", description: "", currentlyWorking: false, employmentType: "" };
-  const defaultSkill = { name: "" };
 
+  // Main state variables
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState({
@@ -35,32 +54,35 @@ export default function ProfilePage() {
     skills: []
   });
   const [tempData, setTempData] = useState({ ...userData });
-  
-  // New states for skills management
+
+  // Skills management
   const [allSkills, setAllSkills] = useState([]);
   const [skillInput, setSkillInput] = useState("");
   const [filteredSkills, setFilteredSkills] = useState([]);
   const [showSkillDropdown, setShowSkillDropdown] = useState(false);
   const skillsContainerRef = useRef(null);
 
+  // Fetch user profile on mount
   useEffect(() => {
     fetchUserProfile();
   }, []);
-  
-  // Load all available skills when in edit mode
+
+  // Load all available skills when editing
   useEffect(() => {
     if (isEditing) {
       fetchAllSkills();
     }
   }, [isEditing]);
-  
-  // Filter skills based on input
+
+  // Filter skills for autocomplete when skillInput changes
   useEffect(() => {
     if (skillInput.trim() !== "") {
       const filtered = allSkills.filter(
-        skill => 
-          skill.name.toLowerCase().includes(skillInput.toLowerCase()) && 
-          !tempData.skills.some(userSkill => userSkill.name.toLowerCase() === skill.name.toLowerCase())
+        (skill) =>
+          skill?.name?.toLowerCase().includes(skillInput.toLowerCase()) &&
+          !tempData.skills.some(
+            (userSkill) => userSkill?.name?.toLowerCase() === skill.name.toLowerCase()
+          )
       );
       setFilteredSkills(filtered);
       setShowSkillDropdown(true);
@@ -68,44 +90,39 @@ export default function ProfilePage() {
       setShowSkillDropdown(false);
     }
   }, [skillInput, allSkills, tempData.skills]);
-  
-  // Close dropdown when clicking outside
+
+  // Close skills dropdown if clicking outside
   useEffect(() => {
-    function handleClickOutside(event) {
+    const handleClickOutside = (event) => {
       if (skillsContainerRef.current && !skillsContainerRef.current.contains(event.target)) {
         setShowSkillDropdown(false);
       }
-    }
-    
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // API calls
   const fetchUserProfile = async () => {
     setLoading(true);
     try {
       const data = await getUserProfile();
-      setUserData({
+      const profile = {
         ...data,
         avatar: data.avatar || "https://i.pravatar.cc/150?img=3",
         educations: data.educations || [],
         experiences: data.experiences || [],
         skills: data.skills || []
-      });
-      setTempData({
-        ...data,
-        avatar: data.avatar || "https://i.pravatar.cc/150?img=3",
-        educations: data.educations || [],
-        experiences: data.experiences || [],
-        skills: data.skills || []
-      });
+      };
+      setUserData(profile);
+      setTempData(profile);
     } catch (error) {
       console.error("Error fetching user profile", error);
     } finally {
       setLoading(false);
     }
   };
-  
+
   const fetchAllSkills = async () => {
     try {
       const skills = await getAllSkills();
@@ -115,12 +132,23 @@ export default function ProfilePage() {
     }
   };
 
+  // Input change handler for basic fields
   const handleChange = (e) => {
     setTempData({ ...tempData, [e.target.name]: e.target.value });
   };
 
+  // Save all changes with one button
   const handleSave = async () => {
     try {
+      Swal.fire({
+        title: "Saving...",
+        text: "Updating your profile",
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        willOpen: () => Swal.showLoading()
+      });
+
+      // Update basic user info
       await updateUserProfile({
         fullName: tempData.fullName,
         email: tempData.email,
@@ -128,19 +156,56 @@ export default function ProfilePage() {
         bio: tempData.bio,
         location: tempData.location,
         phoneNumber: tempData.phoneNumber,
-        website: tempData.website
-      });
-      const experiencePromises = tempData.experiences.map(async (exp) => {
-        if (exp.id) {
-          return updateExperience(exp.id, exp);
-        } else {
-          return createExperience(exp);
-        }
+        website: tempData.website,
+        skills: tempData.skills
       });
 
-      await Promise.all(experiencePromises);
-      await fetchUserProfile();
-      setIsEditing(false);
+      // Process Experiences
+      for (const exp of tempData.experiences.filter(exp => !exp.id)) {
+        if (!exp.title || !exp.company || !exp.startDate) {
+          console.warn("Skipping experience due to missing required fields", exp);
+          continue;
+        }
+
+        const formattedExp = {
+          ...exp,
+          startDate: exp.startDate ? exp.startDate.split('T')[0] : null,
+          endDate: exp.endDate ? exp.endDate.split('T')[0] : null
+        }
+
+        const createdExp = await createExperience(formattedExp);
+        const expIndex = tempData.experiences.findIndex(e =>
+          e.title === exp.title && e.company === exp.company && !e.id);
+          if (expIndex !== -1) {
+           tempData.experiences[expIndex].id = createdExp.id;
+          }
+      }
+      
+      const freshProfile = await getUserProfile();
+      const expIdsInUI = tempData.experiences.filter(exp => exp.id).map(exp => exp.id);
+      const experiencesToDelete = freshProfile.experiences.filter(exp => !expIdsInUI.includes(exp.id));
+      for (const exp of experiencesToDelete) {
+        await deleteExperience(exp.id);
+      }
+
+      // Process Educations
+      for (const edu of tempData.educations.filter(edu => !edu.id)) {
+        if (!edu.institution || !edu.degree) {
+          console.warn("Skipping education due to missing required fields", edu);
+          continue;
+        }
+        await createEducation(edu);
+      }
+      for (const edu of tempData.educations.filter(edu => edu.id)) {
+        await updateEducation(edu.id, edu);
+      }
+      const freshProfile2 = await getUserProfile();
+      const eduIdsInUI = tempData.educations.filter(edu => edu.id).map(edu => edu.id);
+      const educationsToDelete = freshProfile2.educations.filter(edu => !eduIdsInUI.includes(edu.id));
+      for (const edu of educationsToDelete) {
+        await deleteEducation(edu.id);
+      }
+
       Swal.fire({
         icon: "success",
         title: "Profile Updated",
@@ -150,11 +215,15 @@ export default function ProfilePage() {
         background: "#1C1F2E",
         color: "#ffffff"
       });
+
+      await fetchUserProfile();
+      setIsEditing(false);
     } catch (error) {
+      console.error("Error updating profile:", error);
       Swal.fire({
         icon: "error",
         title: "Update Failed",
-        text: error.response?.date || "An error occurred while updating your profile. Please try again.",
+        text: error.response?.data?.message || "An error occurred while updating your profile.",
         background: "#1C1F2E",
         color: "#ffffff"
       });
@@ -163,7 +232,6 @@ export default function ProfilePage() {
 
   const formatDate = (dateString) => {
     if (!dateString) return "Present";
-
     try {
       return format(new Date(dateString), "MMM yyyy");
     } catch {
@@ -171,40 +239,37 @@ export default function ProfilePage() {
     }
   };
 
-  // Education logic - keeping what's already there
+  // Education logic
   const addEducation = () => {
     setTempData({ ...tempData, educations: [...tempData.educations, { ...defaultEducation }] });
   };
-  
+
   const removeEducation = (index) => {
     const edu = [...tempData.educations];
     edu.splice(index, 1);
     setTempData({ ...tempData, educations: edu });
   };
-  
+
   const handleEducationChange = (index, e) => {
     const edu = [...tempData.educations];
     edu[index] = { ...edu[index], [e.target.name]: e.target.value };
     setTempData({ ...tempData, educations: edu });
   };
 
-  // Experience logic - keeping what's already there
+  // Experience logic
   const addExperience = () => {
     setTempData({ ...tempData, experiences: [...tempData.experiences, { ...defaultExperience }] });
   };
-  
+
   const removeExperience = async (index) => {
     const exp = [...tempData.experiences];
     const experienceToRemove = exp[index];
-
     try {
       if (experienceToRemove.id) {
         await deleteExperience(experienceToRemove.id);
       }
-
       exp.splice(index, 1);
       setTempData({ ...tempData, experiences: exp });
-
       Swal.fire({
         icon: "success",
         title: "Experience Removed",
@@ -224,52 +289,37 @@ export default function ProfilePage() {
       });
     }
   };
-  
+
   const handleExperienceChange = (index, e) => {
     const exp = [...tempData.experiences];
     const fieldName = e.target.name;
     let value = e.target.value;
-
     if (fieldName === "currentlyWorking") {
       value = e.target.checked;
-
-      if (value === true) {
-        exp[index].endDate = null;
-      }
+      if (value) exp[index].endDate = null;
     }
-
     exp[index] = { ...exp[index], [fieldName]: value };
     setTempData({ ...tempData, experiences: exp });
   };
 
-  // Enhanced Skill logic
+  // Skill logic
   const handleSkillInputChange = (e) => {
     setSkillInput(e.target.value);
   };
 
   const handleAddSkill = async (skillName) => {
     try {
-      // First check if the skill is already in the user's skills
-      if (tempData.skills.some(skill => skill.name.toLowerCase() === skillName.toLowerCase())) {
+      // Prevent duplicate skills
+      if (tempData.skills.some(skill => skill?.name?.toLowerCase() === skillName.toLowerCase())) {
         setSkillInput("");
         return;
       }
-
-      // Add the skill through the API
-      await addSkillToUser(skillName);
-      
-      // Add to local state
-      const newSkill = { name: skillName };
-      setTempData({
-        ...tempData,
-        skills: [...tempData.skills, newSkill]
-      });
-      
-      // Clear input and hide dropdown
+      const result = await addSkillToUser(skillName);
+      const newSkill = { id: result.id, name: result.name };
+      setUserData((prev) => ({ ...prev, skills: [...prev.skills, newSkill] }));
+      setTempData((prev) => ({ ...prev, skills: [...prev.skills, newSkill] }));
       setSkillInput("");
       setShowSkillDropdown(false);
-      
-      // Show success message
       Swal.fire({
         icon: "success",
         title: "Skill Added",
@@ -292,8 +342,9 @@ export default function ProfilePage() {
   };
 
   const handleAddCustomSkill = async () => {
-    if (skillInput.trim() === "") return;
-    await handleAddSkill(skillInput.trim());
+    if (skillInput.trim()) {
+      await handleAddSkill(skillInput.trim());
+    }
   };
 
   const handleRemoveSkill = async (skillId, skillName) => {
@@ -301,17 +352,11 @@ export default function ProfilePage() {
       if (skillId) {
         await removeSkillFromUser(skillId);
       }
-      
-      // Update local state
-      const updatedSkills = tempData.skills.filter(skill => 
-        skillId ? skill.id !== skillId : skill.name !== skillName
+      const updatedSkills = tempData.skills.filter(
+        (skill) => (skillId ? skill.id !== skillId : skill.name !== skillName)
       );
-      
-      setTempData({
-        ...tempData,
-        skills: updatedSkills
-      });
-      
+      setTempData({ ...tempData, skills: updatedSkills });
+      setUserData({ ...userData, skills: updatedSkills });
       Swal.fire({
         icon: "success",
         title: "Skill Removed",
@@ -350,7 +395,7 @@ export default function ProfilePage() {
         {/* Profile Header */}
         <div className="bg-gradient-to-r from-yellow-500/10 to-transparent p-6 border-b border-yellow-500/30">
           <div className="flex flex-col md:flex-row items-center gap-6">
-            {/* Profile Avatar */}
+            {/* Avatar */}
             <div className="relative group">
               <div className="w-28 h-28 rounded-full border-4 border-yellow-500 shadow-lg overflow-hidden bg-black/50">
                 {userData.avatar ? (
@@ -378,7 +423,7 @@ export default function ProfilePage() {
             {/* Edit Button */}
             <button
               onClick={() => {
-                if (isEditing) setTempData({ ...userData });
+                if (!isEditing) setTempData({ ...userData });
                 setIsEditing(!isEditing);
               }}
               className="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-full flex items-center gap-2 transition-colors font-medium"
@@ -388,7 +433,7 @@ export default function ProfilePage() {
             </button>
           </div>
 
-          {userData.location || userData.phoneNumber || userData.website || userData.email ? (
+          {(userData.location || userData.phoneNumber || userData.website || userData.email) && (
             <div className="flex flex-wrap gap-4 mt-4 text-sm">
               {userData.location && (
                 <div className="flex items-center text-gray-400">
@@ -417,15 +462,15 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
-          ) : null}
+          )}
         </div>
 
-        {/* Profile Form */}
+        {/* Profile Form / Read-only Display */}
         <div className="p-6">
           {isEditing ? (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[ 
+                {[
                   { label: "Full Name", key: "fullName" },
                   { label: "Username", key: "username" },
                   { label: "Email", key: "email", type: "email" },
@@ -493,7 +538,6 @@ export default function ProfilePage() {
                     <input
                       type="date"
                       name="startDate"
-                      placeholder="Start Date"
                       value={edu.startDate}
                       onChange={(e) => handleEducationChange(index, e)}
                       className="w-full p-2 mb-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
@@ -501,7 +545,6 @@ export default function ProfilePage() {
                     <input
                       type="date"
                       name="endDate"
-                      placeholder="End Date"
                       value={edu.endDate}
                       onChange={(e) => handleEducationChange(index, e)}
                       className="w-full p-2 mb-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
@@ -521,22 +564,17 @@ export default function ProfilePage() {
                 </button>
               </div>
 
-
               {/* Experiences Section */}
               <div className="mt-8">
                 <h3 className="text-xl font-bold text-white mb-4">Work Experience</h3>
                 {tempData.experiences.map((exp, index) => (
-                  <div key={index} className="border border-yellow-500/30 rounded-lg p-4 mb-4 bg-black/10">
+                  <div key={exp.id || index} className="border border-yellow-500/30 rounded-lg p-4 mb-4 bg-black/10">
                     <div className="flex justify-between mb-2">
                       <span className="text-yellow-500 font-medium">Experience #{index + 1}</span>
-                      <button 
-                        onClick={() => removeExperience(index)} 
-                        className="text-red-400 hover:text-red-300 transition-colors"
-                      >
+                      <button onClick={() => removeExperience(index)} className="text-red-400 hover:text-red-300 transition-colors">
                         Remove
                       </button>
                     </div>
-                    
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-gray-400 text-xs mb-1">Job Title*</label>
@@ -550,7 +588,6 @@ export default function ProfilePage() {
                           required
                         />
                       </div>
-                      
                       <div>
                         <label className="block text-gray-400 text-xs mb-1">Company*</label>
                         <input
@@ -563,7 +600,6 @@ export default function ProfilePage() {
                           required
                         />
                       </div>
-                      
                       <div>
                         <label className="block text-gray-400 text-xs mb-1">Location</label>
                         <input
@@ -575,7 +611,6 @@ export default function ProfilePage() {
                           className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
                         />
                       </div>
-                      
                       <div>
                         <label className="block text-gray-400 text-xs mb-1">Employment Type</label>
                         <select
@@ -592,7 +627,6 @@ export default function ProfilePage() {
                           <option value="Internship">Internship</option>
                         </select>
                       </div>
-                      
                       <div>
                         <label className="block text-gray-400 text-xs mb-1">Start Date*</label>
                         <input
@@ -604,7 +638,6 @@ export default function ProfilePage() {
                           required
                         />
                       </div>
-                      
                       <div className="flex flex-col">
                         <label className="block text-gray-400 text-xs mb-1">End Date</label>
                         <input
@@ -629,7 +662,6 @@ export default function ProfilePage() {
                           </label>
                         </div>
                       </div>
-                      
                       <div className="md:col-span-2">
                         <label className="block text-gray-400 text-xs mb-1">Description</label>
                         <textarea
@@ -644,109 +676,107 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 ))}
-                <button 
-                  onClick={addExperience} 
-                  className="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-md flex items-center gap-1 transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Experience
-                 </button>
+                <button onClick={addExperience} className="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-md flex items-center gap-1 transition-colors">
+                  <Plus className="w-4 h-4" /> Add Experience
+                </button>
               </div>
 
               {/* Skills Section */}
               <div className="mt-8" ref={skillsContainerRef}>
                 <h3 className="text-xl font-bold text-white mb-4">Skills</h3>
-                {tempData.skills.map((skill, index) => (
-                  <div 
-                  key={skill.id || index}
-                   className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 px-3 py-1 rounded-full flex items-center gap-1"
-                  >
-                    <span>{skill.name}</span>
-                    <button
-                        onClick={() => handleRemoveSkill(skill.id, skill.name)} 
-                        className="hover:text-white focus:outline-none"
-                        aria-label={`Remove ${skill.name} skill`}
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {/* Skill input with autocomplete dropdown */}
-              <div className="relative">
-                <div className="flex gap-2">
-                  <div className="flex-1 relative">
-                    <input
-                      type="text"
-                      value={skillInput}
-                      onChange={handleSkillInputChange}
-                      placeholder="Add Skill (e.g. JavaScript, React, Java)"
-                      className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30 focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500"
-                    />
-
-                    {/* Autocomplete dropdown */}
-                    {showSkillDropdown && filteredSkills.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-[#181A28] border border-yellow-500/30 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                        {filteredSkills.map((skill) => (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {tempData.skills.length > 0 ? (
+                    tempData.skills.map((skill, index) =>
+                      skill?.name ? (
+                        <div key={skill.id || index} className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 px-3 py-1 rounded-full flex items-center gap-1">
+                          <Tag className="w-3 h-3 mr-1" />
+                          <span>{skill.name}</span>
                           <button
-                            key={skill.id}
-                            onClick={() => handleAddSkill(skill.name)}
-                            className="w-full text-left px-4 py-2 hover:bg-yellow-500/10 text-gray-300 hover:text-white"
+                            onClick={() => handleRemoveSkill(skill.id, skill.name)}
+                            className="hover:text-white focus:outline-none ml-1"
+                            aria-label={`Remove ${skill.name} skill`}
                           >
-                            {skill.name}
+                            <X className="w-4 h-4" />
                           </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={handleAddCustomSkill}
-                    className="bg-yellow-500 hover:bg-yellow-400 text-black px-3 py-2 rounded-md flex items-center gap-1"
-                    >
-                    <Plus className="w-4 h-4" />
-                    Add
-                    </button>
+                        </div>
+                      ) : null
+                    )
+                  ) : (
+                    <p className="text-gray-400 text-sm">
+                      No skills added yet. Add some skills to showcase your expertise!
+                    </p>
+                  )}
                 </div>
-                <p className="text-gray-400 text-xs mt-2">
-                  Enter a skill and click "Add" , or select from suggested skills
-                </p>
+
+                <div className="relative">
+                  <div className="flex gap-2">
+                    <div className="flex-1 relative">
+                      <input
+                        type="text"
+                        value={skillInput}
+                        onChange={handleSkillInputChange}
+                        placeholder="Add Skill (e.g. JavaScript, React, Java)"
+                        className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30 focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500"
+                      />
+                      {showSkillDropdown && filteredSkills.length > 0 && (
+                        <div className="absolute z-10 w-full mt-1 bg-[#181A28] border border-yellow-500/30 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                          {filteredSkills.map((skill) => (
+                            <button
+                              key={skill.id}
+                              onClick={() => handleAddSkill(skill.name)}
+                              className="w-full text-left px-4 py-2 hover:bg-yellow-500/10 text-gray-300 hover:text-white"
+                            >
+                              {skill.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={handleAddCustomSkill}
+                      className="bg-yellow-500 hover:bg-yellow-400 text-black px-3 py-2 rounded-md flex items-center gap-1"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add
+                    </button>
+                  </div>
+                  <p className="text-gray-400 text-xs mt-2">
+                    Enter a skill and click "Add", or select from suggested skills
+                  </p>
+                </div>
               </div>
             </>
           ) : (
             <div>
-              {/* When not editing - show skills as read-only display */}
+              {/* Read-only view for Skills */}
               {userData.skills && userData.skills.length > 0 ? (
                 <div className="mt-6">
                   <h3 className="text-xl font-semibold text-white mb-3">Skills</h3>
                   <div className="flex flex-wrap gap-2">
-                    {userData.skills.map((skill, index) => (
-                      <div 
-                        key={skill.id || index} 
-                        className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 px-3 py-1 rounded-full flex items-center gap-1"
-                      >
-                        <Tag className="w-3 h-3 mr-1" />
-                        <span>{skill.name}</span>
-                      </div>
-                    ))}
+                    {userData.skills.map((skill, index) =>
+                      skill?.name ? (
+                        <div key={skill.id || index} className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 px-3 py-1 rounded-full flex items-center gap-1">
+                          <Tag className="w-3 h-3 mr-1" />
+                          <span>{skill.name}</span>
+                        </div>
+                      ) : null
+                    )}
                   </div>
                 </div>
               ) : (
                 <div className="text-center text-gray-400 py-4">
-                  Click "Edit Profile" to update your information
+                  Click "Edit Profile" to update your information.
                 </div>
               )}
-              {!isEditing && userData.experiences && userData.experiences.length > 0 && (
+
+              {/* Read-only view for Experiences */}
+              {userData.experiences && userData.experiences.length > 0 && (
                 <div className="mt-8">
                   <h3 className="text-xl font-semibold text-white mb-4">Work Experience</h3>
                   <div className="space-y-6">
                     {userData.experiences.map((exp, index) => (
                       <div key={exp.id || index} className="relative pl-8 border-l-2 border-yellow-500/30">
-                        {/* Position dot */}
                         <div className="absolute w-4 h-4 bg-yellow-500 rounded-full -left-[9px] top-0"></div>
-                        
-                        {/* Experience content */}
                         <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-4">
                           <div className="flex flex-wrap justify-between items-start mb-2">
                             <h4 className="text-yellow-400 font-bold text-lg">{exp.title}</h4>
@@ -755,7 +785,6 @@ export default function ProfilePage() {
                               <span>{formatDate(exp.startDate)} - {formatDate(exp.endDate)}</span>
                             </div>
                           </div>
-                          
                           <div className="flex flex-wrap gap-2 mb-2">
                             <div className="text-white/80 text-sm flex items-center">
                               <Building className="w-3 h-3 mr-1" />
@@ -774,9 +803,46 @@ export default function ProfilePage() {
                               </div>
                             )}
                           </div>
-                          
                           {exp.description && (
                             <p className="text-gray-300 text-sm whitespace-pre-line">{exp.description}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Read-only view for Education */}
+              {userData.educations && userData.educations.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-xl font-semibold text-white mb-4">Education</h3>
+                  <div className="space-y-6">
+                    {userData.educations.map((edu, index) => (
+                      <div key={edu.id || index} className="relative pl-8 border-l-2 border-yellow-500/30">
+                        <div className="absolute w-4 h-4 bg-yellow-500 rounded-full -left-[9px] top-0"></div>
+                        <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-4">
+                          <div className="flex flex-wrap justify-between items-start mb-2">
+                            <h4 className="text-yellow-400 font-bold text-lg">{edu.degree}</h4>
+                            <div className="text-gray-400 text-sm flex items-center">
+                              <Calendar className="w-3 h-3 mr-1" />
+                              <span>{formatDate(edu.startDate)} - {formatDate(edu.endDate)}</span>
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            <div className="text-white/80 text-sm flex items-center">
+                              <Building className="w-3 h-3 mr-1" />
+                              <span>{edu.institution}</span>
+                            </div>
+                            {edu.fieldOfStudy && (
+                              <div className="text-gray-400 text-sm flex items-center">
+                                <Tag className="w-3 h-3 mr-1" />
+                                <span>{edu.fieldOfStudy}</span>
+                              </div>
+                            )}
+                          </div>
+                          {edu.description && (
+                            <p className="text-gray-300 text-sm whitespace-pre-line">{edu.description}</p>
                           )}
                         </div>
                       </div>
@@ -788,9 +854,13 @@ export default function ProfilePage() {
           )}
 
           {isEditing && (
+            // Single Save All Changes Button
             <div className="mt-8 flex justify-end">
-              <button onClick={handleSave} className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-2 rounded-md flex items-center gap-2 font-medium transition-colors">
-                <Check className="w-5 h-5" /> Save Changes
+              <button
+                onClick={handleSave}
+                className="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-md flex items-center gap-2 font-medium transition-colors"
+              >
+                <Check className="w-5 h-5" /> Save Profile
               </button>
             </div>
           )}
@@ -798,12 +868,14 @@ export default function ProfilePage() {
       </div>
 
       {/* Background pattern */}
-      <div className="fixed inset-0 opacity-3 pointer-events-none z-[-1]"
+      <div
+        className="fixed inset-0 opacity-3 pointer-events-none z-[-1]"
         style={{
-          backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath fill='%23EAB308' opacity='0.05' d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100'/%3E%3C/svg%3E\")",
+          backgroundImage:
+            'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'56\' height=\'100\' viewBox=\'0 0 56 100\'%3E%3Cpath fill=\'%23EAB308\' opacity=\'0.05\' d=\'M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100\'/%3E%3C/svg%3E")',
           backgroundSize: "112px 200px"
-        }}>
-      </div>
+        }}
+      ></div>
     </div>
   );
 }
