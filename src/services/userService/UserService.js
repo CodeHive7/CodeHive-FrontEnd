@@ -2,6 +2,7 @@ import "../../utils/polyfills.js";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import apiClient from "../apiClient.js";
+import { startOfDay } from "date-fns";
 
 let stompClient = null;
 const subscribers = new Map();
@@ -395,32 +396,65 @@ export const getUserExperiences = async () => {
 };
 
 export const createExperience = async (experienceData) => {
-    try {
-        console.log("Experience Data", JSON.stringify(experienceData));
-      const response = await apiClient.post("/experiences", experienceData);
-      console.log("Experience created", response.data);
-      return response.data;
-    } catch (error) {
-      console.error("Error creating experience", error.response?.data || error.message);
-      throw error;
-    }
+  try {
+    // Remove client-side only fields
+    const { tempId, ...dataToSend } = experienceData;
+    
+    // Format dates for the API
+    const formattedData = {
+      ...dataToSend,
+      startDate: dataToSend.startDate ? dataToSend.startDate.split('T')[0] : null,
+      endDate: dataToSend.endDate ? dataToSend.endDate.split('T')[0] : null
+    };
+    
+    console.log("Creating experience with data:", formattedData);
+    const response = await apiClient.post("/experiences", formattedData);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating experience:", error);
+    throw error;
+  }
 };
 
 export const updateExperience = async (id, experienceData) => {
-    try {
-      const response = await apiClient.put(`/experiences/${id}`, experienceData);
-      return response.data;
-    } catch (error) {
-      console.error("Error updating experience", error);
-      throw error;
+  try {
+    if (!id) {
+      throw new Error("Cannot update experience without an ID");
     }
+    
+    // Remove client-side only fields
+    const { tempId, ...dataToSend } = experienceData;
+    
+    // Format dates for the API
+    const formattedData = {
+      ...dataToSend,
+      startDate: dataToSend.startDate ? dataToSend.startDate.split('T')[0] : null,
+      endDate: dataToSend.endDate ? dataToSend.endDate.split('T')[0] : null
+    };
+    
+    console.log(`Updating experience ${id} with data:`, formattedData);
+    const response = await apiClient.put(`/experiences/${id}`, formattedData);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating experience ${id}:`, error);
+    throw error;
+  }
 };
 
+// Improved deleteExperience function
 export const deleteExperience = async (id) => {
-  try {
+  
+    if (!id) {
+        console.error("Cannot delete experience: Missing ID");
+      throw new Error("Cannot delete experience: Missing ID");
+    }
+    
+    try {
+    console.log(`Deleting experience ${id}`);
     await apiClient.delete(`/experiences/${id}`);
+    console.log(`Experience ${id} deleted successfully`);
   } catch (error) {
-    console.error("Error deleting experience", error);
+    console.error(`Error deleting experience ${id}:`, error.response?.data || error.message);
     throw error;
   }
 };
