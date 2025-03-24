@@ -315,7 +315,7 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
             </div>
 
             {/* Optimized Animation Styles */}
-            <style jsx>{`
+            <style>{`
                 @keyframes fadeIn {
                     from { opacity: 0; }
                     to { opacity: 1; }
