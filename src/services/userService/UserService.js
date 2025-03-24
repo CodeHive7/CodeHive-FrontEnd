@@ -378,7 +378,8 @@ export const removeSkillFromUser = async (skillId) => {
     try {
         await apiClient.delete(`/skills/user/${skillId}`);
     } catch (error) {
-        
+        console.error("Error removing skill", error);
+        throw error;
     }
 }
 
@@ -395,10 +396,12 @@ export const getUserExperiences = async () => {
 
 export const createExperience = async (experienceData) => {
     try {
+        console.log("Experience Data", JSON.stringify(experienceData));
       const response = await apiClient.post("/experiences", experienceData);
+      console.log("Experience created", response.data);
       return response.data;
     } catch (error) {
-      console.error("Error creating experience", error);
+      console.error("Error creating experience", error.response?.data || error.message);
       throw error;
     }
 };
