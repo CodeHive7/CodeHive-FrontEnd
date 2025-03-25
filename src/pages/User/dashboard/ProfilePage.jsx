@@ -554,6 +554,28 @@ export default function ProfilePage() {
 
   // Add this function to handle saving just the profile info
   const saveProfile = async () => {
+    // First check if any profile fields have changed
+    const hasBasicInfoChanged = 
+      userData.fullName !== tempData.fullName ||
+      userData.email !== tempData.email ||
+      userData.username !== tempData.username ||
+      userData.bio !== tempData.bio ||
+      userData.location !== tempData.location ||
+      userData.phoneNumber !== tempData.phoneNumber ||
+      userData.website !== tempData.website;
+    
+    // If nothing changed, show a message and return
+    if (!hasBasicInfoChanged) {
+      Swal.fire({
+        icon: "info",
+        title: "No Changes",
+        text: "No changes were made to your profile details.",
+        background: "#1C1F2E",
+        color: "#ffffff"
+      });
+      return;
+    }
+    
     try {
       Swal.fire({
         title: "Saving...",
@@ -574,8 +596,18 @@ export default function ProfilePage() {
         website: tempData.website
       });
 
-      // Refresh user data
-      await fetchUserProfile();
+      // IMPORTANT: Instead of refreshing all profile data which overwrites experiences,
+      // just update the userData state with the new basic info
+      setUserData(prevUserData => ({
+        ...prevUserData,
+        fullName: tempData.fullName,
+        email: tempData.email,
+        username: tempData.username,
+        bio: tempData.bio,
+        location: tempData.location,
+        phoneNumber: tempData.phoneNumber,
+        website: tempData.website
+      }));
       
       Swal.fire({
         icon: "success",
@@ -643,8 +675,38 @@ export default function ProfilePage() {
             {/* Edit Button */}
             <button
               onClick={() => {
-                if (!isEditing) setTempData({ ...userData });
-                setIsEditing(!isEditing);
+                if (!isEditing) {
+                  // When entering edit mode, copy the current user data AND set isEditing to true
+                  setTempData({ ...userData });
+                  setIsEditing(true); // ← This line was missing!
+                } else {
+                  // When canceling, ask user to confirm if they have unsaved experiences
+                  const hasUnsavedExperiences = tempData.experiences.some(exp => !exp.id);
+                  
+                  if (hasUnsavedExperiences) {
+                    Swal.fire({
+                      title: "Unsaved Changes",
+                      text: "You have unsaved experience entries. Are you sure you want to cancel?",
+                      icon: "warning",
+                      showCancelButton: true,
+                      confirmButtonText: "Yes, cancel editing",
+                      cancelButtonText: "No, continue editing",
+                      background: "#1C1F2E",
+                      color: "#ffffff"
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        setIsEditing(false);
+                        // Don't fetch profile again, just restore the previous userData
+                        setTempData({ ...userData });
+                      }
+                    });
+                    return;
+                  }
+                  
+                  // No unsaved experiences, simply exit edit mode
+                  setIsEditing(false);
+                  setTempData({ ...userData });
+                }
               }}
               className="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-full flex items-center gap-2 transition-colors font-medium"
             >
@@ -1160,14 +1222,19 @@ export default function ProfilePage() {
           )}
 
           {isEditing && (
-            // Single Save All Changes Button
-            <div className="mt-8 flex justify-end">
-              <button
-                onClick={saveProfile}
-                className="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-md flex items-center gap-2 font-medium transition-colors"
-              >
-                <Check className="w-5 h-5" /> Save Profile Details
-              </button>
+            <div className="mt-8">
+              <div className="flex justify-end">
+                <button
+                  onClick={saveProfile}
+                  className="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-md flex items-center gap-2 font-medium transition-colors"
+                >
+                  <Check className="w-5 h-5" /> Save Profile Details
+                </button>
+              </div>
+              <p className="text-yellow-400 text-sm mt-2 text-right italic">
+                Note: This button only saves basic profile information. 
+                Each experience must be saved individually with its own "Save Experience" button.
+              </p>
             </div>
           )}
         </div>
