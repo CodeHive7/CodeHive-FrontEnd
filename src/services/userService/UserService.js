@@ -473,7 +473,14 @@ export const getUserEducations = async () => {
 
 export const createEducation = async (educationData) => {
     try {
-      const response = await apiClient.post("/educations", educationData);
+        const { tempId, ...dataToSend } = educationData;
+        // Format dates for the API
+        const formattedData = {
+            ...dataToSend,
+            startDate: dataToSend.startDate ? dataToSend.startDate.split('T')[0] : null,
+            endDate: dataToSend.endDate ? dataToSend.endDate.split('T')[0] : null
+        };
+      const response = await apiClient.post("/educations", formattedData);
       return response.data;
     } catch (error) {
       console.error("Error creating education", error);
