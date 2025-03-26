@@ -64,7 +64,7 @@ export default function ProfilePage() {
 
   // Add this state at the top of your component
   const [editingExperienceId, setEditingExperienceId] = useState(null);
-
+  const [editingEducationId, setEditingEducationId] = useState(null);
   // Fetch user profile on mount
   useEffect(() => {
     fetchUserProfile();
@@ -275,20 +275,17 @@ export default function ProfilePage() {
     }
   };
 
-  // Education logic
-  const addEducation = () => {
-    setTempData({ ...tempData, educations: [...tempData.educations, { ...defaultEducation }] });
-  };
-
-  const removeEducation = (index) => {
-    const edu = [...tempData.educations];
-    edu.splice(index, 1);
-    setTempData({ ...tempData, educations: edu });
-  };
 
   const handleEducationChange = (index, e) => {
     const edu = [...tempData.educations];
-    edu[index] = { ...edu[index], [e.target.name]: e.target.value };
+    const field = e.target.name;
+    let value = e.target.value;
+
+    if (field === "currentlyStudying") {
+      value = e.target.checked;
+      if (value) edu[index].endDate = null;
+    }
+    edu[index] = { ...edu[index], [field]: value };
     setTempData({ ...tempData, educations: edu });
   };
 
@@ -630,6 +627,177 @@ export default function ProfilePage() {
     }
   };
 
+
+// Add these new functions for education handling
+const toggleEducationEdit = (eduId) => {
+  setEditingEducationId(editingEducationId === eduId ? null : eduId);
+};
+
+const saveEducation = async (index) => {
+  const education = tempData.educations[index];
+  
+  // Validate required fields
+  if (!education.institution || !education.degree) {
+    Swal.fire({
+      icon: "error",
+      title: "Missing Information",
+      text: "Please fill in all required fields (Institution and Degree).",
+      background: "#1C1F2E",
+      color: "#ffffff"
+    });
+    return;
+  }
+  
+  try {
+    Swal.fire({
+      title: "Saving...",
+      text: education.id ? "Updating education" : "Creating new education",
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      willOpen: () => Swal.showLoading()
+    });
+    
+    let savedEducation;
+    
+    if (education.id) {
+      // Update existing education
+      savedEducation = await updateEducation(education.id, education);
+      console.log("Education updated:", savedEducation);
+    } else {
+      // Create new education
+      savedEducation = await createEducation(education);
+      console.log("Education created:", savedEducation);
+      
+      // Update tempData to include the new ID
+      const updatedEducations = [...tempData.educations];
+      updatedEducations[index] = { 
+        ...education, 
+        id: savedEducation.id,
+        tempId: undefined // Remove temporary ID
+      };
+      
+      setTempData({
+        ...tempData,
+        educations: updatedEducations
+      });
+    }
+    
+    // Refresh user profile data in the background
+    fetchUserProfile();
+    
+    // Exit edit mode
+    setEditingEducationId(null);
+    
+    Swal.fire({
+      icon: "success",
+      title: education.id ? "Education Updated" : "Education Created",
+      text: `Your education has been successfully ${education.id ? "updated" : "saved"}!`,
+      timer: 2000,
+      showConfirmButton: false,
+      background: "#1C1F2E",
+      color: "#ffffff"
+    });
+  } catch (error) {
+    console.error("Error saving education:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Save Failed",
+      text: error.response?.data || "Failed to save education. Please try again.",
+      background: "#1C1F2E",
+      color: "#ffffff"
+    });
+  }
+};
+
+// Update addEducation function to use tempId like experiences
+const addEducation = () => {
+  // Create a temporary ID to track this education until it's saved
+  const tempId = `temp-edu-${Date.now()}`;
+  
+  // Create new education object with default empty values
+  const newEducation = { 
+    ...defaultEducation, 
+    tempId 
+  };
+  
+  // Add to tempData
+  setTempData(prev => ({
+    ...prev,
+    educations: [...prev.educations, newEducation]
+  }));
+  
+  // Automatically open the edit form for the new education
+  setEditingEducationId(tempId);
+};
+
+// Update removeEducation to handle server-side deletion
+const removeEducation = async (index) => {
+  const eduToRemove = tempData.educations[index];
+  
+  // Ask for confirmation before removing
+  const result = await Swal.fire({
+    title: "Remove Education?",
+    text: `Are you sure you want to remove "${eduToRemove.institution || 'this education'}"?`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, remove it",
+    background: "#1C1F2E",
+    color: "#ffffff"
+  });
+  
+  if (!result.isConfirmed) {
+    return;
+  }
+  
+  try {
+    // Show loading indicator
+    Swal.fire({
+      title: "Removing...",
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      willOpen: () => Swal.showLoading()
+    });
+    
+    // If it has an ID, remove from the server first
+    if (eduToRemove.id) {
+      await deleteEducation(eduToRemove.id);
+    }
+    
+    // Remove from UI state
+    const updatedEducations = [...tempData.educations];
+    updatedEducations.splice(index, 1);
+    setTempData({ ...tempData, educations: updatedEducations });
+    
+    // Close edit mode if it was being edited
+    if (editingEducationId === eduToRemove.id || editingEducationId === eduToRemove.tempId) {
+      setEditingEducationId(null);
+    }
+    
+    // Refresh the user profile to ensure UI and server are in sync
+    fetchUserProfile();
+    
+    Swal.fire({
+      icon: "success",
+      title: "Education Removed",
+      timer: 1500,
+      showConfirmButton: false,
+      background: "#1C1F2E",
+      color: "#ffffff"
+    });
+  } catch (error) {
+    console.error("Error removing education:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Remove Failed",
+      text: "Failed to remove education. Please try again.",
+      background: "#1C1F2E",
+      color: "#ffffff"
+    });
+  }
+};
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-64">
@@ -785,66 +953,183 @@ export default function ProfilePage() {
               </div>
 
               {/* Educations Section */}
-              <div className="mt-8">
-                <h3 className="text-xl font-bold text-white mb-4">Educations</h3>
-                {tempData.educations.map((edu, index) => (
-                  <div key={edu.id || index} className="border border-yellow-500 rounded-lg p-4 mb-4">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-yellow-500 font-medium">Education #{index + 1}</span>
-                      <button onClick={() => removeEducation(index)} className="text-red-500">Remove</button>
+                <div className="mt-8">
+                  <h3 className="text-xl font-bold text-white mb-4">Education</h3>
+                  
+                  {/* Existing educations */}
+                  {tempData.educations.map((edu, index) => (
+                    <div 
+                      key={edu.id || edu.tempId || index} 
+                      className="border border-yellow-500/30 rounded-lg p-4 mb-4 bg-black/10"
+                    >
+                      <div className="flex justify-between mb-2">
+                        <span className="text-yellow-500 font-medium">
+                          Education #{index + 1} {edu.id ? `(ID: ${edu.id})` : "(New)"}
+                        </span>
+                        <div className="flex gap-2">
+                          {!editingEducationId || editingEducationId !== (edu.id || edu.tempId) ? (
+                            <>
+                              <button 
+                                onClick={() => toggleEducationEdit(edu.id || edu.tempId)}
+                                className="text-yellow-400 hover:text-yellow-300 transition-colors"
+                              >
+                                Edit
+                              </button>
+                              <button 
+                                onClick={() => removeEducation(index)} 
+                                className="text-red-400 hover:text-red-300 transition-colors"
+                              >
+                                Remove
+                              </button>
+                            </>
+                          ) : null}
+                        </div>
+                      </div>
+                      
+                      {/* If this education is being edited, show the form */}
+                      {editingEducationId === (edu.id || edu.tempId) ? (
+                        <form onSubmit={(e) => e.preventDefault()}>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-gray-400 text-xs mb-1">Institution*</label>
+                              <input
+                                type="text"
+                                name="institution"
+                                placeholder="e.g. Harvard University"
+                                value={edu.institution || ""}
+                                onChange={(e) => handleEducationChange(index, e)}
+                                className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-gray-400 text-xs mb-1">Degree*</label>
+                              <input
+                                type="text"
+                                name="degree"
+                                placeholder="e.g. Bachelor of Science"
+                                value={edu.degree || ""}
+                                onChange={(e) => handleEducationChange(index, e)}
+                                className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-gray-400 text-xs mb-1">Field of Study</label>
+                              <input
+                                type="text"
+                                name="fieldOfStudy"
+                                placeholder="e.g. Computer Science"
+                                value={edu.fieldOfStudy || ""}
+                                onChange={(e) => handleEducationChange(index, e)}
+                                className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-gray-400 text-xs mb-1">Start Date</label>
+                              <input
+                                type="date"
+                                name="startDate"
+                                value={edu.startDate || ""}
+                                onChange={(e) => handleEducationChange(index, e)}
+                                className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
+                              />
+                            </div>
+                            <div className="flex flex-col">
+                              <label className="block text-gray-400 text-xs mb-1">End Date</label>
+                              <input
+                                type="date"
+                                name="endDate"
+                                value={edu.endDate || ""}
+                                onChange={(e) => handleEducationChange(index, e)}
+                                className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
+                                disabled={edu.currentlyStudying}
+                              />
+                              <div className="mt-2 flex items-center">
+                                <input
+                                  type="checkbox"
+                                  id={`currentlyStudying-${index}`}
+                                  name="currentlyStudying"
+                                  checked={edu.currentlyStudying || false}
+                                  onChange={(e) => handleEducationChange(index, e)}
+                                  className="mr-2 rounded border-yellow-500/30 text-yellow-500 focus:ring-yellow-500/50"
+                                />
+                                <label htmlFor={`currentlyStudying-${index}`} className="text-gray-400 text-xs">
+                                  I am currently studying here
+                                </label>
+                              </div>
+                            </div>
+                            <div className="md:col-span-2">
+                              <label className="block text-gray-400 text-xs mb-1">Description</label>
+                              <textarea
+                                name="description"
+                                placeholder="Describe your studies, achievements, etc."
+                                value={edu.description || ""}
+                                onChange={(e) => handleEducationChange(index, e)}
+                                rows="3"
+                                className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Individual Save/Update and Cancel Buttons */}
+                          <div className="flex justify-end gap-2 mt-4">
+                            <button
+                              type="button"
+                              onClick={() => toggleEducationEdit(null)}
+                              className="bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => saveEducation(index)}
+                              className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-md flex items-center gap-1"
+                              disabled={!edu.institution || !edu.degree}
+                            >
+                              <Check className="w-4 h-4" /> 
+                              {edu.id ? "Update Education" : "Save Education"}
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        // Display education in read-only mode when not editing
+                        <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-3">
+                          <div className="flex flex-wrap justify-between items-start mb-2">
+                            <h4 className="text-yellow-400 font-bold text-lg">{edu.degree}</h4>
+                            <div className="text-gray-400 text-sm flex items-center">
+                              <Calendar className="w-3 h-3 mr-1" />
+                              <span>{formatDate(edu.startDate)} - {formatDate(edu.endDate)}</span>
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            <div className="text-white/80 text-sm flex items-center">
+                              <Building className="w-3 h-3 mr-1" />
+                              <span>{edu.institution}</span>
+                            </div>
+                            {edu.fieldOfStudy && (
+                              <div className="text-gray-400 text-sm flex items-center">
+                                <Tag className="w-3 h-3 mr-1" />
+                                <span>{edu.fieldOfStudy}</span>
+                              </div>
+                            )}
+                          </div>
+                          {edu.description && (
+                            <p className="text-gray-300 text-sm whitespace-pre-line">{edu.description}</p>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <input
-                      type="text"
-                      name="institution"
-                      placeholder="Institution"
-                      value={edu.institution}
-                      onChange={(e) => handleEducationChange(index, e)}
-                      className="w-full p-2 mb-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
-                    />
-                    <input
-                      type="text"
-                      name="degree"
-                      placeholder="Degree"
-                      value={edu.degree}
-                      onChange={(e) => handleEducationChange(index, e)}
-                      className="w-full p-2 mb-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
-                    />
-                    <input
-                      type="text"
-                      name="fieldOfStudy"
-                      placeholder="Field of Study"
-                      value={edu.fieldOfStudy}
-                      onChange={(e) => handleEducationChange(index, e)}
-                      className="w-full p-2 mb-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
-                    />
-                    <input
-                      type="date"
-                      name="startDate"
-                      value={edu.startDate}
-                      onChange={(e) => handleEducationChange(index, e)}
-                      className="w-full p-2 mb-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
-                    />
-                    <input
-                      type="date"
-                      name="endDate"
-                      value={edu.endDate}
-                      onChange={(e) => handleEducationChange(index, e)}
-                      className="w-full p-2 mb-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
-                    />
-                    <textarea
-                      name="description"
-                      placeholder="Description"
-                      value={edu.description}
-                      onChange={(e) => handleEducationChange(index, e)}
-                      rows="2"
-                      className="w-full p-2 rounded-md border bg-[#181A28] text-white border-yellow-500/30"
-                    />
-                  </div>
-                ))}
-                <button onClick={addEducation} className="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-md">
-                  Add Education
-                </button>
-              </div>
+                  ))}
+                  
+                  {/* Add Education Button */}
+                  <button 
+                    onClick={addEducation} 
+                    className="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-md flex items-center gap-1 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" /> Add New Education
+                  </button>
+                </div>
 
               {/* Experiences Section */}
               <div className="mt-8">
