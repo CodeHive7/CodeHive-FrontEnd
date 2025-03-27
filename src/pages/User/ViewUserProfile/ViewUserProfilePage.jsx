@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getUserProfileByUsername } from "../../../services/userService/UserService.js";
-import { ArrowLeft, Loader2, User, MapPin, Phone, Globe, Mail, FileText, AtSign } from "lucide-react";
+import { 
+  ArrowLeft, Loader2, User, MapPin, Phone, Globe, Mail, FileText, AtSign, 
+  Calendar, Building, Briefcase, Tag 
+} from "lucide-react";
 
 export default function ViewUserProfilePage() {
     const { username } = useParams(); // Get username from URL
@@ -20,6 +23,17 @@ export default function ViewUserProfilePage() {
             console.error("Error fetching user profile", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Format date helper function
+    const formatDate = (dateString) => {
+        if (!dateString) return "Present";
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+        } catch {
+            return dateString;
         }
     };
 
@@ -149,6 +163,107 @@ export default function ViewUserProfilePage() {
                             </div>
                         ))}
                     </div>
+
+                    {/* Skills Section */}
+                    {userData.skills && userData.skills.length > 0 && (
+                        <div className="mt-8">
+                            <h3 className="text-xl font-semibold text-yellow-400 mb-3">Skills</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {userData.skills.map((skill, index) =>
+                                    skill?.name ? (
+                                        <div key={skill.id || index} 
+                                            className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 
+                                                    px-3 py-1 rounded-full flex items-center gap-1">
+                                            <Tag className="w-3 h-3 mr-1" />
+                                            <span>{skill.name}</span>
+                                        </div>
+                                    ) : null
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Experience Section */}
+                    {userData.experiences && userData.experiences.length > 0 && (
+                        <div className="mt-8">
+                            <h3 className="text-xl font-semibold text-yellow-400 mb-4">Work Experience</h3>
+                            <div className="space-y-6">
+                                {userData.experiences.map((exp, index) => (
+                                    <div key={exp.id || index} className="relative pl-8 border-l-2 border-yellow-500/30">
+                                        <div className="absolute w-4 h-4 bg-yellow-500 rounded-full -left-[9px] top-0"></div>
+                                        <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-4">
+                                            <div className="flex flex-wrap justify-between items-start mb-2">
+                                                <h4 className="text-yellow-400 font-bold text-lg">{exp.title}</h4>
+                                                <div className="text-gray-400 text-sm flex items-center">
+                                                    <Calendar className="w-3 h-3 mr-1" />
+                                                    <span>{formatDate(exp.startDate)} - {formatDate(exp.endDate)}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2 mb-2">
+                                                <div className="text-white/80 text-sm flex items-center">
+                                                    <Building className="w-3 h-3 mr-1" />
+                                                    <span>{exp.company}</span>
+                                                </div>
+                                                {exp.location && (
+                                                    <div className="text-gray-400 text-sm flex items-center">
+                                                        <MapPin className="w-3 h-3 mr-1" />
+                                                        <span>{exp.location}</span>
+                                                    </div>
+                                                )}
+                                                {exp.employmentType && (
+                                                    <div className="text-gray-400 text-sm flex items-center">
+                                                        <Briefcase className="w-3 h-3 mr-1" />
+                                                        <span>{exp.employmentType}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {exp.description && (
+                                                <p className="text-gray-300 text-sm whitespace-pre-line">{exp.description}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Education Section */}
+                    {userData.educations && userData.educations.length > 0 && (
+                        <div className="mt-8">
+                            <h3 className="text-xl font-semibold text-yellow-400 mb-4">Education</h3>
+                            <div className="space-y-6">
+                                {userData.educations.map((edu, index) => (
+                                    <div key={edu.id || index} className="relative pl-8 border-l-2 border-yellow-500/30">
+                                        <div className="absolute w-4 h-4 bg-yellow-500 rounded-full -left-[9px] top-0"></div>
+                                        <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-4">
+                                            <div className="flex flex-wrap justify-between items-start mb-2">
+                                                <h4 className="text-yellow-400 font-bold text-lg">{edu.degree}</h4>
+                                                <div className="text-gray-400 text-sm flex items-center">
+                                                    <Calendar className="w-3 h-3 mr-1" />
+                                                    <span>{formatDate(edu.startDate)} - {formatDate(edu.endDate)}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2 mb-2">
+                                                <div className="text-white/80 text-sm flex items-center">
+                                                    <Building className="w-3 h-3 mr-1" />
+                                                    <span>{edu.institution}</span>
+                                                </div>
+                                                {edu.fieldOfStudy && (
+                                                    <div className="text-gray-400 text-sm flex items-center">
+                                                        <Tag className="w-3 h-3 mr-1" />
+                                                        <span>{edu.fieldOfStudy}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {edu.description && (
+                                                <p className="text-gray-300 text-sm whitespace-pre-line">{edu.description}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
