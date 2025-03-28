@@ -3,6 +3,7 @@ import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import apiClient from "../apiClient.js";
 import { startOfDay } from "date-fns";
+import { tr } from "date-fns/locale";
 
 let stompClient = null;
 const subscribers = new Map();
@@ -154,25 +155,20 @@ export const fetchAcceptedApplicants = async (projectId) => {
     }
 };
 
-
-export const connectToChat = (token, onConnected , onError) => {
-    if (stompClient && stompClient.connected) {
-        return stompClient;
+export const connectToChat = (token, onConnected, onError) => {
+    // Force disconnect any existing client
+    if (stompClient) {
+        try {
+            stompClient.deactivate();
+        } catch (error) {
+            console.warn("Error deactivating existing client", error);
+        }
+        stompClient = null;
     }
-
+    
+    console.log("Creating new STOMP connection");
     const socket = new SockJS('http://localhost:8082/ws-chat');
 
-    socket.onopen = () => {
-        console.log("WebSocket Opened");
-    };
-
-    socket.onclose = () => {
-        console.log("WebSocket Closed");
-    };
-
-    socket.onerror = (error) => {
-        console.error("WebSocket Error:", error);
-    };
     stompClient = new Client({
         webSocketFactory: () => socket,
         connectHeaders: {
@@ -188,13 +184,13 @@ export const connectToChat = (token, onConnected , onError) => {
         heartbeatOutgoing: 4000
     });
 
+    socket.onopen = () => console.log("WebSocket Opened");
+    socket.onclose = () => console.log("WebSocket Closed");
+    socket.onerror = (error) => console.error("WebSocket Error:", error);
+
     stompClient.onConnect = () => {
         console.log("WebSocket Connected");
         if (onConnected) onConnected(stompClient);
-    };
-
-    stompClient.onDisconnect = () => {
-        console.log("WebSocket Disconnected");
     };
 
     stompClient.onStompError = (frame) => {
@@ -207,9 +203,17 @@ export const connectToChat = (token, onConnected , onError) => {
 };
 
 export const disconnectFromChat = () => {
-    if (stompClient && stompClient.connected) {
-        stompClient.deactivate();
-        console.log("WebSocket Disconnected");
+    if (stompClient) {
+        try {
+            if (stompClient.connected) {
+                stompClient.deactivate();
+                console.log("WebSocket Disconnected");
+            }
+            stompClient = null;
+        } catch (error) {
+            console.warn("Error during disconnect:", error);
+            stompClient = null;
+        }
     }
 };
 
@@ -220,33 +224,26 @@ export const subscribeToProject = (projectId, OnMessageReceived) => {
     }
 
     const subscriptionKey = `/topic/project/${projectId}`;
-    // If already subscribed , just add new callback
-    if (subscribers.has(subscriptionKey)) {
-        const callbacks = subscribers.get(subscriptionKey).callbacks;
-        callbacks.push(OnMessageReceived);
-        return subscribers.get(subscriptionKey).subscription;
-    }
-
     console.log(`Subscribing to ${subscriptionKey}`);
 
-    const subscription = stompClient.subscribe(subscriptionKey, (message) => {
-        console.log("Received message on project subscription", message);
-        try {
-        const receivedMessage = JSON.parse(message.body);
-        // Call all registered callbacks for this subscription
-        const callbacks = subscribers.get(subscriptionKey).callbacks;
-        callbacks.forEach(callback => callback(receivedMessage));
-        } catch (error) {
-            console.error("Error parsing project message", error);
-        }
-    });
+    try {
+        const subscription = stompClient.subscribe(subscriptionKey, (message) => {
+            console.log("Received message on project subscription:", message.body);
+            try {
+                const parsedMessage = JSON.parse(message.body);
+                console.log("Parsed message:", parsedMessage);
+                OnMessageReceived(parsedMessage);
+            } catch (error) {
+                console.error("Error parsing message", error, message.body);
+            }
+        });
 
-    subscribers.set(subscriptionKey, {
-        subscription,
-        callbacks: [OnMessageReceived]
-      });
-
-    return subscription;
+        console.log("Project subscription successful");
+        return subscription;
+    } catch (error) {
+        console.error(`Error subscribing to ${subscriptionKey}`, error);
+        return null;
+    }
 };
 
 export const sendChatMessage = (projectId, content) => {
@@ -265,59 +262,97 @@ export const sendChatMessage = (projectId, content) => {
 
 export const joinProjectChat = (projectId) => {
     if (!stompClient || !stompClient.connected) {
-      throw new Error('WebSocket not connected');
+        console.error("STOMP client not connected");
+        return false;
     }
 
     try {
         console.log(`Sending join message for project ${projectId}`);
         stompClient.publish({
-        destination: '/app/chat.join',
-        body: JSON.stringify({
-            projectId: projectId,
-            content: ""
-        })
+            destination: '/app/chat.join',
+            body: JSON.stringify({
+                projectId: Number(projectId),
+                content: ""
+            })
         });
-} catch (error) {
-    console.error("Error joining project chat", error);
-}
+        return true;
+    } catch (error) {
+        console.error("Error joining project chat", error);
+        return false;
+    }
 };
 
 // Subscribe to user-specific messages (like history)
-export const subscribeToUserMessages = (onHistoryReceived) => {
+export const subscribeToUserMessages = (OnUserMessagesReceived) => {
     if (!stompClient || !stompClient.connected) {
-      console.error('STOMP client not connected');
-      return null;
+        console.error("STOMP client not connected");
+        return null;
     }
-  
-    return stompClient.subscribe('/user/queue/messages', (message) => {
-        console.log("Received messages", message);
-        try {
-            const messages = message.body ? JSON.parse(message.body) : [];
-            onHistoryReceived(messages);
-        } catch (error) {
-            console.error("Error parsing message history", error);
-            onHistoryReceived([]);
-        }
-    });
+
+    try {
+        const subscription = stompClient.subscribe('/user/queue/messages', (message) => {
+            console.log("Received message history:", message.body);
+            try {
+                const parsedMessages = JSON.parse(message.body);
+                console.log("History messages count:", 
+                    Array.isArray(parsedMessages) ? parsedMessages.length : "not an array");
+                
+                    if (Array.isArray(parsedMessages)) {
+                        OnUserMessagesReceived(parsedMessages);
+                    } else {
+                        console.warn("History is not an array, using empty array instead");
+                        OnUserMessagesReceived([]);
+                    }
+            } catch (error) {
+                console.error("Error parsing message history", error, message.body);
+                // Important: Return empty array to prevent loading state from getting stuck
+                OnUserMessagesReceived([]);
+            }
+        });
+        
+        console.log("User subscription successful");
+        return subscription;
+    } catch (error) {
+        console.error("Error subscribing to user messages", error);
+        return null;
+    }
 };
 
-// Request message history
+// Replace the fetchChatHistory function:
+
 export const fetchChatHistory = (projectId) => {
+    console.log(`Requesting chat history for project ${projectId}`);
+    
     if (!stompClient || !stompClient.connected) {
-        console.error('Cannot fetch history: WebSocket not connected');
+        console.error("STOMP client not connected when fetching history");
         return false;
     }
-  
+
     try {
-        console.log(`Requesting chat history for project ${projectId}`);
         stompClient.publish({
-        destination: '/app/chat.fetchMessages',
-        body: JSON.stringify({
-            projectId: projectId,
-            content: ""
-        })
+            destination: '/app/chat.fetchMessages',
+            body: JSON.stringify({
+                projectId: projectId,
+                content: ""
+            })
         });
-        return true;
+        console.log("Chat history request sent");
+        
+        // Set a fallback timeout to fetch via HTTP if WebSocket history fails
+        setTimeout(() => {
+            getProjectMessages(projectId)
+                .then(messages => {
+                    if (messages && messages.length > 0) {
+                        console.log(`Fallback: Got ${messages.length} messages via HTTP`);
+                        const event = new CustomEvent('chat-history', {
+                            detail: { messages, projectId }
+                        });
+                        window.dispatchEvent(event);
+                    }
+                })
+                .catch(err => console.error("Fallback history fetch failed:", err));
+            }, 5000);
+            return true;
     } catch (error) {
         console.error("Error fetching chat history", error);
         return false;
