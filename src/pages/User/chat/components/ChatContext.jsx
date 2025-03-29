@@ -84,20 +84,14 @@ export function ChatProvider({ children }) {
     
     // Handle message history with better error handling
     const handleMessageHistory = async (historyMessages, projectId) => {
-        console.log(`Received message history for project ${projectId}:`, 
-            Array.isArray(historyMessages) ? `${historyMessages.length} messages` : "no messages");
             
         setLoadingMessages(false);
         
         if (Array.isArray(historyMessages) && historyMessages.length > 0) {
-            // Sort messages by timestamp
-            const sortedMessages = [...historyMessages].sort((a, b) => 
+            setMessages(historyMessages.sort((a,b) => 
                 new Date(a.timestamp) - new Date(b.timestamp)
-            );
-            setMessages(sortedMessages);
-            console.log("Message history loaded successfully:", sortedMessages.length, "messages");
+        ));
         } else {
-            console.log("No message history found for project:", projectId);
             setMessages([]);
         }
     };

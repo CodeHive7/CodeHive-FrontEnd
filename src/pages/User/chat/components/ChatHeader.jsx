@@ -13,7 +13,7 @@ export default function ChatHeader({
             <div className="max-w-4xl mx-auto">
                 <div className="p-4 flex items-center justify-between">
                     <div className="flex items-center">
-                        <Link to="/user/projects" className="mr-4 text-yellow-400 hover:text-yellow-300">
+                        <Link to="/user/messages" className="mr-4 text-yellow-400 hover:text-yellow-300">
                             <ArrowLeft className="h-5 w-5" />
                         </Link>
                         
