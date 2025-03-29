@@ -15,7 +15,7 @@ export default function NavigationGuard() {
         }
         
         // Check if we're in a chat route and navigating too rapidly
-        if (location.pathname.includes('/chat')) {
+        if (location.pathname.includes('/projects/') && location.pathname.includes('/chat')) {
             navigationAttemptRef.current += 1;
             
             // If there are too many navigations in a short period, block it
