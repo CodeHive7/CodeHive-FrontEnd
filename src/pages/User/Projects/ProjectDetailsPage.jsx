@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { fetchProjectById, applyForPosition } from "../../../services/userService/UserService.js";
-import { ArrowLeft, Globe, User, Briefcase, CheckCircle, Users, Calendar, Loader2, Clock, XCircle } from "lucide-react";
+import { 
+  ArrowLeft, Globe, User, Briefcase, CheckCircle, Users, Calendar, 
+  Loader2, Clock, XCircle, ChevronRight, Shield, Code, GitBranch, 
+  Grid, Layers, ExternalLink, MessageSquare, Share2, AlertTriangle
+} from "lucide-react";
 import { getAccessToken } from "../../../services/Auth/tokenService.js";
 import Swal from "sweetalert2";
 import { jwtDecode } from "jwt-decode";
@@ -110,10 +114,21 @@ export default function ProjectDetailsPage() {
             Swal.fire({
                 title: "Answer the Questions",
                 html: `
-                    ${hasQuestion1 ? `<p class="text-left font-semibold">${project.question1}</p>
-                    <input id="answer1" class="swal2-input" placeholder="Your answer" required>` : ''}
-                    ${hasQuestion2 ? `<p class="text-left font-semibold">${project.question2}</p>
-                    <input id="answer2" class="swal2-input" placeholder="Your answer" required>` : ''}
+                    <div class="mb-4">
+                        ${hasQuestion1 ? `
+                            <div class="mb-3">
+                                <p class="text-left font-semibold mb-2 text-yellow-400">${project.question1}</p>
+                                <textarea id="answer1" class="swal2-textarea w-full bg-gray-800 text-white border-gray-700" 
+                                    placeholder="Your answer" rows="3" required></textarea>
+                            </div>` : ''}
+                        ${hasQuestion2 ? `
+                            <div>
+                                <p class="text-left font-semibold mb-2 text-yellow-400">${project.question2}</p>
+                                <textarea id="answer2" class="swal2-textarea w-full bg-gray-800 text-white border-gray-700" 
+                                    placeholder="Your answer" rows="3" required></textarea>
+                            </div>` : ''}
+                    </div>
+                    <p class="text-left text-sm text-gray-400 mb-2">These answers will be shared with the project creator.</p>
                 `,
                 showCancelButton: true,
                 confirmButtonText: "Submit Application",
@@ -123,6 +138,12 @@ export default function ProjectDetailsPage() {
                 color: "#ffffff",
                 confirmButtonColor: "#EAB308",
                 cancelButtonColor: "#4B5563",
+                customClass: {
+                    container: 'custom-swal-container',
+                    popup: 'custom-swal-popup',
+                    confirmButton: 'custom-swal-confirm',
+                    cancelButton: 'custom-swal-cancel'
+                },
                 preConfirm: () => {
                     const answer1 = document.getElementById("answer1")?.value.trim() || "";
                     const answer2 = document.getElementById("answer2")?.value.trim() || "";
@@ -142,31 +163,49 @@ export default function ProjectDetailsPage() {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-[#0A0B14] flex flex-col items-center justify-center">
-                <Loader2 className="w-12 h-12 text-yellow-500 animate-spin mb-4" />
-                <p className="text-gray-400">Loading project details...</p>
-            </div>
-        );
-    }
-
-    if (!project) {
-        return (
-            <div className="min-h-screen bg-[#0A0B14] flex flex-col items-center justify-center">
-                <p className="text-gray-400 text-center text-lg">Project not found.</p>
-            </div>
-        );
-    }
-
-    // Get stage badge color
-    const getStageBadgeColor = (stage) => {
+    // Get stage badge color and icon
+    const getStageInfo = (stage) => {
         switch(stage) {
-            case "NOT_STARTED": return "bg-blue-500";
-            case "IN_DEVELOPMENT": return "bg-yellow-500";
-            case "FINISHED": return "bg-green-500";
-            case "NEEDS_FIXES": return "bg-red-500";
-            default: return "bg-purple-500";
+            case "NOT_STARTED": 
+                return { 
+                    color: "bg-blue-600", 
+                    textColor: "text-blue-100",
+                    borderColor: "border-blue-500/30", 
+                    bgColor: "bg-blue-500/10",
+                    icon: <Layers className="w-4 h-4 mr-1.5" /> 
+                };
+            case "IN_DEVELOPMENT": 
+                return { 
+                    color: "bg-amber-600", 
+                    textColor: "text-amber-100",
+                    borderColor: "border-amber-500/30", 
+                    bgColor: "bg-amber-500/10",
+                    icon: <GitBranch className="w-4 h-4 mr-1.5" /> 
+                };
+            case "FINISHED": 
+                return { 
+                    color: "bg-green-600", 
+                    textColor: "text-green-100",
+                    borderColor: "border-green-500/30", 
+                    bgColor: "bg-green-500/10",
+                    icon: <CheckCircle className="w-4 h-4 mr-1.5" /> 
+                };
+            case "NEEDS_FIXES": 
+                return { 
+                    color: "bg-red-600", 
+                    textColor: "text-red-100",
+                    borderColor: "border-red-500/30", 
+                    bgColor: "bg-red-500/10",
+                    icon: <Grid className="w-4 h-4 mr-1.5" /> 
+                };
+            default: 
+                return { 
+                    color: "bg-purple-600", 
+                    textColor: "text-purple-100",
+                    borderColor: "border-purple-500/30", 
+                    bgColor: "bg-purple-500/10",
+                    icon: <Code className="w-4 h-4 mr-1.5" /> 
+                };
         }
     };
 
@@ -181,115 +220,231 @@ export default function ProjectDetailsPage() {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#0A0B14] flex flex-col items-center justify-center">
+                <div className="relative">
+                    <div className="absolute inset-0 rounded-full bg-yellow-500/20 animate-ping"></div>
+                    <Loader2 className="w-12 h-12 text-yellow-500 animate-spin relative z-10" />
+                </div>
+                <p className="text-gray-400 mt-4 animate-pulse">Loading project details...</p>
+            </div>
+        );
+    }
+
+    if (!project) {
+        return (
+            <div className="min-h-screen bg-[#0A0B14] flex flex-col items-center justify-center p-4">
+                <div className="bg-[#12141F] rounded-xl border border-gray-800 p-8 max-w-md w-full text-center shadow-lg">
+                    <div className="bg-gray-800/50 rounded-full p-4 w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                        <AlertTriangle className="h-10 w-10 text-yellow-500" />
+                    </div>
+                    <h2 className="text-xl font-bold text-white mb-2">Project Not Found</h2>
+                    <p className="text-gray-400 mb-6">The project you're looking for doesn't exist or has been removed.</p>
+                    <button 
+                        onClick={() => navigate('/user')}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded-md font-medium transition-colors inline-flex items-center"
+                    >
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Go Back Home
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    const stageInfo = getStageInfo(project.stage);
+
     return (
         <div className="min-h-screen bg-[#0A0B14] text-white">
             {/* Header */}
-            <header className="sticky top-0 z-40 border-b border-gray-800 bg-[#0A0B14]">
-                <div className="flex h-16 items-center justify-between px-6">
-                    <h1 className="text-3xl font-bold text-yellow-400">🐝 Hive Details</h1>
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="flex items-center text-yellow-400 hover:text-yellow-300 transition cursor-pointer"
-                    >
-                        <ArrowLeft className="w-5 h-5 mr-2" /> Return
-                    </button>
+            <header className="sticky top-0 z-40 border-b border-gray-800 bg-[#0A0B14]/90 backdrop-blur-sm shadow-md">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6">
+                    <div className="flex h-16 items-center justify-between">
+                        <Link to="/user" className="text-2xl font-bold text-white flex items-center">
+                            <span className="text-yellow-400">Code</span>Hive
+                        </Link>
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="flex items-center text-gray-300 hover:text-yellow-400 transition-colors bg-gray-800 hover:bg-gray-700 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+                        >
+                            <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                        </button>
+                    </div>
                 </div>
             </header>
 
             {/* Main Content */}
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
-                <div className="honeycomb-cell group bg-gradient-to-br from-[#12141F] to-[#191c2e] rounded-lg overflow-hidden shadow-lg border-l-2 border-r-2 border-yellow-500/30 transform transition-all duration-300">
-                    {/* Hexagonal design elements */}
-                    <div className="absolute -left-3 -top-3 w-12 h-12 bg-yellow-500/20 rounded-full"></div>
-                    <div className="absolute -right-4 -bottom-4 w-14 h-14 bg-yellow-500/10 rounded-full"></div>
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+                <div className="bg-gradient-to-br from-[#12141F] to-[#191c2e] rounded-xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/30 transition-colors duration-300">
+                    {/* Project Header Section with enhanced visuals */}
+                    <div className="relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-transparent opacity-60"></div>
+                        <div className="relative z-10 p-6 sm:p-8">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div>
+                                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white group-hover:text-yellow-300 transition-colors">
+                                        {project.name}
+                                    </h1>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        <span className="bg-gray-800/80 text-gray-300 px-3 py-1 rounded-full text-xs font-medium inline-flex items-center">
+                                            <Code className="w-3 h-3 mr-1.5" />
+                                            {project.category || "Uncategorized"}
+                                        </span>
+                                        <span className={`${stageInfo.bgColor} ${stageInfo.textColor} px-3 py-1 rounded-full text-xs font-medium inline-flex items-center border ${stageInfo.borderColor}`}>
+                                            {stageInfo.icon}
+                                            {getStageDisplayName(project.stage)}
+                                        </span>
+                                        {project.status === "ACCEPTED" && (
+                                            <span className="inline-flex items-center text-green-400 bg-green-900/20 px-3 py-1 rounded-full text-xs font-medium border border-green-600/30">
+                                                <CheckCircle className="w-3 h-3 mr-1.5" /> Active
+                                            </span>
+                                        )}
+                                        {project.status === "PENDING" && (
+                                            <span className="inline-flex items-center text-yellow-400 bg-yellow-900/20 px-3 py-1 rounded-full text-xs font-medium border border-yellow-600/30">
+                                                <Clock className="w-3 h-3 mr-1.5" /> Pending
+                                            </span>
+                                        )}
+                                        {project.status === "REJECTED" && (
+                                            <span className="inline-flex items-center text-red-400 bg-red-900/20 px-3 py-1 rounded-full text-xs font-medium border border-red-600/30">
+                                                <XCircle className="w-3 h-3 mr-1.5" /> Rejected
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button 
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(window.location.href);
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'bottom-end',
+                                                icon: 'success',
+                                                title: 'Link copied to clipboard!',
+                                                showConfirmButton: false,
+                                                timer: 2000,
+                                                background: '#1C1F2E',
+                                                color: '#ffffff'
+                                            });
+                                        }}
+                                        className="p-2 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors"
+                                        aria-label="Share project"
+                                    >
+                                        <Share2 className="w-5 h-5 text-gray-400 hover:text-yellow-400" />
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            // Would be connected to message function in a real app
+                                            Swal.fire({
+                                                icon: 'info',
+                                                title: 'Contact Creator',
+                                                text: `Send a message to ${project.creatorName} about this project.`,
+                                                background: '#1C1F2E',
+                                                color: '#ffffff',
+                                                confirmButtonColor: '#EAB308',
+                                                showCancelButton: true
+                                            });
+                                        }}
+                                        className="p-2 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors"
+                                        aria-label="Message creator"
+                                    >
+                                        <MessageSquare className="w-5 h-5 text-gray-400 hover:text-yellow-400" />
+                                    </button>
+                                </div>
+                            </div>
 
-                    {/* Stage badge */}
-                    <div className={`absolute top-0 right-0 ${getStageBadgeColor(project.stage)} px-3 py-1 text-black text-xs font-bold rounded-bl-lg`}>
-                        {getStageDisplayName(project.stage)}
+                            {/* Project Metadata with improved layout */}
+                            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 bg-[#0D101B]/50 p-4 rounded-lg border border-gray-800/50">
+                                <div className="flex items-center">
+                                    <div className="bg-yellow-500/10 rounded-full p-2 mr-3">
+                                        <User className="w-5 h-5 text-yellow-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500">Created by</p>
+                                        <p className="font-medium text-white">{project.creatorName}</p>
+                                    </div>
+                                </div>
+                                
+                                {project.createdAt && (
+                                    <div className="flex items-center">
+                                        <div className="bg-yellow-500/10 rounded-full p-2 mr-3">
+                                            <Calendar className="w-5 h-5 text-yellow-400" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-500">Created on</p>
+                                            <p className="font-medium text-white">
+                                                {new Date(project.createdAt).toLocaleDateString(undefined, {
+                                                    year: 'numeric',
+                                                    month: 'short',
+                                                    day: 'numeric'
+                                                })}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                <div className="flex items-center">
+                                    <div className="bg-yellow-500/10 rounded-full p-2 mr-3">
+                                        <Users className="w-5 h-5 text-yellow-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500">Team size</p>
+                                        <p className="font-medium text-white">
+                                            {project.positions.reduce((acc, pos) => acc + pos.quantity, 0)} positions
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="p-6">
-                        {/* Header */}
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <h3 className="text-2xl font-bold text-yellow-400 group-hover:text-yellow-300 transition-colors">
-                                    {project.name}
-                                </h3>
-                                <p className="text-gray-400 text-sm mt-1">
-                                    <span className="bg-gray-800 px-2 py-1 rounded text-xs">
-                                        {project.category || "Uncategorized"}
-                                    </span>
-                                </p>
-                            </div>
-
-                            <div className="flex items-center gap-2 text-sm">
-                                {project.status === "ACCEPTED" && (
-                                    <span className="flex items-center text-green-400 bg-green-900/20 px-2 py-1 rounded-lg border border-green-600/30">
-                                        <CheckCircle className="w-4 h-4 mr-1" /> Active
-                                    </span>
-                                )}
-                                {project.status === "PENDING" && (
-                                    <span className="flex items-center text-yellow-400 bg-yellow-900/20 px-2 py-1 rounded-lg border border-yellow-600/30">
-                                        <Clock className="w-4 h-4 mr-1" /> Pending
-                                    </span>
-                                )}
-                                {project.status === "REJECTED" && (
-                                    <span className="flex items-center text-red-400 bg-red-900/20 px-2 py-1 rounded-lg border border-red-600/30">
-                                        <XCircle className="w-4 h-4 mr-1" /> Rejected
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Project info */}
-                        <div className="flex justify-between items-center mt-4 text-sm">
-                            <div className="flex items-center">
-                                <User className="w-4 h-4 text-yellow-400 mr-1" />
-                                <span>Created by <span className="font-medium text-white">{project.creatorName}</span></span>
-                            </div>
-                            {project.createdAt && (
-                                <div className="flex items-center text-gray-400">
-                                    <Calendar className="w-4 h-4 mr-1" />
-                                    <span>{new Date(project.createdAt).toLocaleDateString()}</span>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Description */}
-                        <div className="mt-5 text-gray-300">
-                            <h4 className="text-sm font-semibold text-yellow-400 mb-2 flex items-center">
-                                <span className="mr-2">Description</span>
+                    {/* Description Section with improved typography and spacing */}
+                    <div className="px-6 sm:px-8 py-6">
+                        <div className="mb-8">
+                            <h3 className="text-lg font-semibold text-yellow-400 mb-4 flex items-center">
+                                <span className="mr-2">About this Project</span>
                                 <div className="h-px bg-yellow-500/30 flex-grow"></div>
-                            </h4>
-                            <p className="bg-[#181A28]/50 p-4 rounded-md border border-yellow-500/10">
-                                {project.description}
-                            </p>
+                            </h3>
+                            <div className="bg-[#0D101B]/70 p-5 rounded-lg border border-gray-800 text-gray-300 leading-relaxed">
+                                {project.description.split('\n').map((paragraph, i) => (
+                                    <p key={i} className={i > 0 ? 'mt-4' : ''}>
+                                        {paragraph}
+                                    </p>
+                                ))}
+                            </div>
                         </div>
 
-                        {/* Website Link */}
+                        {/* Project Link with enhanced visual */}
                         {project.websiteUrl && (
-                            <div className="mt-4">
-                                <h4 className="text-sm font-semibold text-yellow-400 mb-2 flex items-center">
-                                    <span className="mr-2">Project Link</span>
+                            <div className="mb-8">
+                                <h3 className="text-lg font-semibold text-yellow-400 mb-4 flex items-center">
+                                    <span className="mr-2">Project Resources</span>
                                     <div className="h-px bg-yellow-500/30 flex-grow"></div>
-                                </h4>
+                                </h3>
                                 <a
                                     href={project.websiteUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center bg-[#181A28]/50 p-3 rounded-md border border-yellow-500/10 text-yellow-400 hover:bg-yellow-500/10 transition-colors"
+                                    className="flex items-center bg-[#0D101B]/70 p-4 rounded-lg border border-gray-800 text-yellow-400 hover:border-yellow-500/50 hover:bg-yellow-500/5 transition-all group"
                                 >
-                                    <Globe className="w-4 h-4 mr-2" />
-                                    {project.websiteUrl}
+                                    <div className="bg-yellow-500/10 rounded-full p-2 mr-3">
+                                        <Globe className="w-5 h-5 text-yellow-400" />
+                                    </div>
+                                    <div className="flex-grow">
+                                        <div className="text-sm text-gray-400">Project Website</div>
+                                        <div className="text-yellow-400 font-medium truncate max-w-lg">
+                                            {project.websiteUrl}
+                                        </div>
+                                    </div>
+                                    <ExternalLink className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
                                 </a>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Positions Section */}
-                <div className="mt-8">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6 text-center">
+                {/* Positions Section with enhanced cards */}
+                <div className="mt-12">
+                    <h2 className="text-2xl font-bold text-white mb-8 text-center">
                         <span className="relative inline-block">
                             <span className="relative z-10">Available Positions</span>
                             <span className="absolute bottom-1 left-0 w-full h-3 bg-yellow-500 opacity-20 rounded"></span>
@@ -297,75 +452,141 @@ export default function ProjectDetailsPage() {
                     </h2>
 
                     {project.positions.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {project.positions.map((position) => (
                                 <div
                                     key={position.id}
-                                    className="honeycomb-cell group bg-gradient-to-br from-[#12141F] to-[#191c2e] rounded-lg overflow-hidden shadow-lg border-l-2 border-r-2 border-yellow-500/30 transform transition-all duration-300"
+                                    className="group bg-gradient-to-br from-[#12141F] to-[#191c2e] rounded-lg overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/30 transform transition-all duration-300 hover:scale-[1.03] hover:shadow-xl"
                                 >
-                                    {/* Hexagonal design elements */}
-                                    <div className="absolute -left-3 -top-3 w-8 h-8 bg-yellow-500/20 rounded-full"></div>
-                                    <div className="absolute -right-3 -bottom-3 w-8 h-8 bg-yellow-500/10 rounded-full"></div>
-
-                                    <div className="p-5">
-                                        <div className="flex justify-between items-center mb-3">
-                                            <h4 className="text-xl font-bold text-white">{position.roleName}</h4>
-                                            <span className={`text-xs px-2 py-1 rounded-full ${
-                                                position.quantity > 0 
-                                                    ? 'bg-yellow-500/20 text-yellow-400' 
-                                                    : 'bg-gray-800 text-gray-400'
-                                            }`}>
-                                                {position.quantity} {position.quantity === 1 ? 'spot' : 'spots'} left
-                                            </span>
-                                        </div>
-
-                                        <div className="flex items-center mb-4 text-sm">
-                                            <div className="bg-yellow-500/10 rounded-full p-1.5">
-                                                <Briefcase className="w-4 h-4 text-yellow-400" />
+                                    {/* Position visual enhancement with spotlight effect */}
+                                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(234,179,8,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                    
+                                    <div className="p-6 relative">
+                                        {/* Position Header with improved layout */}
+                                        <div className="mb-4">
+                                            <div className="flex justify-between items-start">
+                                                <h3 className="text-xl font-bold text-white group-hover:text-yellow-300 transition-colors">
+                                                    {position.roleName}
+                                                </h3>
+                                                <span className={`text-xs flex items-center px-2 py-1 rounded-full 
+                                                    ${position.quantity > 0 
+                                                        ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' 
+                                                        : 'bg-gray-800 text-gray-400 border border-gray-700'
+                                                    }`}
+                                                >
+                                                    {position.quantity > 0 
+                                                        ? <CheckCircle className="w-3 h-3 mr-1" /> 
+                                                        : <XCircle className="w-3 h-3 mr-1" />
+                                                    }
+                                                    {position.quantity} {position.quantity === 1 ? 'spot' : 'spots'} left
+                                                </span>
                                             </div>
-                                            <span className="ml-2 text-gray-300">
-                                                {position.paid ? "Paid Position" : "Volunteer Position"}
-                                            </span>
                                         </div>
 
+                                        {/* Position Details with improved visuals */}
+                                        <div className="space-y-4 mb-6">
+                                            <div className="flex items-center text-sm">
+                                                <div className="bg-yellow-500/10 rounded-full p-1.5 mr-2">
+                                                    <Briefcase className="w-4 h-4 text-yellow-400" />
+                                                </div>
+                                                <span className={position.paid ? "text-green-400" : "text-gray-300"}>
+                                                    {position.paid ? "Paid Position" : "Volunteer Position"}
+                                                </span>
+                                            </div>
+                                            
+                                            <div className="flex items-center text-sm">
+                                                <div className="bg-yellow-500/10 rounded-full p-1.5 mr-2">
+                                                    <Shield className="w-4 h-4 text-yellow-400" />
+                                                </div>
+                                                <span className="text-gray-300">
+                                                    Requires application review
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Apply Button with enhanced states */}
                                         <button
                                             onClick={() => handleApply(position.id)}
-                                            disabled={position.quantity === 0}
-                                            className={`w-full mt-3 px-4 py-2.5 rounded-md font-medium transition-all ${
-                                                position.quantity === 0 
-                                                    ? "bg-gray-700 text-gray-400 cursor-not-allowed" 
-                                                    : "bg-yellow-500 hover:bg-yellow-600 text-black"
-                                            }`}
+                                            disabled={position.quantity === 0 || project.creatorName === loggedInUsername}
+                                            className={`w-full px-4 py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-center
+                                                ${position.quantity === 0 
+                                                    ? "bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700" 
+                                                    : project.creatorName === loggedInUsername
+                                                        ? "bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700"
+                                                        : "bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 text-black shadow-md hover:shadow-lg border border-transparent"
+                                                }`}
                                         >
-                                            {position.quantity === 0 ? "No Spots Available" : "Apply Now"}
+                                            {position.quantity === 0 
+                                                ? <XCircle className="w-4 h-4 mr-2" /> 
+                                                : project.creatorName === loggedInUsername
+                                                    ? <User className="w-4 h-4 mr-2" />
+                                                    : <CheckCircle className="w-4 h-4 mr-2" />
+                                            }
+                                            {position.quantity === 0 
+                                                ? "No Spots Available" 
+                                                : project.creatorName === loggedInUsername
+                                                    ? "Your Project"
+                                                    : "Apply Now"
+                                            }
+                                            {!(position.quantity === 0 || project.creatorName === loggedInUsername) && (
+                                                <ChevronRight className="w-4 h-4 ml-1 group-hover:ml-2 transition-all" />
+                                            )}
                                         </button>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center p-8 bg-gradient-to-br from-[#12141F] to-[#191c2e] rounded-lg border-l-2 border-r-2 border-yellow-500/30">
-                            <p className="text-gray-400">No positions available for this project at this time.</p>
+                        <div className="text-center p-12 bg-gradient-to-br from-[#12141F] to-[#191c2e] rounded-lg border border-gray-800">
+                            <div className="inline-block p-6 bg-gray-800/50 rounded-full mb-4">
+                                <Users className="h-10 w-10 text-yellow-500/50" />
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-300 mb-2">No Positions Available</h3>
+                            <p className="text-gray-400 max-w-md mx-auto">
+                                There are currently no positions available for this project. Check back later or explore other projects.
+                            </p>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Honeycomb decoration (visible on larger screens) */}
-            <div className="hidden lg:block absolute -right-20 top-1/3 opacity-10 pointer-events-none">
-                <div className="honeycomb-decor w-48 h-48 border-2 border-yellow-500 rotate-12"></div>
+            {/* Honeycomb decoration (visible on larger screens) with improved styling */}
+            <div className="hidden lg:block fixed top-1/4 right-0 opacity-10 pointer-events-none">
+                <div className="w-64 h-64 border-2 border-yellow-500/20 rounded-full"></div>
             </div>
-            <div className="hidden lg:block absolute -left-16 bottom-1/4 opacity-5 pointer-events-none">
-                <div className="honeycomb-decor w-36 h-36 border-2 border-yellow-500 -rotate-12"></div>
+            <div className="hidden lg:block fixed bottom-1/4 left-0 opacity-10 pointer-events-none">
+                <div className="w-48 h-48 border-2 border-yellow-500/20 rounded-full"></div>
             </div>
 
-            {/* Background pattern */}
-            <div className="fixed inset-0 opacity-3 pointer-events-none z-[-1]"
+            {/* Background pattern with subtle animation */}
+            <div className="fixed inset-0 opacity-5 pointer-events-none z-[-1] animate-pulse"
                 style={{
-                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath fill='%23EAB308' opacity='0.05' d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100'/%3E%3C/svg%3E\")",
-                    backgroundSize: "112px 200px"
+                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath fill='%23EAB308' opacity='0.1' d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100'/%3E%3C/svg%3E\")",
+                    backgroundSize: "112px 200px",
+                    animationDuration: "10s"
                 }}>
             </div>
+
+            {/* Custom styling for SweetAlert */}
+            <style>{`
+                .custom-swal-popup {
+                    background: #1C1F2E !important;
+                    border: 1px solid #2D3748 !important;
+                    border-radius: 0.75rem !important;
+                }
+                .custom-swal-confirm {
+                    background: #EAB308 !important;
+                    color: black !important;
+                }
+                .custom-swal-cancel {
+                    background: #4B5563 !important;
+                }
+                .swal2-textarea {
+                    background-color: #1A202C !important;
+                    color: white !important;
+                    border-color: #2D3748 !important;
+                }
+            `}</style>
         </div>
     );
 }
