@@ -9,6 +9,8 @@ import UserRoutes from "./userRoutes/UserRoutes.jsx";
 import VerifyEmail from "../pages/User/email/VerifyEmail.jsx";
 import ChatStabilizer
  from "../pages/User/chat/components/ChatStabilizer.jsx";
+import OAuthCallback from "../components/OAuth/OAuthCallback.jsx";
+
 const AppRoutes = () => {
     return (
         <Routes>
@@ -22,6 +24,7 @@ const AppRoutes = () => {
             <Route path="/user/projects/:projectId/chat" element={<ChatStabilizer/>}/>
             <Route path="/projects/:projectId/chat" element={<ChatStabilizer/>}/>
             <Route path="/verify-email" element={<VerifyEmail/>}/>
+            <Route path="/oauth-callback" element={<OAuthCallback/>}/>
         </Routes>
     );
 };
