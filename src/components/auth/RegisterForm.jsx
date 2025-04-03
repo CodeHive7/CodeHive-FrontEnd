@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { registerUser } from "../../services/Auth/authService.js";
+import { CheckCircle, Mail, AlertCircle } from "lucide-react";
 
 const RegisterForm = () => {
-    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: "",
         email: "",
@@ -13,7 +13,8 @@ const RegisterForm = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(null);
+    const [isRegistered, setIsRegistered] = useState(false);
+    const [registeredEmail, setRegisteredEmail] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,9 +30,13 @@ const RegisterForm = () => {
                 fullName: formData.fullName,
                 password: formData.password,
             });
-            setSuccess(response);
+            
+            // Store the registered email and set success state
+            setRegisteredEmail(formData.email);
+            setIsRegistered(true);
             setError(null);
-            navigate("/login");
+            
+            // Reset form data
             setFormData({
                 username: "",
                 email: "",
@@ -46,6 +51,60 @@ const RegisterForm = () => {
         }
     };
 
+    // If registration was successful, show the verification instructions
+    if (isRegistered) {
+        return (
+            <div className="w-full max-w-md space-y-8">
+                <div className="space-y-4 text-center">
+                    <img src="/images/beelogo.png" alt="CodeHive Logo" className="w-16 mx-auto" />
+                    <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
+                    <h1 className="text-3xl font-bold text-green-500">Registration Successful!</h1>
+                </div>
+
+                <div className="bg-[#12141F]/80 border border-green-500/30 rounded-xl p-6 text-center">
+                    <Mail className="w-10 h-10 text-yellow-400 mx-auto mb-4" />
+                    <h2 className="text-xl font-medium text-white mb-2">Email Verification Required</h2>
+                    <p className="text-gray-300 mb-4">
+                        We've sent a verification link to:
+                    </p>
+                    <p className="text-yellow-400 font-semibold text-lg mb-4 break-all">
+                        {registeredEmail}
+                    </p>
+                    <div className="border-t border-gray-700 pt-4 mt-4">
+                        <h3 className="font-medium text-yellow-400 mb-2">Next steps:</h3>
+                        <ol className="text-left space-y-2 text-gray-300">
+                            <li className="flex items-start">
+                                <span className="bg-yellow-500 text-black rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5">1</span>
+                                Check your email inbox
+                            </li>
+                            <li className="flex items-start">
+                                <span className="bg-yellow-500 text-black rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5">2</span>
+                                Click the verification link in the email
+                            </li>
+                            <li className="flex items-start">
+                                <span className="bg-yellow-500 text-black rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5">3</span>
+                                Return here to log in after verification
+                            </li>
+                        </ol>
+                    </div>
+                    <div className="mt-6">
+                        <Link 
+                            to="/login" 
+                            className="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-medium rounded-md inline-block"
+                        >
+                            Proceed to Login
+                        </Link>
+                    </div>
+                </div>
+                
+                <div className="text-center text-sm text-gray-400">
+                    <p className="mb-1">Didn't receive the email?</p>
+                    <p>Check your spam folder or <button className="text-yellow-500 hover:text-yellow-400 underline" onClick={() => setIsRegistered(false)}>try signing up again</button></p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="w-full max-w-md space-y-8">
             <div className="space-y-4 text-center">
@@ -56,8 +115,12 @@ const RegisterForm = () => {
                 <p className="text-gray-400">Sign up and become part of the buzzing community.</p>
             </div>
 
-            {error && <p className="text-red-500 text-center">{error}</p>}
-            {success && <p className="text-green-500 text-center">{success}</p>}
+            {error && (
+                <div className="bg-red-900/20 border border-red-500/50 rounded-md p-3 flex items-center">
+                    <AlertCircle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0" />
+                    <p className="text-red-500 text-sm">{error}</p>
+                </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">
@@ -122,6 +185,14 @@ const RegisterForm = () => {
                         />
                     </div>
                 </div>
+
+                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-md p-3 flex items-center">
+                    <Mail className="h-5 w-5 text-yellow-500 mr-2 flex-shrink-0" />
+                    <p className="text-yellow-500 text-sm">
+                        You'll need to verify your email address before logging in.
+                    </p>
+                </div>
+
                 <button type="submit" className="w-full h-12 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-md transition-transform transform hover:scale-105" disabled={isLoading}>
                     {isLoading ? (
                         <div className="flex items-center justify-center">
@@ -148,9 +219,9 @@ const RegisterForm = () => {
 
             <p className="text-center text-sm text-gray-500">
                 Already part of the hive?{" "}
-                <a href="/login" className="text-yellow-500 hover:text-yellow-400 font-semibold">
+                <Link to="/login" className="text-yellow-500 hover:text-yellow-400 font-semibold">
                     Sign In
-                </a>
+                </Link>
             </p>
         </div>
     );
