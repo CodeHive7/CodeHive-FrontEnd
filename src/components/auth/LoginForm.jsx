@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/Auth/AuthContext.jsx";
 import axios from "axios";
+import OAuthButton from "../OAuth/OAuthButton.jsx";
 
 const LoginForm = () => {
     const [formData, setFormData] = useState({
@@ -13,7 +14,7 @@ const LoginForm = () => {
     const [needsVerification, setNeedsVerification] = useState(false);
     const [userEmail, setUserEmail] = useState("");
     const navigate = useNavigate();
-    const { loginHandler } = useAuth();
+    const { loginHandler, loginWithGithub, isLoginWithGithubLoading} = useAuth();
 
     async function onSubmit(event) {
         event.preventDefault();
@@ -158,7 +159,7 @@ const LoginForm = () => {
                 <button
                     type="submit"
                     className="w-full h-12 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-md transition-transform transform hover:scale-105"
-                    disabled={isLoading}
+                    disabled={isLoading || isLoginWithGithubLoading}
                 >
                     {isLoading ? (
                         <div className="flex items-center justify-center">
@@ -191,10 +192,16 @@ const LoginForm = () => {
                     </div>
                 </div>
 
+                <OAuthButton
+                    provider={"GitHub"}
+                    onClick={loginWithGithub}
+                    isLoading={isLoginWithGithubLoading}
+                />
+
                 <button
                     type="button"
                     className="w-full h-12 bg-black text-yellow-400 border border-yellow-500 hover:bg-yellow-500 hover:text-black rounded-md flex items-center justify-center transition-transform transform hover:scale-105"
-                    disabled={isLoading}
+                    disabled={isLoading || isLoginWithGithubLoading}
                 >
                     <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                         <path
