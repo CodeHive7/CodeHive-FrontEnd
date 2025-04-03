@@ -41,4 +41,20 @@ export const logout = async () => {
     } finally {
         clearTokens();
     }
-}
+};
+
+export const initiateGithubOAuth = () => {
+    const currentHostname = window.location.origin;
+
+    window.location.href = `http://localhost:8082/oauth2/authorization/github?redirect_uri=${currentHostname}/oauth-callback`;
+};
+
+export const handleOAuthCallback = async () => {
+    try {
+        const { data } = await apiClient.get(`/auth/oauth2/success`, { withCredentials: true });
+        return data;
+    } catch (error) {
+        console.error("Error handling OAuth callback:", error);
+        throw error;
+    }
+};
