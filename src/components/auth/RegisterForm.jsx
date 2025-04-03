@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { registerUser } from "../../services/Auth/authService.js";
 import { CheckCircle, Mail, AlertCircle } from "lucide-react";
+import { useAuth } from "../../context/Auth/AuthContext.jsx";
+import OAuthButton from "../OAuth/OAuthButton.jsx";
 
 const RegisterForm = () => {
     const [formData, setFormData] = useState({
@@ -15,6 +17,7 @@ const RegisterForm = () => {
     const [error, setError] = useState(null);
     const [isRegistered, setIsRegistered] = useState(false);
     const [registeredEmail, setRegisteredEmail] = useState("");
+    const { loginWithGithub, isLoginWithGithubLoading } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -122,6 +125,24 @@ const RegisterForm = () => {
                 </div>
             )}
 
+            {/* Github OAuth button */}
+            <div className="space-y-4">
+                <OAuthButton
+                    provider="Github"
+                    onClick={loginWithGithub}
+                    isLoading={isLoginWithGithubLoading}
+                />
+
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-800" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-black px-2 text-yellow-400">Or register with email</span>
+                    </div>
+                </div>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">
                     <div className="space-y-2">
@@ -193,7 +214,7 @@ const RegisterForm = () => {
                     </p>
                 </div>
 
-                <button type="submit" className="w-full h-12 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-md transition-transform transform hover:scale-105" disabled={isLoading}>
+                <button type="submit" className="w-full h-12 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-md transition-transform transform hover:scale-105" disabled={isLoading || isLoginWithGithubLoading}>
                     {isLoading ? (
                         <div className="flex items-center justify-center">
                             <svg
