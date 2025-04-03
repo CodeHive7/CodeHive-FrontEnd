@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { login, refreshToken, logout } from "../../services/Auth/authService.js";
+import { login as loginService, refreshToken, logout as logoutService } from "../../services/Auth/authService.js";
 import { getAccessToken, clearTokens } from "../../services/Auth/tokenService.js";
 import { jwtDecode } from "jwt-decode";
 
@@ -9,7 +9,12 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [isLoginWithGithubLoading, setIsLoginWithGithubLoading] = useState(false);
     const navigate = useNavigate();
+
+    // Compute isAuthenticated from user
+    const isAuthenticated = !!user;
 
     useEffect(() => {
         const initializeAuth = async () => {
@@ -38,7 +43,7 @@ export const AuthProvider = ({ children }) => {
 
     const loginHandler = async (credentials) => {
         try {
-            const tokens = await login(credentials);
+            const tokens = await loginService(credentials);
             const decodedUser = jwtDecode(tokens.accessToken);
 
             const userData = {
@@ -62,15 +67,49 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const handleLogout = async () => {
-       await logout();
+    const logoutHandler = async () => {
+       await logoutService();
        setUser(null);
        clearTokens();
        navigate("/login");
     };
 
+    const initiateGithubLogin = () => {
+        window.location.href = 'http://localhost:8082/oauth2/authorization/github';
+    };
+
+    const loginWithGithub = async () => {
+        try {
+            setIsLoginWithGithubLoading(true);
+            initiateGithubLogin();
+            // Note: The actual authentication will be handled after redirect
+            return true;
+        } catch (error) {
+            setError(error.response?.data || "Failed to authenticate with GitHub");
+            return false;
+        } finally {
+            // This won't execute immediately since we're redirecting
+            setIsLoginWithGithubLoading(false);
+        }
+    };
+
+    // Create context value using your original function names
+    const contextValue = {
+        currentUser: user,        // Keep currentUser for compatibility
+        user,        
+        setUser,             // Also provide user for newer components
+        isAuthenticated,          
+        isLoading: loading,       // Keep isLoading for compatibility
+        loading,                  // Also provide loading for newer components 
+        error,
+        loginHandler,             // Keep original name
+        logoutHandler,            // Keep original name
+        loginWithGithub,
+        isLoginWithGithubLoading,
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loginHandler, logoutHandler: handleLogout, loading }}>
+        <AuthContext.Provider value={contextValue}>
             {!loading && children}
         </AuthContext.Provider>
     );
