@@ -6,6 +6,7 @@ import AdminRoutes from "./adminRoutes/AdminRoutes.jsx";
 import UserHomePage from "../pages/User/UserHomePage.jsx";
 import ProjectDetailsPage from "../pages/User/Projects/ProjectDetailsPage.jsx";
 import UserRoutes from "./userRoutes/UserRoutes.jsx";
+import VerifyEmail from "../pages/User/email/VerifyEmail.jsx";
 import ChatStabilizer
  from "../pages/User/chat/components/ChatStabilizer.jsx";
 const AppRoutes = () => {
@@ -20,6 +21,7 @@ const AppRoutes = () => {
             <Route path="/projects/:projectId" element={<ProjectDetailsPage/>}/>
             <Route path="/user/projects/:projectId/chat" element={<ChatStabilizer/>}/>
             <Route path="/projects/:projectId/chat" element={<ChatStabilizer/>}/>
+            <Route path="/verify-email" element={<VerifyEmail/>}/>
         </Routes>
     );
 };

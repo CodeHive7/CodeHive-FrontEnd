@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/Auth/AuthContext.jsx";
+import axios from "axios";
 
 const LoginForm = () => {
     const [formData, setFormData] = useState({
@@ -9,21 +10,99 @@ const LoginForm = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [needsVerification, setNeedsVerification] = useState(false);
+    const [userEmail, setUserEmail] = useState("");
     const navigate = useNavigate();
     const { loginHandler } = useAuth();
 
     async function onSubmit(event) {
         event.preventDefault();
         setIsLoading(true);
+        setNeedsVerification(false);
 
         try {
             await loginHandler(formData);
             navigate("/");
         } catch (err) {
-            setError(err.response?.data?.message || "Invalid credentials. Please try again.");
+            if (err.response?.status === 403 && 
+                (err.response?.data?.message?.includes("email") ||
+                err.response?.data?.message?.includes("verify"))) {
+                    setNeedsVerification(true);
+                    setUserEmail(err.response?.data?.email || "");
+                } else {
+                    setError(err.response?.data?.message || "Invalid credentials. Please try again.");
+                }
         } finally {
             setIsLoading(false);
         }
+    }
+
+    const handleResendVerification = async () => {
+        if (!userEmail) return;
+
+        try {
+            setIsLoading(true);
+            await axios.post("http://localhost:8082/api/auth/resend-verification", {
+                email: userEmail
+            });
+            setError(null);
+            setNeedsVerification(false);
+            alert("Verification email sent! Please check your inbox.");
+        } catch (err) {
+            setError(err.response?.data?.message || "Failed to send verification email.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // If user needs to verify email
+    if (needsVerification) {
+        return (
+            <div className="w-full max-w-md space-y-8">
+                <div className="space-y-4 text-center">
+                    <img src="/images/beelogo.png" alt="CodeHive Logo" className="w-16 mx-auto" />
+                    <h1 className="text-4xl font-bold tracking-tight text-yellow-400">
+                        Email Verification Required
+                    </h1>
+                    <p className="text-gray-400">
+                        Your account exists, but you need to verify your email before logging in.
+                    </p>
+                </div>
+
+                <div className="bg-gray-800/50 p-6 rounded-lg">
+                    <div className="space-y-4">
+                            <label className="block text-sm text-gray-300">
+                                Please enter your email to receive a verification link:
+                            </label>
+                            <input
+                                type="email"
+                                value={userEmail}
+                                onChange={(e) => setUserEmail(e.target.value)}
+                                placeholder="Your email address"
+                                className="h-12 bg-[#12141F] border border-yellow-500 focus:border-yellow-600 w-full rounded-md px-3 py-1 text-sm text-white placeholder-yellow-300"
+                            />
+                            
+                            <button
+                                onClick={handleResendVerification}
+                                disabled={isLoading || !userEmail}
+                                className="w-full h-12 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-md transition-colors disabled:opacity-50"
+                            >
+                                {isLoading ? "Sending..." : "Send Verification Email"}
+                            </button>
+                    </div>
+                </div>
+
+                <div className="text-center">
+                    <button
+                        onClick={() => setNeedsVerification(false)}
+                        className="text-yellow-500 hover:text-yellow-400"
+                    >
+                        Back to Login
+                    </button>
+                </div>
+
+            </div>
+        );
     }
 
     return (
