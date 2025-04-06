@@ -50,7 +50,9 @@ export const getGitHubLoginUrl = async () => {
 };
 
 export const handleGitHubCallback = async (code) => {
-    const { data } = await apiClient.post("/auth/github/callback", { code });
+    const { data } = await apiClient.get("/auth/github/callback", {
+        params: { code }
+    });
     setTokens(data);
     return data;
 };
