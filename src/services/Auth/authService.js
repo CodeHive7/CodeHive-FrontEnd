@@ -1,3 +1,4 @@
+import { Code } from "lucide-react";
 import apiClient from "../apiClient.js";
 import { setTokens, clearTokens, getRefreshToken } from "./tokenService.js";
 
@@ -41,4 +42,15 @@ export const logout = async () => {
     } finally {
         clearTokens();
     }
-}
+};
+
+export const getGitHubLoginUrl = async () => {
+    const { data } = await apiClient.get("/auth/github/login");
+    return data;
+};
+
+export const handleGitHubCallback = async (code) => {
+    const { data } = await apiClient.post("/auth/github/callback", { code });
+    setTokens(data);
+    return data;
+};
