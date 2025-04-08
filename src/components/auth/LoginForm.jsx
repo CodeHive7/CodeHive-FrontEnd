@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/Auth/AuthContext.jsx";
 import axios from "axios";
+import { ErrorAlert } from "../ui/ErrorAlert.jsx";
+import { SuccessAlert } from "../ui/SuccessAlert.jsx";
 
 const LoginForm = () => {
     const [formData, setFormData] = useState({
@@ -10,6 +12,7 @@ const LoginForm = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(null);
     const [needsVerification, setNeedsVerification] = useState(false);
     const [userEmail, setUserEmail] = useState("");
     const navigate = useNavigate();
@@ -19,18 +22,25 @@ const LoginForm = () => {
         event.preventDefault();
         setIsLoading(true);
         setNeedsVerification(false);
+        setError(null);
+
 
         try {
             await loginHandler(formData);
             navigate("/");
         } catch (err) {
-            if (err.response?.status === 403 && 
+            if ((err.response?.status === 403 || err.response?.status === 400) && 
                 (err.response?.data?.message?.includes("email") ||
-                err.response?.data?.message?.includes("verify"))) {
+                err.response?.data?.message?.includes("verify") || 
+            (typeof err.response?.data === 'string' && err.response?.data.toLowerCase().includes("verify")))) {
                     setNeedsVerification(true);
-                    setUserEmail(err.response?.data?.email || "");
+                    setUserEmail(err.response?.data?.email || formData.username || "");
                 } else {
-                    setError(err.response?.data?.message || "Invalid credentials. Please try again.");
+                    const errorMessage = err.response?.data?.message ||
+                                         err.response?.data ||
+                                         err.message ||
+                        "Login failed. Please try again.";
+                    setError(errorMessage);
                 }
         } finally {
             setIsLoading(false);
@@ -46,8 +56,9 @@ const LoginForm = () => {
                 email: userEmail
             });
             setError(null);
+            setSuccessMessage("Verification email sent! Please check your inbox.");
             setNeedsVerification(false);
-            alert("Verification email sent! Please check your inbox.");
+            
         } catch (err) {
             setError(err.response?.data?.message || "Failed to send verification email.");
         } finally {
@@ -115,7 +126,16 @@ const LoginForm = () => {
                 <p className="text-gray-400">Sign in to access the hive and collaborate with your swarm.</p>
             </div>
 
-            {error && <p className="text-red-500 text-center">{error}</p>}
+            <ErrorAlert
+                message={error}
+                onClose={() => setError(null)}
+            />
+
+            <SuccessAlert
+                message={successMessage}
+                duration={5000}
+                onClose={() => setSuccessMessage(null)}
+            />
 
             <form onSubmit={onSubmit} className="space-y-6">
                 <div className="space-y-4">
