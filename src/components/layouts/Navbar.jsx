@@ -10,9 +10,9 @@ import {
   X, 
   ChevronDown,
   Settings,
-  Bell,
   MessageSquare,
-  User
+  User,
+  Code
 } from "lucide-react";
 import { HiTerminal, HiCode } from 'react-icons/hi';
 
@@ -70,8 +70,8 @@ export default function Navbar() {
                                 <div className="absolute -inset-0.5 bg-amber-500/20 rounded-md blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             </div>
                             <div className="ml-2">
-                                <span className="text-xl font-bold text-white">Code</span>
-                                <span className="text-xl font-bold text-amber-500">Hive</span>
+                                <span className="text-xl font-bold text-white font-mono">Code</span>
+                                <span className="text-xl font-bold text-amber-500 font-mono">Hive</span>
                             </div>
                         </button>
 
@@ -88,7 +88,7 @@ export default function Navbar() {
                                 onClick={handleHomeClick}
                             >
                                 <Home className="h-5 w-5 text-amber-500 mr-2" />
-                                <span className="font-mono">Home</span>
+                                <span className="font-mono">home.view()</span>
                             </button>
 
                             {/* If user is logged in, show profile dropdown */}
@@ -110,42 +110,48 @@ export default function Navbar() {
                                         <ChevronDown className={`h-4 w-4 text-amber-500 ml-1 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
                                     </button>
 
-                                    {/* Profile Dropdown Menu */}
+                                    {/* Profile Dropdown Menu with enhanced code editor style */}
                                     {isProfileOpen && (
-                                        <div className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-gray-900 border border-gray-800 overflow-hidden z-50 animate-slideDown">
+                                        <div className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-gray-900 border border-amber-500/20 overflow-hidden z-50 animate-slideDown">
                                             <div className="py-1">
-                                                <div className="px-4 py-2 border-b border-gray-800">
-                                                    <p className="text-xs text-gray-500 font-mono">// Signed in as</p>
-                                                    <p className="text-sm text-white font-mono">{user.email || user.username}</p>
+                                                <div className="px-4 py-3 border-b border-amber-500/20 bg-gray-950">
+                                                    <p className="text-xs text-amber-500/70 font-mono">// Signed in as</p>
+                                                    <p className="text-sm text-white font-mono flex items-center">
+                                                        <Code className="h-3 w-3 mr-1 flex-shrink-0 text-amber-500/70" />
+                                                        {user.email || user.username}
+                                                    </p>
+                                                    <p className="text-xs text-amber-400/50 font-mono mt-1">
+                                                        .developer
+                                                    </p>
                                                 </div>
                                                 <button
-                                                    className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 flex items-center"
+                                                    className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-amber-500/10 flex items-center font-mono"
                                                     onClick={() => navigate('/user/profile')}
                                                 >
                                                     <User className="h-4 w-4 text-amber-500 mr-2" />
-                                                    <span className="font-mono">user.profile()</span>
+                                                    user.profile()
                                                 </button>
                                                 <button
-                                                    className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 flex items-center"
+                                                    className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-amber-500/10 flex items-center font-mono"
                                                     onClick={() => navigate('/user/messages')}
                                                 >
                                                     <MessageSquare className="h-4 w-4 text-amber-500 mr-2" />
-                                                    <span className="font-mono">messages.inbox()</span>
+                                                    messages.inbox()
                                                 </button>
                                                 <button
-                                                    className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 flex items-center"
+                                                    className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-amber-500/10 flex items-center font-mono"
                                                     onClick={() => navigate('/user/settings')}
                                                 >
                                                     <Settings className="h-4 w-4 text-amber-500 mr-2" />
-                                                    <span className="font-mono">user.settings()</span>
+                                                    user.settings()
                                                 </button>
-                                                <hr className="border-gray-800 my-1" />
+                                                <hr className="border-amber-500/20 my-1" />
                                                 <button
-                                                    className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800 flex items-center"
+                                                    className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 flex items-center font-mono"
                                                     onClick={logoutHandler}
                                                 >
                                                     <LogOut className="h-4 w-4 mr-2" />
-                                                    <span className="font-mono">auth.logout()</span>
+                                                    auth.logout()
                                                 </button>
                                             </div>
                                         </div>
@@ -164,7 +170,7 @@ export default function Navbar() {
                                         onClick={() => navigate("/login")}
                                     >
                                         <UserCircle className="h-5 w-5 text-amber-500 mr-2" />
-                                        <span className="font-mono">Login</span>
+                                        <span className="font-mono">auth.login()</span>
                                     </button>
                                     <button
                                         className={`
@@ -177,7 +183,7 @@ export default function Navbar() {
                                         onClick={() => navigate("/register")}
                                     >
                                         <HiCode className="h-5 w-5 mr-2" />
-                                        <span className="font-mono">Get Started</span>
+                                        <span className="font-mono">user.register()</span>
                                     </button>
                                 </div>
                             )}
@@ -201,49 +207,55 @@ export default function Navbar() {
                 </div>
             </div>
 
-            {/* Mobile Menu */}
-            <div className={`md:hidden ${isMenuOpen ? 'block' : 'hidden'} bg-gray-950 border-b border-gray-800`}>
+            {/* Mobile Menu with code editor style */}
+            <div className={`md:hidden ${isMenuOpen ? 'block' : 'hidden'} bg-gray-950 border-b border-amber-500/20`}>
                 <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                     <button
-                        className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-800"
+                        className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-white hover:bg-amber-500/10"
                         onClick={handleHomeClick}
                     >
                         <Home className="h-5 w-5 text-amber-500 mr-2" />
-                        <span className="font-mono">Home</span>
+                        <span className="font-mono">home.view()</span>
                     </button>
 
                     {/* Mobile menu additional options */}
                     {user ? (
                         <>
-                            <div className="flex items-center px-3 py-2 text-base font-medium text-gray-300">
+                            <div className="flex items-center px-3 py-2 text-base font-medium text-gray-300 border-t border-amber-500/10 mt-2 pt-2">
                                 <div className="w-8 h-8 bg-gray-900 border border-amber-500/50 rounded-md flex items-center justify-center text-amber-500 font-mono mr-2">
                                     {user.username ? user.username.charAt(0).toUpperCase() : '?'}
                                 </div>
-                                <span className="font-mono">{user.username}</span>
+                                <div>
+                                    <span className="font-mono block">{user.username}</span>
+                                    <span className="text-xs text-amber-500/70 font-mono flex items-center">
+                                        <Code className="h-3 w-3 mr-1 flex-shrink-0" />
+                                        .developer
+                                    </span>
+                                </div>
                             </div>
                             <button
-                                className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-800"
+                                className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-white hover:bg-amber-500/10"
                                 onClick={() => navigate('/user/profile')}
                             >
                                 <User className="h-5 w-5 text-amber-500 mr-2" />
                                 <span className="font-mono">user.profile()</span>
                             </button>
                             <button
-                                className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-800"
+                                className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-white hover:bg-amber-500/10"
                                 onClick={() => navigate('/user/messages')}
                             >
                                 <MessageSquare className="h-5 w-5 text-amber-500 mr-2" />
                                 <span className="font-mono">messages.inbox()</span>
                             </button>
                             <button
-                                className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-800"
+                                className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-white hover:bg-amber-500/10"
                                 onClick={() => navigate('/user/settings')}
                             >
                                 <Settings className="h-5 w-5 text-amber-500 mr-2" />
                                 <span className="font-mono">user.settings()</span>
                             </button>
                             <button
-                                className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-red-400 hover:bg-gray-800"
+                                className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-red-400 hover:bg-red-500/10 border-t border-amber-500/10 mt-2 pt-2"
                                 onClick={logoutHandler}
                             >
                                 <LogOut className="h-5 w-5 mr-2" />
@@ -253,21 +265,26 @@ export default function Navbar() {
                     ) : (
                         <>
                             <button
-                                className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-800"
+                                className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-white hover:bg-amber-500/10"
                                 onClick={() => navigate("/login")}
                             >
                                 <UserCircle className="h-5 w-5 text-amber-500 mr-2" />
-                                <span className="font-mono">Login</span>
+                                <span className="font-mono">auth.login()</span>
                             </button>
                             <button
                                 className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium bg-amber-600 text-white hover:bg-amber-700"
                                 onClick={() => navigate("/register")}
                             >
                                 <HiCode className="h-5 w-5 mr-2" />
-                                <span className="font-mono">Get Started</span>
+                                <span className="font-mono">user.register()</span>
                             </button>
                         </>
                     )}
+                </div>
+                
+                {/* Code-like decorations */}
+                <div className="px-3 py-1.5 text-xs text-amber-500/50 font-mono border-t border-amber-500/20">
+                    {`// CodeHive v1.0.3`}
                 </div>
             </div>
 
