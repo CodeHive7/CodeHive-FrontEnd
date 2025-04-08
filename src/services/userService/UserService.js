@@ -167,8 +167,8 @@ export const connectToChat = (token, onConnected, onError) => {
     }
     
     console.log("Creating new STOMP connection");
-    //const socket = new SockJS('http://localhost:8082/ws-chat');
-    const socket = new SockJS(`http://localhost:8083/ws-chat`); // dockerised version
+    const socket = new SockJS('http://localhost:8082/ws-chat');
+    //const socket = new SockJS(`http://localhost:8083/ws-chat`); // dockerised version
 
     stompClient = new Client({
         webSocketFactory: () => socket,
