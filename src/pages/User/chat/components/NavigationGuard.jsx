@@ -19,7 +19,7 @@ export default function NavigationGuard() {
             navigationAttemptRef.current += 1;
             
             // If there are too many navigations in a short period, block it
-            if (navigationAttemptRef.current > 2) {
+            if (navigationAttemptRef.current > 1) {
                 console.log('Blocking rapid navigation in chat');
                 // Block the navigation by going back to the previous path
                 window.history.pushState(null, '', previousPathRef.current);
@@ -29,7 +29,7 @@ export default function NavigationGuard() {
             // Reset the counter after a delay
             setTimeout(() => {
                 navigationAttemptRef.current = 0;
-            }, 1000);
+            }, 2000);
         }
         
         previousPathRef.current = location.pathname;
