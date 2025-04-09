@@ -1,4 +1,4 @@
-import React from "react";
+import { BiCodeBlock } from 'react-icons/bi';
 
 export default function Integrations() {
     const integrations = [
@@ -66,16 +66,20 @@ export default function Integrations() {
     ];
 
     return (
-        <section className="px-4 py-20 bg-black text-white">
+        <section className="px-4 py-20 bg-gray-950 text-white">
             <div className="max-w-6xl mx-auto text-center">
-                <h2 className="text-4xl font-bold mb-16">
-                    Works with Your <span className="text-yellow-400">Favorite Tools</span>
+                <h2 className="text-3xl font-bold mb-6">
+                    <span className="text-blue-400 font-mono">import</span> <span className="text-amber-500">{"{ "}</span><span className="text-green-400">Integrations</span><span className="text-amber-500">{" }"}</span>
                 </h2>
+                <p className="text-gray-400 mb-16 max-w-lg mx-auto border-l-2 border-amber-500 pl-3 text-left font-mono text-sm">
+                    // Connect with tools you already use through our extensive API and plugin system
+                </p>
+                
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
                     {integrations.map((item, i) => (
                         <div
                             key={i}
-                            className="bg-[#12141F] p-6 rounded-lg aspect-square flex items-center justify-center hover:border hover:border-yellow-400 transition-all"
+                            className="bg-gray-900 p-6 rounded-lg aspect-square flex items-center justify-center border border-gray-800 hover:border-amber-500 transition-all"
                         >
                             <div className="w-12 h-12">{item.logo}</div>
                             <span className="sr-only">{item.name}</span>
@@ -83,12 +87,26 @@ export default function Integrations() {
                     ))}
                 </div>
 
-                <p className="mt-16 text-gray-400 max-w-lg mx-auto">
-                    Seamlessly connect with the tools you already use. Our platform integrates with your workflow for maximum productivity.
-                </p>
+                <div className="mt-16 bg-gray-900 border border-gray-700 p-4 rounded-md max-w-xl mx-auto">
+                    <p className="font-mono text-sm text-green-400">// Code sample: Connect to any third-party API</p>
+                    <pre className="text-left bg-gray-950 p-3 rounded mt-2 overflow-x-auto">
+                        <code className="text-xs md:text-sm font-mono">
+                            <span className="text-blue-400">import</span> <span className="text-amber-400">{"{ CodeHive }"}</span> <span className="text-blue-400">from</span> <span className="text-green-400">'code-hive'</span>;
+                            <br />
+                            <br />
+                            <span className="text-green-400">// Setup your integration</span><br />
+                            <span className="text-blue-400">const</span> <span className="text-amber-400">api</span> = <span className="text-blue-400">await</span> <span className="text-purple-400">CodeHive</span>.<span className="text-yellow-400">connect</span>(<span className="text-green-400">'github'</span>);
+                            <br />
+                            <br />
+                            <span className="text-green-400">// Fetch repositories</span><br />
+                            <span className="text-blue-400">const</span> <span className="text-amber-400">repos</span> = <span className="text-blue-400">await</span> <span className="text-amber-400">api</span>.<span className="text-yellow-400">getRepositories</span>();
+                        </code>
+                    </pre>
+                </div>
 
-                <button className="mt-8 px-8 py-3 bg-yellow-500 text-black font-semibold rounded-full hover:bg-yellow-400 transition-all">
-                    Explore Integrations
+                <button className="mt-8 px-8 py-3 bg-amber-600 text-white font-semibold rounded-md hover:bg-amber-700 transition-all flex items-center mx-auto">
+                    <BiCodeBlock className="mr-2" />
+                    <span>View API Documentation</span>
                 </button>
             </div>
         </section>

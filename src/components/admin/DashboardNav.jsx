@@ -3,6 +3,7 @@ import {
     LayoutDashboard, Users, Settings, Bell, FolderKanban, BarChart3, Menu, ChevronDown, ChevronRight
 } from "lucide-react";
 import { useState } from "react";
+import { HiTerminal, HiCode } from 'react-icons/hi';
 
 const DashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
     const location = useLocation();
@@ -35,28 +36,31 @@ const DashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
 
     return (
         <aside
-            className={`fixed top-0 left-0 min-h-screen w-64 border-r border-yellow-500 bg-[#0A0B14] text-gray-300 transform 
+            className={`fixed top-0 left-0 min-h-screen w-64 border-r border-amber-500/30 bg-gray-950 text-gray-300 transform 
             ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} 
             lg:relative lg:translate-x-0 lg:w-64 
             transition-transform duration-300 ease-in-out z-50 shadow-lg`}
         >
             {/* Sidebar Header */}
-            <div className="border-b border-yellow-500 px-6 py-4 flex justify-between items-center lg:block">
+            <div className="border-b border-amber-500/30 px-6 py-4 flex justify-between items-center lg:block">
                 <Link to="/" className="flex items-center gap-2">
-                    {/* Bee Logo */}
-                    <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center shadow-md">
-                        🐝
+                    {/* Terminal Logo */}
+                    <div className="w-10 h-10 bg-gray-900 border border-gray-700 rounded-md flex items-center justify-center shadow-md">
+                        <HiTerminal className="text-amber-500 w-6 h-6" />
                     </div>
-                    <span className="font-bold text-xl text-yellow-400">Admin</span>
+                    <div>
+                        <span className="font-mono text-sm text-gray-400">sudo</span>
+                        <span className="font-bold text-xl text-amber-500 block -mt-1">Admin</span>
+                    </div>
                 </Link>
-                <button className="lg:hidden text-yellow-400" onClick={toggleSidebar}>
+                <button className="lg:hidden text-amber-500" onClick={toggleSidebar}>
                     <Menu />
                 </button>
             </div>
 
             {/* Sidebar Navigation */}
             <nav className="p-6">
-                <h3 className="text-yellow-400 uppercase text-sm">Menu</h3>
+                <h3 className="text-amber-500 font-mono text-xs mb-1">// Main Navigation</h3>
                 <ul className="mt-3 space-y-2">
                     {routes.map((route) =>
                         route.subRoutes ? (
@@ -64,14 +68,14 @@ const DashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                                 <button
                                     onClick={toggleProjectsMenu}
                                     className={`flex items-center justify-between w-full px-3 py-2 rounded-md ${
-                                        isProjectsOpen ? "bg-yellow-500/20 text-yellow-400" : "hover:bg-yellow-500/10"
+                                        isProjectsOpen ? "bg-amber-500/20 text-amber-500" : "hover:bg-amber-500/10"
                                     } transition`}
                                 >
                                     <div className="flex items-center gap-2">
-                                        <route.icon className="h-5 w-5 text-yellow-400" />
-                                        {route.label}
+                                        <route.icon className="h-5 w-5 text-amber-500" />
+                                        <span className="font-mono">{route.label}</span>
                                     </div>
-                                    {isProjectsOpen ? <ChevronDown className="h-4 w-4 text-yellow-400" /> : <ChevronRight className="h-4 w-4 text-yellow-400" />}
+                                    {isProjectsOpen ? <ChevronDown className="h-4 w-4 text-amber-500" /> : <ChevronRight className="h-4 w-4 text-amber-500" />}
                                 </button>
 
                                 {isProjectsOpen && (
@@ -81,9 +85,12 @@ const DashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                                                 <Link
                                                     to={subroute.href}
                                                     className={`flex items-center gap-2 px-3 py-2 rounded-md ${
-                                                        location.pathname === subroute.href ? "bg-yellow-500 text-black" : "hover:bg-yellow-500/20"
+                                                        location.pathname === subroute.href 
+                                                            ? "bg-amber-600 text-white" 
+                                                            : "hover:bg-amber-500/20 text-gray-300 hover:text-amber-500"
                                                     } transition`}
                                                 >
+                                                    <span className="font-mono text-xs text-gray-500">{'>>'}</span>
                                                     {subroute.label}
                                                 </Link>
                                             </li>
@@ -96,11 +103,13 @@ const DashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                                 <Link
                                     to={route.href}
                                     className={`flex items-center gap-2 px-3 py-2 rounded-md ${
-                                        location.pathname === route.href ? "bg-yellow-500 text-black" : "hover:bg-yellow-500/10"
+                                        location.pathname === route.href 
+                                            ? "bg-amber-600 text-white" 
+                                            : "hover:bg-amber-500/10 hover:text-amber-500"
                                     } transition`}
                                 >
-                                    <route.icon className="h-5 w-5 text-yellow-400" />
-                                    {route.label}
+                                    <route.icon className="h-5 w-5 text-amber-500" />
+                                    <span className="font-mono">{route.label}</span>
                                 </Link>
                             </li>
                         )
@@ -108,22 +117,36 @@ const DashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                 </ul>
 
                 {/* Resources Section */}
-                <h3 className="text-yellow-400 mt-6 uppercase text-sm">Resources</h3>
+                <h3 className="text-amber-500 mt-8 font-mono text-xs mb-1">// System Tools</h3>
                 <ul className="mt-3 space-y-2">
                     {resources.map((resource) => (
                         <li key={resource.id}>
                             <Link
                                 to={resource.href}
                                 className={`flex items-center gap-2 px-3 py-2 rounded-md ${
-                                    location.pathname === resource.href ? "bg-yellow-500 text-black" : "hover:bg-yellow-500/10"
+                                    location.pathname === resource.href 
+                                        ? "bg-amber-600 text-white" 
+                                        : "hover:bg-amber-500/10 hover:text-amber-500"
                                 } transition`}
                             >
-                                <resource.icon className="h-5 w-5 text-yellow-400" />
-                                {resource.label}
+                                <resource.icon className="h-5 w-5 text-amber-500" />
+                                <span className="font-mono">{resource.label}</span>
                             </Link>
                         </li>
                     ))}
                 </ul>
+                
+                {/* Environment Info */}
+                <div className="mt-8 bg-gray-900 rounded-md p-3 border border-gray-800">
+                    <p className="text-xs font-mono text-gray-400">// Environment</p>
+                    <div className="flex items-center mt-1">
+                        <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
+                        <span className="text-xs font-mono text-green-500">production</span>
+                    </div>
+                    <p className="text-xs font-mono text-gray-500 mt-2 border-t border-gray-800 pt-2">
+                        v1.2.4-stable
+                    </p>
+                </div>
             </nav>
         </aside>
     );

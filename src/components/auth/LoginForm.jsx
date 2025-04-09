@@ -4,6 +4,11 @@ import { useAuth } from "../../context/Auth/AuthContext.jsx";
 import axios from "axios";
 import { ErrorAlert } from "../ui/ErrorAlert.jsx";
 import { SuccessAlert } from "../ui/SuccessAlert.jsx";
+// Fix the imports - use specific imports to avoid issues
+import { BiCodeAlt, BiLogIn } from 'react-icons/bi';
+import { BsGithub, BsGoogle } from 'react-icons/bs';
+import { VscTerminalPowershell } from 'react-icons/vsc';
+import { HiCode, HiOutlineCode, HiTerminal } from 'react-icons/hi';
 
 const LoginForm = () => {
     const [formData, setFormData] = useState({
@@ -21,229 +26,277 @@ const LoginForm = () => {
     async function onSubmit(event) {
         event.preventDefault();
         setIsLoading(true);
-        setNeedsVerification(false);
         setError(null);
-
-
+        
         try {
             await loginHandler(formData);
-            navigate("/");
+            navigate("/dashboard");
         } catch (err) {
-            if ((err.response?.status === 403 || err.response?.status === 400) && 
-                (err.response?.data?.message?.includes("email") ||
-                err.response?.data?.message?.includes("verify") || 
-            (typeof err.response?.data === 'string' && err.response?.data.toLowerCase().includes("verify")))) {
-                    setNeedsVerification(true);
-                    setUserEmail(err.response?.data?.email || formData.username || "");
-                } else {
-                    const errorMessage = err.response?.data?.message ||
-                                         err.response?.data ||
-                                         err.message ||
-                        "Login failed. Please try again.";
-                    setError(errorMessage);
-                }
+            if (err.response?.status === 400 && 
+                err.response?.data?.includes("verify")) {
+                setNeedsVerification(true);
+                setUserEmail(formData.username);
+            } else {
+                setError(err.response?.data || "Authentication failed");
+            }
         } finally {
             setIsLoading(false);
         }
     }
 
-    const handleResendVerification = async () => {
+    async function handleResendVerification() {
         if (!userEmail) return;
-
+        
         try {
             setIsLoading(true);
-            await axios.post("http://localhost:8082/api/auth/resend-verification", {
-                email: userEmail
+            await axios.post("http://localhost:8082/api/auth/resend-verification", { 
+                email: userEmail 
             });
-            setError(null);
-            setSuccessMessage("Verification email sent! Please check your inbox.");
-            setNeedsVerification(false);
-            
+            setSuccessMessage("Verification email sent successfully!");
+            setTimeout(() => setNeedsVerification(false), 3000);
         } catch (err) {
-            setError(err.response?.data?.message || "Failed to send verification email.");
+            setError(err.response?.data || "Failed to send verification email");
         } finally {
             setIsLoading(false);
         }
-    };
+    }
 
     // If user needs to verify email
     if (needsVerification) {
         return (
-            <div className="w-full max-w-md space-y-8">
-                <div className="space-y-4 text-center">
-                    <img src="/images/beelogo.png" alt="CodeHive Logo" className="w-16 mx-auto" />
-                    <h1 className="text-4xl font-bold tracking-tight text-yellow-400">
-                        Email Verification Required
-                    </h1>
-                    <p className="text-gray-400">
-                        Your account exists, but you need to verify your email before logging in.
-                    </p>
-                </div>
+            <div className="w-full max-w-xl mx-auto">
+                <div className="bg-gray-950 rounded-lg shadow-xl border border-gray-800 overflow-hidden">
+                    <div className="p-6 sm:p-8">
+                        <div className="flex items-center justify-center mb-8">
+                            <HiTerminal className="text-amber-500 w-8 h-8" />
+                            <h1 className="ml-3 text-2xl font-bold text-white">
+                                Code<span className="text-amber-500">Hive</span>
+                            </h1>
+                        </div>
+                        
+                        <h2 className="text-xl font-semibold text-white mb-2">
+                            <HiOutlineCode className="inline mr-2" />
+                            Email Verification Required
+                        </h2>
+                        <p className="text-gray-400 mb-6 border-l-2 border-amber-500 pl-3">
+                            // Verify your email to access the developer network
+                        </p>
 
-                <div className="bg-gray-800/50 p-6 rounded-lg">
-                    <div className="space-y-4">
-                            <label className="block text-sm text-gray-300">
-                                Please enter your email to receive a verification link:
-                            </label>
-                            <input
-                                type="email"
-                                value={userEmail}
-                                onChange={(e) => setUserEmail(e.target.value)}
-                                placeholder="Your email address"
-                                className="h-12 bg-[#12141F] border border-yellow-500 focus:border-yellow-600 w-full rounded-md px-3 py-1 text-sm text-white placeholder-yellow-300"
-                            />
+                        <ErrorAlert
+                            message={error}
+                            onClose={() => setError(null)}
+                        />
+
+                        <SuccessAlert
+                            message={successMessage}
+                            duration={5000}
+                            onClose={() => setSuccessMessage(null)}
+                        />
+
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm text-gray-300 font-mono mb-1">
+                                        const emailAddress = 
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={userEmail}
+                                        onChange={(e) => setUserEmail(e.target.value)}
+                                        placeholder="your.email@example.com"
+                                        className="h-12 bg-gray-900 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-sm text-white placeholder-gray-500 font-mono"
+                                    />
+                                </div>
+                                
+                                <div className="bg-gray-900 border border-gray-700 p-3 rounded-md flex items-start">
+                                    <BiCodeAlt className="h-5 w-5 text-amber-500 mr-2 flex-shrink-0 mt-1" />
+                                    <p className="text-gray-300 text-sm">
+                                        <span className="font-mono text-green-400">// Note:</span><br />
+                                        Check your inbox and spam folder for the verification email
+                                    </p>
+                                </div>
+                            </div>
                             
                             <button
                                 onClick={handleResendVerification}
                                 disabled={isLoading || !userEmail}
-                                className="w-full h-12 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-md transition-colors disabled:opacity-50"
+                                className="w-full h-12 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                             >
-                                {isLoading ? "Sending..." : "Send Verification Email"}
+                                {isLoading ? (
+                                    <span className="flex items-center">
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Processing...
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center">
+                                        <BiCodeAlt className="mr-2" size={18} />
+                                        Send Verification Email
+                                    </span>
+                                )}
                             </button>
+                            
+                            <div className="text-center mt-4">
+                                <button
+                                    onClick={() => setNeedsVerification(false)}
+                                    className="text-amber-500 hover:text-amber-400 text-sm font-mono"
+                                >
+                                    return <span className="text-green-500">login</span>;
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <div className="text-center">
-                    <button
-                        onClick={() => setNeedsVerification(false)}
-                        className="text-yellow-500 hover:text-yellow-400"
-                    >
-                        Back to Login
-                    </button>
-                </div>
-
             </div>
         );
     }
 
     return (
-        <div className="w-full max-w-md space-y-8">
-            <div className="space-y-4 text-center">
-                <img src="/images/beelogo.png" alt="CodeHive Logo" className="w-16 mx-auto" />
-                <h1 className="text-4xl font-bold tracking-tight text-yellow-400">
-                    Welcome to the Hive! 🐝
-                </h1>
-                <p className="text-gray-400">Sign in to access the hive and collaborate with your swarm.</p>
-            </div>
-
-            <ErrorAlert
-                message={error}
-                onClose={() => setError(null)}
-            />
-
-            <SuccessAlert
-                message={successMessage}
-                duration={5000}
-                onClose={() => setSuccessMessage(null)}
-            />
-
-            <form onSubmit={onSubmit} className="space-y-6">
-                <div className="space-y-4">
-                    <div className="space-y-2">
-                        <label htmlFor="username" className="text-yellow-400">
-                            Username
-                        </label>
-                        <input
-                            id="username"
-                            placeholder="Enter your hive name"
-                            type="text"
-                            autoCapitalize="none"
-                            autoComplete="username"
-                            autoCorrect="off"
-                            disabled={isLoading}
-                            className="h-12 bg-[#12141F] border border-yellow-500 focus:border-yellow-600 w-full rounded-md px-3 py-1 text-sm text-white placeholder-yellow-300"
-                            value={formData.username}
-                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                        />
+        <div className="w-full max-w-xl mx-auto">
+            <div className="bg-gray-950 rounded-lg shadow-xl border border-gray-800 overflow-hidden">
+                <div className="p-6 sm:p-8">
+                    <div className="flex items-center justify-center mb-6">
+                        <HiTerminal className="text-amber-500 w-8 h-8" />
+                        <h1 className="ml-3 text-2xl font-bold text-white">
+                            Code<span className="text-amber-500">Hive</span>
+                        </h1>
                     </div>
-                    <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                            <label htmlFor="password" className="text-yellow-400">Password</label>
-                            <a href="/forgot-password" className="text-sm text-yellow-500 hover:text-yellow-400">
-                                Forgot?
-                            </a>
+                    
+                    <h2 className="text-xl font-semibold text-white mb-1">
+                        <span className="text-green-400 font-mono">function</span> <span className="text-blue-400">login</span><span className="text-yellow-500">()</span>
+                    </h2>
+                    <p className="text-gray-400 mb-6 border-l-2 border-amber-500 pl-3 font-mono text-sm">
+                        // Access the collaborative development network
+                    </p>
+
+                    <ErrorAlert
+                        message={error}
+                        onClose={() => setError(null)}
+                    />
+
+                    <SuccessAlert
+                        message={successMessage}
+                        duration={5000}
+                        onClose={() => setSuccessMessage(null)}
+                    />
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                        <button 
+                            type="button"
+                            className="h-11 bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded-md flex items-center justify-center text-gray-200 transition-colors"
+                            onClick={() => window.location.href = '/api/auth/github/login'}
+                        >
+                            <BsGithub className="mr-2" size={18} />
+                            <span>GitHub</span>
+                        </button>
+                        <button 
+                            type="button"
+                            className="h-11 bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded-md flex items-center justify-center text-gray-200 transition-colors"
+                        >
+                            <BsGoogle className="mr-2" size={16} />
+                            <span>Google</span>
+                        </button>
+                    </div>
+                    
+                    <div className="relative mb-6">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-800"></div>
                         </div>
-                        <input
-                            id="password"
-                            type="password"
-                            placeholder="Enter your hive key"
-                            disabled={isLoading}
-                            className="h-12 bg-[#12141F] border border-yellow-500 focus:border-yellow-600 w-full rounded-md px-3 py-1 text-sm text-white placeholder-yellow-300"
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        />
+                        <div className="relative flex justify-center text-xs">
+                            <span className="bg-gray-950 px-2 text-gray-500 font-mono">// or continue with</span>
+                        </div>
                     </div>
-                </div>
 
-                <button
-                    type="submit"
-                    className="w-full h-12 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-md transition-transform transform hover:scale-105"
-                    disabled={isLoading}
-                >
-                    {isLoading ? (
-                        <div className="flex items-center justify-center">
-                            <svg
-                                className="animate-spin -ml-1 mr-3 h-5 w-5 text-black"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path
-                                    className="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    <form onSubmit={onSubmit} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1 font-mono">
+                                    const username =
+                                </label>
+                                <input
+                                    id="username"
+                                    placeholder="your_username"
+                                    type="text"
+                                    autoCapitalize="none"
+                                    autoComplete="username"
+                                    autoCorrect="off"
+                                    disabled={isLoading}
+                                    className="h-12 bg-gray-900 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-sm text-white placeholder-gray-500 font-mono"
+                                    value={formData.username}
+                                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                                 />
-                            </svg>
-                            Connecting to the Hive...
+                            </div>
+                            <div>
+                                <div className="flex items-center justify-between mb-1">
+                                    <label htmlFor="password" className="block text-sm font-medium text-gray-300 font-mono">
+                                        const password =
+                                    </label>
+                                    <a href="/forgot-password" className="text-xs text-amber-500 hover:text-amber-400 font-mono">
+                                        .reset()
+                                    </a>
+                                </div>
+                                <input
+                                    id="password"
+                                    type="password"
+                                    placeholder="••••••••"
+                                    disabled={isLoading}
+                                    className="h-12 bg-gray-900 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-sm text-white placeholder-gray-500 font-mono"
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                />
+                            </div>
                         </div>
-                    ) : (
-                        "Enter the Hive →"
-                    )}
-                </button>
 
-                <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-800" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-black px-2 text-yellow-400">Or</span>
-                    </div>
+                        <div className="bg-gray-900 border border-gray-700 rounded-md p-3 flex items-center">
+                            <HiOutlineCode className="h-5 w-5 text-amber-500 mr-2 flex-shrink-0" />
+                            <p className="text-gray-300 text-sm font-mono">
+                                // Join the network of developers collaborating on real projects
+                            </p>
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="w-full h-12 mt-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-md transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <>
+                                    <svg
+                                        className="animate-spin h-5 w-5"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                        />
+                                    </svg>
+                                    Authenticating...
+                                </>
+                            ) : (
+                                <>
+                                    <BiLogIn size={18} />
+                                    <span>Connect to Hive</span>
+                                </>
+                            )}
+                        </button>
+                    </form>
                 </div>
-
-                <button
-                    type="button"
-                    className="w-full h-12 bg-black text-yellow-400 border border-yellow-500 hover:bg-yellow-500 hover:text-black rounded-md flex items-center justify-center transition-transform transform hover:scale-105"
-                    disabled={isLoading}
-                >
-                    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-                        <path
-                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                            fill="#FFD700"
-                        />
-                        <path
-                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                            fill="#34A853"
-                        />
-                        <path
-                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                            fill="#FBBC05"
-                        />
-                        <path
-                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                            fill="#EA4335"
-                        />
-                    </svg>
-                    Connect with Google
-                </button>
-            </form>
-
-            <p className="text-center text-sm text-gray-500">
-                New to the hive?{" "}
-                <a href="/register" className="text-yellow-500 hover:text-yellow-400 font-semibold">
-                    Join Now
-                </a>
-            </p>
+                
+                <div className="p-5 bg-gray-900 border-t border-gray-800 text-center">
+                    <p className="text-sm text-gray-500 font-mono">
+                        <span className="text-blue-400">if</span> (<span className="text-green-400">!</span>user) {" "}
+                        <a href="/register" className="text-amber-500 hover:text-amber-400 font-medium">
+                            register();
+                        </a>
+                    </p>
+                </div>
+            </div>
         </div>
     );
 };
