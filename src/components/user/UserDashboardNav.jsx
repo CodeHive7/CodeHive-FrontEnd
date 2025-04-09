@@ -8,12 +8,12 @@ import {
     PlusCircle, 
     Home,
     LogOut,
-    Shield,
-    Hexagon
+    Shield
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useAuth } from "../../context/Auth/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
+import { HiTerminal } from 'react-icons/hi';
 
 const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
     const location = useLocation();
@@ -141,47 +141,42 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
             onTouchEnd={handleTouchEnd}
         >
             {/* Sidebar Header with Logo */}
-            <div className="relative p-2 xs:p-3 sm:p-4 border-b border-yellow-500/20 flex-shrink-0">
+            <div className="relative p-2 xs:p-3 sm:p-4 border-b border-amber-500/20 flex-shrink-0">
                 <Link 
                     to="/userHome" 
-                    className="flex items-center gap-1.5 xs:gap-2 group focus:outline-none focus:ring-2 focus:ring-yellow-500/60 rounded-md p-0.5"
+                    className="flex items-center gap-1.5 xs:gap-2 group focus:outline-none focus:ring-2 focus:ring-amber-500/60 rounded-md p-0.5"
                     aria-label="CodeHive Homepage"
                 >
-                    <div className="relative flex-shrink-0">
-                        <Hexagon className="h-5 w-5 xs:h-6 xs:w-6 sm:h-7 sm:w-7 text-yellow-500 transition-transform duration-300 group-hover:scale-110" />
-                        <div className="absolute inset-0 flex items-center justify-center text-black font-bold text-[8px] xs:text-[10px] sm:text-xs">
-                            CH
-                        </div>
+                    <div className="relative flex-shrink-0 bg-gray-900 border border-gray-800 rounded-md w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 flex items-center justify-center">
+                        <HiTerminal className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 text-amber-500 transition-transform duration-300 group-hover:scale-110" />
                     </div>
                     <div className="overflow-hidden">
-                        <h1 className="font-bold text-sm xs:text-base sm:text-lg whitespace-nowrap">
-                            <span className="bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">Code</span>
-                            <span className="text-white">Hive</span>
+                        <h1 className="font-bold text-sm xs:text-base sm:text-lg whitespace-nowrap font-mono">
+                            <span className="text-white">Code</span>
+                            <span className="text-amber-500">Hive</span>
                         </h1>
                     </div>
                 </Link>
             </div>
 
             {/* User Info Section */}
-            <div className="relative px-2 xs:px-3 sm:px-4 py-1.5 xs:py-2 sm:py-3 border-b border-yellow-500/20 flex-shrink-0">
+            <div className="relative px-2 xs:px-3 sm:px-4 py-1.5 xs:py-2 sm:py-3 border-b border-amber-500/20 flex-shrink-0">
                 <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 overflow-hidden">
-                    <div className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-md flex-shrink-0">
-                        <span className="text-black font-bold text-[10px] xs:text-xs sm:text-sm">
-                            {user?.username?.charAt(0).toUpperCase() || "U"}
-                        </span>
+                    <div className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 bg-gray-800 border border-amber-500/50 rounded-md flex items-center justify-center text-amber-500 font-mono text-xs sm:text-sm flex-shrink-0">
+                        {user?.username?.charAt(0).toUpperCase() || "U"}
                     </div>
                     <div className="flex flex-col min-w-0 overflow-hidden">
-                        <span className="font-medium text-white text-[10px] xs:text-xs sm:text-sm md:text-base truncate">{user?.username || "User"}</span>
-                        <span className="text-[8px] xs:text-[10px] sm:text-xs text-yellow-400/70 flex items-center truncate">
+                        <span className="font-medium text-white text-[10px] xs:text-xs sm:text-sm md:text-base truncate font-mono">{user?.username || "User"}</span>
+                        <span className="text-[8px] xs:text-[10px] sm:text-xs text-amber-400/70 flex items-center truncate font-mono">
                             <Shield className="h-2 w-2 xs:h-2.5 xs:w-2.5 sm:h-3 sm:w-3 mr-0.5 xs:mr-1 flex-shrink-0" />
-                            Developer
+                            .developer
                         </span>
                     </div>
                 </div>
             </div>
 
             {/* Navigation Menu with improved text sizes */}
-            <nav className="flex-grow overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-yellow-500/20 scrollbar-track-transparent p-1.5 xs:p-2 sm:p-3 flex-shrink">
+            <nav className="flex-grow overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-amber-500/20 scrollbar-track-transparent p-1.5 xs:p-2 sm:p-3 flex-shrink">
                 <div className="space-y-0.5 xs:space-y-1 sm:space-y-1.5">
                     {routes.map((route) =>
                         route.subRoutes ? (
@@ -192,9 +187,9 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                                         flex items-center justify-between w-full px-1.5 xs:px-2 sm:px-3 py-1 xs:py-1.5 sm:py-2 rounded-lg
                                         transition-all duration-200 group
                                         ${(activeSection === route.id || isSubRouteActive(route.id)) 
-                                            ? "bg-yellow-500/20 text-yellow-300" 
+                                            ? "bg-amber-500/20 text-amber-300" 
                                             : "text-gray-300 hover:bg-gray-800/40 hover:text-white"}
-                                        focus:outline-none focus:ring-2 focus:ring-yellow-500/40
+                                        focus:outline-none focus:ring-2 focus:ring-amber-500/40
                                     `}
                                     aria-expanded={route.id === "projects" ? isProjectsOpen : isTasksOpen}
                                 >
@@ -202,13 +197,15 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                                         <div className={`
                                             mr-1.5 xs:mr-2 sm:mr-2.5 flex items-center justify-center h-3.5 w-3.5 xs:h-4 xs:w-4 sm:h-5 sm:w-5 flex-shrink-0
                                             ${(activeSection === route.id || isSubRouteActive(route.id)) 
-                                                ? "text-yellow-400" 
-                                                : "text-gray-400 group-hover:text-yellow-400"}
+                                                ? "text-amber-400" 
+                                                : "text-gray-400 group-hover:text-amber-400"}
                                             transition-colors duration-200
                                         `}>
                                             <route.icon className="h-3.5 w-3.5 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
                                         </div>
-                                        <span className="text-xs sm:text-sm md:text-base font-medium truncate">{route.label}</span>
+                                        <span className="text-xs sm:text-sm md:text-base font-medium truncate font-mono">
+                                            {route.id}.menu()
+                                        </span>
                                     </div>
                                     <div className={`
                                         transform transition-transform duration-200 flex-shrink-0
@@ -242,21 +239,23 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                                                     text-xs sm:text-sm md:text-base
                                                     transition-all duration-200
                                                     ${isRouteActive(subroute.href)
-                                                        ? "bg-yellow-500/20 text-yellow-300"
+                                                        ? "bg-amber-500/20 text-amber-300"
                                                         : "text-gray-400 hover:bg-gray-800/30 hover:text-white"}
-                                                    focus:outline-none focus:ring-2 focus:ring-yellow-500/40 
-                                                    relative group
+                                                    focus:outline-none focus:ring-2 focus:ring-amber-500/40 
+                                                    relative group font-mono
                                                 `}
                                             >
                                                 {/* Animated indicator line for active subroute */}
                                                 {isRouteActive(subroute.href) && (
-                                                    <div className="absolute left-0 top-0 bottom-0 w-0.5 xs:w-1 sm:w-1.5 bg-yellow-500 rounded-r animate-fadeIn"></div>
+                                                    <div className="absolute left-0 top-0 bottom-0 w-0.5 xs:w-1 sm:w-1.5 bg-amber-500 rounded-r animate-fadeIn"></div>
                                                 )}
                                                 
                                                 {subroute.icon && (
-                                                    <subroute.icon className={`h-2.5 w-2.5 xs:h-3 xs:w-3 sm:h-4 sm:w-4 mr-1 xs:mr-1.5 sm:mr-2 flex-shrink-0 ${isRouteActive(subroute.href) ? "text-yellow-400" : ""}`} />
+                                                    <subroute.icon className={`h-2.5 w-2.5 xs:h-3 xs:w-3 sm:h-4 sm:w-4 mr-1 xs:mr-1.5 sm:mr-2 flex-shrink-0 ${isRouteActive(subroute.href) ? "text-amber-400" : ""}`} />
                                                 )}
-                                                <span className="truncate">{subroute.label}</span>
+                                                <span className="truncate">
+                                                    {`${route.id}.${subroute.id.replace(/-/g, '_')}`}
+                                                </span>
                                             </Link>
                                         ))
                                     }
@@ -272,26 +271,26 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                                     text-xs sm:text-sm md:text-base
                                     transition-all duration-200 group relative
                                     ${isRouteActive(route.href)
-                                        ? "bg-yellow-500/20 text-yellow-300"
+                                        ? "bg-amber-500/20 text-amber-300"
                                         : "text-gray-300 hover:bg-gray-800/40 hover:text-white"}
-                                    focus:outline-none focus:ring-2 focus:ring-yellow-500/40
+                                    focus:outline-none focus:ring-2 focus:ring-amber-500/40 font-mono
                                 `}
                             >
                                 {/* Animated indicator line for active route */}
                                 {isRouteActive(route.href) && (
-                                    <div className="absolute left-0 top-0 bottom-0 w-0.5 xs:w-1 sm:w-1.5 bg-yellow-500 rounded-r animate-pulse"></div>
+                                    <div className="absolute left-0 top-0 bottom-0 w-0.5 xs:w-1 sm:w-1.5 bg-amber-500 rounded-r animate-pulse"></div>
                                 )}
                                 
                                 <div className={`
                                     mr-1.5 xs:mr-2 sm:mr-2.5 flex items-center justify-center h-3.5 w-3.5 xs:h-4 xs:w-4 sm:h-5 sm:w-5 flex-shrink-0
                                     ${isRouteActive(route.href) 
-                                        ? "text-yellow-400" 
-                                        : "text-gray-400 group-hover:text-yellow-400"}
+                                        ? "text-amber-400" 
+                                        : "text-gray-400 group-hover:text-amber-400"}
                                     transition-colors duration-200
                                 `}>
                                     <route.icon className="h-3.5 w-3.5 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
                                 </div>
-                                <span className="truncate">{route.label}</span>
+                                <span className="truncate">{route.id}.view()</span>
                             </Link>
                         )
                     )}
@@ -299,7 +298,7 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
             </nav>
 
             {/* Footer with Logout Button */}
-            <div className="p-1.5 xs:p-2 sm:p-3 border-t border-yellow-500/20 mt-auto flex-shrink-0">
+            <div className="p-1.5 xs:p-2 sm:p-3 border-t border-amber-500/20 mt-auto flex-shrink-0">
                 <button 
                     onClick={(e) => {
                         e.stopPropagation(); // Prevent event bubbling
@@ -307,10 +306,10 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                     }}
                     className="flex items-center justify-center w-full gap-1 xs:gap-1.5 sm:gap-2 px-1.5 xs:px-2 sm:px-3 py-1 xs:py-1.5 sm:py-2
                         text-xs sm:text-sm md:text-base text-red-400 hover:bg-red-500/10 hover:text-red-300
-                        rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500/40"
+                        rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500/40 font-mono"
                 >
                     <LogOut className="h-2.5 w-2.5 xs:h-3 xs:w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <span className="truncate">Logout</span>
+                    <span className="truncate">auth.logout()</span>
                 </button>
             </div>
 
@@ -328,8 +327,8 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                 .scrollbar-thin {
                     scrollbar-width: thin;
                 }
-                .scrollbar-thumb-yellow-500\\/20::-webkit-scrollbar-thumb {
-                    background-color: rgba(234, 179, 8, 0.2);
+                .scrollbar-thumb-amber-500\\/20::-webkit-scrollbar-thumb {
+                    background-color: rgba(245, 158, 11, 0.2);
                     border-radius: 3px;
                 }
                 .scrollbar-thin::-webkit-scrollbar {

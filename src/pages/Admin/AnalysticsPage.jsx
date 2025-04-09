@@ -76,8 +76,8 @@ export default function AnalyticsPage() {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center h-64">
-                <Loader2 className="w-12 h-12 text-yellow-500 animate-spin mb-4" />
-                <p className="text-gray-400">Loading analytics data...</p>
+                <Loader2 className="w-12 h-12 text-amber-500 animate-spin mb-4" />
+                <p className="text-gray-400 font-mono">analytics.loading()</p>
             </div>
         );
     }
@@ -90,25 +90,29 @@ export default function AnalyticsPage() {
 
     return (
         <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-white mb-6">🐝 Analytics Dashboard</h2>
+            <h2 className="text-3xl font-bold text-white mb-6 font-mono">
+                <span className="text-amber-500">admin</span>
+                <span className="text-white">.analytics</span>
+                <span className="text-amber-400">.dashboard()</span>
+            </h2>
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                    { title: "Total Projects", value: stats.totalProjects, icon: <Layers className="w-5 h-5" />, color: "bg-blue-500" },
-                    { title: "Approved Projects", value: stats.acceptedProjects, icon: <CheckCircle className="w-5 h-5" />, color: "bg-green-500" },
-                    { title: "Rejected Projects", value: stats.rejectedProjects, icon: <XCircle className="w-5 h-5" />, color: "bg-red-500" },
-                    { title: "Total Users", value: stats.totalUsers, icon: <Users className="w-5 h-5" />, color: "bg-purple-500" }
+                    { title: "projects.total", value: stats.totalProjects, icon: <Layers className="w-5 h-5" />, color: "bg-blue-500" },
+                    { title: "projects.approved", value: stats.acceptedProjects, icon: <CheckCircle className="w-5 h-5" />, color: "bg-green-500" },
+                    { title: "projects.rejected", value: stats.rejectedProjects, icon: <XCircle className="w-5 h-5" />, color: "bg-red-500" },
+                    { title: "users.total", value: stats.totalUsers, icon: <Users className="w-5 h-5" />, color: "bg-purple-500" }
                 ].map((kpi, index) => (
-                    <div key={index} className="bg-[#1C1F2E] border border-yellow-500/50 rounded-lg p-6">
+                    <div key={index} className="bg-gray-900 border border-amber-500/30 rounded-lg p-6">
                         <div className="flex justify-between items-center mb-4">
-                            <span className="text-gray-400 text-sm">{kpi.title}</span>
+                            <span className="text-gray-400 text-sm font-mono">{kpi.title}</span>
                             <div className={`${kpi.color} p-2 rounded-md bg-opacity-20`}>
                                 {kpi.icon}
                             </div>
                         </div>
                         <div className="flex items-baseline">
-                            <span className="text-3xl font-bold text-white">{kpi.value}</span>
+                            <span className="text-3xl font-bold text-white font-mono">{kpi.value}</span>
                         </div>
                     </div>
                 ))}
@@ -117,34 +121,34 @@ export default function AnalyticsPage() {
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Project Submissions Chart */}
-                <div className="bg-[#1C1F2E] border border-yellow-500 rounded-lg shadow-md p-6">
+                <div className="bg-gray-900 border border-amber-500/30 rounded-lg shadow-md p-6">
                     <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-sm font-medium text-gray-400">Project Submissions</h3>
-                        <TrendingUp className="h-5 w-5 text-yellow-400" />
+                        <h3 className="text-sm font-medium text-gray-400 font-mono">// project submissions</h3>
+                        <TrendingUp className="h-5 w-5 text-amber-400" />
                     </div>
 
                     <div className="h-64 flex items-end justify-between mt-2">
                         {projectTrend.map((value, i) => (
                             <div key={i} className="flex flex-col items-center">
                                 <div
-                                    className="w-10 bg-gradient-to-t from-yellow-500 to-yellow-300 rounded-t-md mx-1 relative"
+                                    className="w-10 bg-gradient-to-t from-amber-500 to-amber-300 rounded-t-md mx-1 relative"
                                     style={{ height: `${value * 2}px` }}
                                 >
-                                    <span className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-medium text-white">
+                                    <span className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-medium text-white font-mono">
                                         {value}
                                     </span>
                                 </div>
-                                <span className="text-gray-400 text-xs mt-2">{months[i]}</span>
+                                <span className="text-gray-400 text-xs mt-2 font-mono">{months[i]}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* Project Status Distribution */}
-                <div className="bg-[#1C1F2E] border border-yellow-500 rounded-lg shadow-md p-6">
+                <div className="bg-gray-900 border border-amber-500/30 rounded-lg shadow-md p-6">
                     <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-sm font-medium text-gray-400">Project Status Distribution</h3>
-                        <PieChart className="h-5 w-5 text-yellow-400" />
+                        <h3 className="text-sm font-medium text-gray-400 font-mono">// project status distribution</h3>
+                        <PieChart className="h-5 w-5 text-amber-400" />
                     </div>
 
                     <div className="flex items-center justify-center">
@@ -164,7 +168,7 @@ export default function AnalyticsPage() {
                                     <circle
                                         cx="50" cy="50" r="40"
                                         fill="transparent"
-                                        stroke="#EAB308"
+                                        stroke="#F59E0B"
                                         strokeWidth="20"
                                         strokeDasharray={`${pendingPercent * 2.51} 251.3`}
                                         strokeDashoffset={`-${acceptedPercent * 2.51}`}
@@ -182,33 +186,33 @@ export default function AnalyticsPage() {
                                 )}
                             </svg>
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-2xl font-bold text-white">{stats.totalProjects}</span>
+                                <span className="text-2xl font-bold text-white font-mono">{stats.totalProjects}</span>
                             </div>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 mt-6">
                         <div className="flex items-center">
-                            <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                            <span className="text-xs text-gray-400">Approved ({acceptedPercent}%)</span>
+                            <div className="w-3 h-3 rounded-sm bg-green-500 mr-2"></div>
+                            <span className="text-xs text-gray-400 font-mono">.approved ({acceptedPercent}%)</span>
                         </div>
                         <div className="flex items-center">
-                            <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
-                            <span className="text-xs text-gray-400">Pending ({pendingPercent}%)</span>
+                            <div className="w-3 h-3 rounded-sm bg-amber-500 mr-2"></div>
+                            <span className="text-xs text-gray-400 font-mono">.pending ({pendingPercent}%)</span>
                         </div>
                         <div className="flex items-center">
-                            <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-                            <span className="text-xs text-gray-400">Rejected ({rejectedPercent}%)</span>
+                            <div className="w-3 h-3 rounded-sm bg-red-500 mr-2"></div>
+                            <span className="text-xs text-gray-400 font-mono">.rejected ({rejectedPercent}%)</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Popular Categories */}
-            <div className="bg-[#1C1F2E] border border-yellow-500 rounded-lg shadow-md p-6">
+            <div className="bg-gray-900 border border-amber-500/30 rounded-lg shadow-md p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-sm font-medium text-gray-400">Popular Categories</h3>
-                    <BarChart className="h-5 w-5 text-yellow-400" />
+                    <h3 className="text-sm font-medium text-gray-400 font-mono">// popular categories</h3>
+                    <BarChart className="h-5 w-5 text-amber-400" />
                 </div>
 
                 <div className="space-y-4">
@@ -216,19 +220,19 @@ export default function AnalyticsPage() {
                         categoryData.map((category, i) => (
                             <div key={i}>
                                 <div className="flex justify-between text-xs mb-1">
-                                    <span className="text-white">{category.name}</span>
-                                    <span className="text-gray-400">{category.percent}%</span>
+                                    <span className="text-white font-mono">{category.name}</span>
+                                    <span className="text-gray-400 font-mono">{category.percent}%</span>
                                 </div>
                                 <div className="w-full h-2 bg-gray-700 rounded-full">
                                     <div
-                                        className="h-full bg-gradient-to-r from-yellow-500 to-yellow-300 rounded-full"
+                                        className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"
                                         style={{ width: `${category.percent}%` }}
                                     ></div>
                                 </div>
                             </div>
                         ))
                         :
-                        <p className="text-center text-gray-400 py-4">No category data available</p>
+                        <p className="text-center text-gray-400 py-4 font-mono">// no category data available</p>
                     }
                 </div>
             </div>
@@ -236,7 +240,7 @@ export default function AnalyticsPage() {
             {/* Background pattern */}
             <div className="fixed inset-0 opacity-3 pointer-events-none z-[-1]"
                  style={{
-                     backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath fill='%23EAB308' opacity='0.05' d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100'/%3E%3C/svg%3E\")",
+                     backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath fill='%23F59E0B' opacity='0.05' d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100'/%3E%3C/svg%3E\")",
                      backgroundSize: "112px 200px"
                  }}>
             </div>

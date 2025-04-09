@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/Auth/AuthContext";
 import { useChat } from "./components/ChatContext.jsx";
 import { fetchProjectById } from "../../../services/userService/UserService.js";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Terminal, RefreshCw, ArrowLeft } from "lucide-react";
 
 import ChatHeader from "./components/ChatHeader";
 import ChatMessages from "./components/ChatMessages";
@@ -35,7 +35,7 @@ export default function ProjectChatPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
-    // Initialize chat when component mounts
+    // Initialization logic remains unchanged...
     useEffect(() => {
         let mounted = true;
         let connectionTimeoutId = null;
@@ -52,8 +52,8 @@ export default function ProjectChatPage() {
                 console.warn("Chat initialization safety timeout triggered");
                 setLoading(false);
                 setError({
-                    title: "Connection Timeout",
-                    message: "The chat is taking too long to connect. Please try again."
+                    title: "ConnectionTimeoutError",
+                    message: "Error: Socket connection timeout after 25000ms. Please retry operation."
                 });
             }, 25000); // Increased timeout to 25s
             
@@ -119,8 +119,8 @@ export default function ProjectChatPage() {
                 if (!mounted) return;
                 
                 setError({
-                    title: "Failed to Connect",
-                    message: error.message || "Unable to connect to the chat. Please try again later."
+                    title: "ConnectionError",
+                    message: error.message || "Error: WebSocket connection failed. Check network status."
                 });
                 setLoading(false);
                 
@@ -157,14 +157,13 @@ export default function ProjectChatPage() {
         };
     }, [projectId, connect]);
     
-    // Scroll to bottom when messages change
+    // Other effect hooks remain unchanged...
     useEffect(() => {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [messages]);
     
-    // Add a safety timeout to clear loading state
     useEffect(() => {
         let loadingTimeoutId = null;
         
@@ -183,7 +182,6 @@ export default function ProjectChatPage() {
         };
     }, [loadingMessages, connected, projectId, disconnect, connect]);
     
-    // Add this effect to force reset the loading state:
     useEffect(() => {
         let forceResetTimerId = null;
         
@@ -221,47 +219,76 @@ export default function ProjectChatPage() {
     // Show error state if needed
     if (error) {
         return (
-            <div className="min-h-screen bg-gradient-to-b from-[#0A0B14] to-[#12141F] text-white flex flex-col items-center justify-center p-4">
-                <div className="bg-gray-800/50 rounded-full p-5 mb-4">
-                    <AlertCircle className="h-12 w-12 text-yellow-500" />
+            <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center p-4 font-mono">
+                <div className="max-w-md w-full bg-gray-900 border border-red-500/30 rounded-lg shadow-lg overflow-hidden">
+                    <div className="bg-gray-800 px-4 py-2 border-b border-gray-700 flex items-center">
+                        <Terminal className="h-4 w-4 text-red-400 mr-2" />
+                        <span className="text-red-400 font-semibold">fatal_error.log</span>
+                    </div>
+                    
+                    <div className="p-6 space-y-4">
+                        <div className="flex items-start">
+                            <AlertCircle className="h-5 w-5 text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
+                            <div>
+                                <p className="text-amber-500 font-bold">{error.title}</p>
+                                <p className="text-gray-300 mt-1 font-mono">{error.message}</p>
+                            </div>
+                        </div>
+                        
+                        <div className="pt-4 border-t border-gray-800 text-sm">
+                            <div className="text-gray-500">
+                                <span className="text-green-400">➜</span> <span className="text-blue-400">debug</span> Try one of the following:
+                            </div>
+                            <div className="flex mt-4 space-x-3">
+                                <button 
+                                    onClick={() => {
+                                        disconnect();
+                                        navigate("/user/messages");
+                                    }}
+                                    className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded text-white text-sm transition-colors flex items-center"
+                                >
+                                    <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
+                                    chat.navigate('/messages')
+                                </button>
+                                <button 
+                                    onClick={() => window.location.reload()}
+                                    className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded text-amber-400 text-sm transition-colors flex items-center"
+                                >
+                                    <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                                    connection.retry()
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <p className="text-xl font-medium mb-2">{error.title}</p>
-                <p className="text-sm text-center max-w-md">{error.message}</p>
-                <div className="mt-6 flex space-x-4">
-                    <button 
-                        onClick={() => {
-                            disconnect(); // Ensure clean disconnect before navigating
-                            navigate("/user/messages");
-                        }}
-                        className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-white transition-colors"
-                    >
-                        Back to Messages
-                    </button>
-                    <button 
-                        onClick={() => window.location.reload()}
-                        className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 rounded-lg text-black transition-colors"
-                    >
-                        Try Again
-                    </button>
+                
+                {/* Subtle code pattern background */}
+                <div className="fixed inset-0 opacity-5 pointer-events-none z-[-1]"
+                    style={{
+                        backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath fill='%23F59E0B' opacity='0.1' d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100'/%3E%3C/svg%3E\")",
+                        backgroundSize: "112px 200px"
+                    }}>
                 </div>
             </div>
         );
     }
     
     return (
-        <div className="min-h-screen bg-gradient-to-b from-[#0A0B14] to-[#12141F] text-white flex flex-col">
+        <div className="min-h-screen bg-gray-950 text-white flex flex-col font-mono">
             <ChatHeader 
                 loading={loading}
                 project={project}
                 connected={connected}
                 showProjectInfo={showProjectInfo}
                 setShowProjectInfo={setShowProjectInfo}
+                terminalStyle={true} // Add this prop to enable the terminal style
             />
             
-            <div className="flex-grow flex flex-col p-4 max-w-4xl mx-auto w-full">
+            <div className="flex-grow flex flex-col p-4 max-w-4xl mx-auto w-full relative">
+                
                 {loading ? (
                     <div className="flex-grow flex items-center justify-center">
-                        <MessageSkeleton count={4} />
+                        <MessageSkeleton count={4} terminalStyle={true} />
                     </div>
                 ) : (
                     <ChatMessages 
@@ -269,6 +296,7 @@ export default function ProjectChatPage() {
                         loadingMessages={loadingMessages}
                         currentUser={user}
                         messagesEndRef={messagesEndRef}
+                        terminalStyle={true} // Add this prop
                     />
                 )}
                 
@@ -277,8 +305,17 @@ export default function ProjectChatPage() {
                         onSendMessage={handleSendMessage}
                         connected={connected}
                         connecting={connecting}
+                        terminalStyle={true} // Add this prop
                     />
                 )}
+            </div>
+            
+            {/* Subtle code pattern background */}
+            <div className="fixed inset-0 opacity-5 pointer-events-none z-[-1]"
+                style={{
+                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath fill='%23F59E0B' opacity='0.1' d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100'/%3E%3C/svg%3E\")",
+                    backgroundSize: "112px 200px"
+                }}>
             </div>
         </div>
     );

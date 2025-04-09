@@ -1,4 +1,4 @@
-import { Bell, Search, LogOut, Menu, User, X, ExternalLink } from "lucide-react";
+import { Bell, Search, LogOut, Menu, User, X, ExternalLink, Code } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/Auth/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
@@ -86,20 +86,23 @@ export default function UserDashboardHeader({ toggleSidebar }) {
     ];
 
     return (
-        <header className="sticky top-0 z-40 border-b border-yellow-500/30 bg-gradient-to-r from-[#0A0B14] to-[#14172B] text-white shadow-md backdrop-blur-sm">
+        <header className="sticky top-0 z-40 border-b border-amber-500/30 bg-gray-950 text-white shadow-md">
             <div className="flex h-14 sm:h-16 items-center justify-between px-3 sm:px-6">
                 {/* Left Section: Sidebar Toggle & Dashboard Title */}
                 <div className="flex items-center gap-2 sm:gap-4">
                     <button 
-                        className="lg:hidden p-1.5 sm:p-2 rounded-md transition-all duration-200 hover:bg-yellow-500/10 focus:outline-none focus:ring-2 focus:ring-yellow-500/50" 
+                        className="lg:hidden p-1.5 sm:p-2 rounded-md transition-all duration-200 hover:bg-amber-500/10 focus:outline-none focus:ring-2 focus:ring-amber-500/50" 
                         onClick={toggleSidebar}
                         aria-label="Toggle sidebar"
                     >
-                        <Menu className="h-5 w-5 text-yellow-400" />
+                        <Menu className="h-5 w-5 text-amber-400" />
                     </button>
-                    <h1 className="text-base sm:text-xl font-bold whitespace-nowrap">
-                        <span className="bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">Hive</span>
-                        <span className="text-white"> Dashboard</span>
+                    <h1 className="text-base sm:text-xl font-bold whitespace-nowrap font-mono">
+                        <span className="text-white">console.</span>
+                        <span className="text-amber-400">log</span>
+                        <span className="text-white">(</span>
+                        <span className="text-green-400">"Dashboard"</span>
+                        <span className="text-white">);</span>
                     </h1>
                 </div>
 
@@ -107,11 +110,11 @@ export default function UserDashboardHeader({ toggleSidebar }) {
                 <div className="flex items-center gap-1 sm:gap-3">
                     {/* Mobile Search Toggle */}
                     <button 
-                        className="sm:hidden relative p-1.5 rounded-full hover:bg-yellow-500/10 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+                        className="sm:hidden relative p-1.5 rounded-md hover:bg-amber-500/10 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                         onClick={() => setIsSearchVisible(!isSearchVisible)}
                         aria-label="Toggle search"
                     >
-                        <Search className="h-5 w-5 text-yellow-400" />
+                        <Search className="h-5 w-5 text-amber-400" />
                     </button>
 
                     {/* Desktop Search */}
@@ -121,16 +124,16 @@ export default function UserDashboardHeader({ toggleSidebar }) {
                         className={`hidden sm:block relative ${isSearchFocused ? 'w-72' : 'w-48 md:w-64'} transition-all duration-300`}
                     >
                         <div className="relative">
-                            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 ${isSearchFocused ? 'text-yellow-400' : 'text-gray-500'} transition-colors duration-200`} />
+                            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 ${isSearchFocused ? 'text-amber-400' : 'text-gray-500'} transition-colors duration-200`} />
                             <input
                                 ref={searchInputRef}
                                 type="search"
-                                placeholder="Search the Hive..."
+                                placeholder="search.query('...')"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onFocus={() => setIsSearchFocused(true)}
                                 onBlur={() => setIsSearchFocused(false)}
-                                className={`w-full bg-gray-900/80 border ${isSearchFocused ? 'border-yellow-500' : 'border-gray-700'} rounded-full pl-9 pr-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-yellow-500/50 text-white placeholder-gray-500 transition-all duration-200`}
+                                className={`w-full bg-gray-900/80 border ${isSearchFocused ? 'border-amber-500' : 'border-gray-700'} rounded-md pl-9 pr-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-white placeholder-gray-500 transition-all duration-200 font-mono`}
                             />
                             {searchQuery && (
                                 <button
@@ -147,7 +150,7 @@ export default function UserDashboardHeader({ toggleSidebar }) {
 
                     {/* Mobile Search Expanded */}
                     {isSearchVisible && (
-                        <div className="absolute inset-x-0 top-0 bg-[#0A0B14] p-3 sm:hidden z-50 animate-slideDown border-b border-yellow-500/20">
+                        <div className="absolute inset-x-0 top-0 bg-gray-950 p-3 sm:hidden z-50 animate-slideDown border-b border-amber-500/20">
                             <form
                                 onSubmit={(e) => {
                                     handleSearchSubmit(e);
@@ -155,14 +158,14 @@ export default function UserDashboardHeader({ toggleSidebar }) {
                                 }}
                                 className="relative flex items-center"
                             >
-                                <Search className="absolute left-3 text-yellow-400 h-4 w-4" />
+                                <Search className="absolute left-3 text-amber-400 h-4 w-4" />
                                 <input
                                     autoFocus
                                     type="search"
-                                    placeholder="Search the Hive..."
+                                    placeholder="search.query('...')"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full bg-gray-900/80 border border-yellow-500 rounded-full pl-9 pr-9 py-2 text-sm focus:outline-none text-white placeholder-gray-500"
+                                    className="w-full bg-gray-900/80 border border-amber-500 rounded-md pl-9 pr-9 py-2 text-sm focus:outline-none text-white placeholder-gray-500 font-mono"
                                 />
                                 <button
                                     type="button"
@@ -183,25 +186,25 @@ export default function UserDashboardHeader({ toggleSidebar }) {
                                 setIsNotificationOpen(!isNotificationOpen);
                                 setIsUserMenuOpen(false);
                             }}
-                            className="relative h-8 w-8 sm:h-9 sm:w-9 rounded-full flex items-center justify-center hover:bg-yellow-500/10 active:bg-yellow-500/20 transition duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+                            className="relative h-8 w-8 sm:h-9 sm:w-9 rounded-md flex items-center justify-center hover:bg-amber-500/10 active:bg-amber-500/20 transition duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                             aria-label="Notifications"
                         >
-                            <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400" />
+                            <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-amber-400" />
                             {notifications.some(n => !n.read) && (
-                                <span className="absolute top-1 right-1.5 h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-yellow-500 ring-2 ring-[#0A0B14] animate-pulse" />
+                                <span className="absolute top-1 right-1.5 h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-sm bg-amber-500 ring-1 ring-gray-950" />
                             )}
                         </button>
 
                         {/* Enhanced Notification Dropdown */}
                         {isNotificationOpen && (
-                            <div className="absolute right-0 mt-2 w-64 sm:w-80 bg-gradient-to-b from-[#181A28] to-[#1F2235] text-white rounded-lg shadow-xl border border-gray-800 z-50 animate-slideDown overflow-hidden">
-                                <div className="p-3 border-b border-gray-800 flex justify-between items-center">
-                                    <h3 className="text-sm font-semibold text-yellow-400 flex items-center">
+                            <div className="absolute right-0 mt-2 w-64 sm:w-80 bg-gray-900 text-white rounded-md shadow-xl border border-amber-500/20 z-50 animate-slideDown overflow-hidden">
+                                <div className="p-3 border-b border-amber-500/20 flex justify-between items-center bg-gray-950">
+                                    <h3 className="text-sm font-semibold text-amber-400 flex items-center font-mono">
                                         <Bell className="h-4 w-4 mr-2" />
-                                        Notifications
+                                        notifications.list()
                                     </h3>
-                                    <button className="text-xs text-gray-400 hover:text-yellow-400 transition-colors duration-200">
-                                        Mark all as read
+                                    <button className="text-xs text-amber-400/70 hover:text-amber-400 transition-colors duration-200 font-mono">
+                                        .markAllRead()
                                     </button>
                                 </div>
                                 
@@ -211,17 +214,17 @@ export default function UserDashboardHeader({ toggleSidebar }) {
                                             {notifications.map(notification => (
                                                 <div 
                                                     key={notification.id}
-                                                    className={`p-3 border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors duration-200 cursor-pointer ${notification.read ? '' : 'bg-yellow-500/5'}`}
+                                                    className={`p-3 border-b border-amber-500/10 hover:bg-amber-500/5 transition-colors duration-200 cursor-pointer ${notification.read ? '' : 'bg-amber-500/10'}`}
                                                 >
                                                     <div className="flex items-start">
                                                         {!notification.read && (
-                                                            <div className="h-2 w-2 mt-1.5 mr-2 rounded-full bg-yellow-500 flex-shrink-0"></div>
+                                                            <div className="h-2 w-2 mt-1.5 mr-2 rounded-sm bg-amber-500 flex-shrink-0"></div>
                                                         )}
                                                         <div className={`flex-grow ${notification.read ? '' : 'pl-1'}`}>
-                                                            <p className={`text-xs sm:text-sm ${notification.read ? 'text-gray-300' : 'text-white'}`}>
+                                                            <p className={`text-xs sm:text-sm font-mono ${notification.read ? 'text-gray-300' : 'text-white'}`}>
                                                                 {notification.message}
                                                             </p>
-                                                            <p className="text-xs text-yellow-500/80 mt-1">
+                                                            <p className="text-xs text-amber-500/70 mt-1 font-mono">
                                                                 {notification.time}
                                                             </p>
                                                         </div>
@@ -231,14 +234,14 @@ export default function UserDashboardHeader({ toggleSidebar }) {
                                         </div>
                                     ) : (
                                         <div className="p-6 text-center">
-                                            <p className="text-gray-400 text-sm">No notifications yet</p>
+                                            <p className="text-gray-400 text-sm font-mono">notifications.length === 0</p>
                                         </div>
                                     )}
                                 </div>
                                 
-                                <div className="p-2 border-t border-gray-800 bg-gray-900/30 text-center">
-                                    <button className="text-xs text-yellow-400 hover:text-yellow-300 flex items-center justify-center w-full py-1.5 transition-colors duration-200">
-                                        View all notifications
+                                <div className="p-2 border-t border-amber-500/20 bg-gray-950 text-center">
+                                    <button className="text-xs text-amber-400 hover:text-amber-300 flex items-center justify-center w-full py-1.5 transition-colors duration-200 font-mono">
+                                        notifications.viewAll()
                                         <ExternalLink className="h-3 w-3 ml-1.5" />
                                     </button>
                                 </div>
@@ -253,26 +256,29 @@ export default function UserDashboardHeader({ toggleSidebar }) {
                                 setIsUserMenuOpen(!isUserMenuOpen);
                                 setIsNotificationOpen(false);
                             }}
-                            className="flex items-center gap-2 pl-1.5 pr-1.5 sm:pl-2 sm:pr-3 py-1 sm:py-1.5 rounded-full hover:bg-yellow-500/10 active:bg-yellow-500/20 transition duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+                            className="flex items-center gap-2 pl-1.5 pr-1.5 sm:pl-2 sm:pr-3 py-1 sm:py-1.5 rounded-md hover:bg-amber-500/10 active:bg-amber-500/20 transition duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                             aria-label="User menu"
                         >
-                            <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center text-black font-bold text-xs sm:text-sm">
+                            <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gray-800 border border-amber-500/50 rounded-md flex items-center justify-center text-amber-500 font-mono text-xs sm:text-sm flex-shrink-0">
                                 {getUserInitials()}
                             </div>
-                            <span className="hidden sm:inline-block text-sm text-gray-300">{user?.username}</span>
+                            <span className="hidden sm:inline-block text-sm text-gray-300 font-mono">{user?.username}</span>
                         </button>
 
                         {/* User Menu Dropdown */}
                         {isUserMenuOpen && (
-                            <div className="absolute right-0 mt-2 w-44 sm:w-48 bg-gradient-to-b from-[#181A28] to-[#1F2235] text-white rounded-lg shadow-xl border border-gray-800 z-50 animate-slideDown overflow-hidden">
-                                <div className="p-3 border-b border-gray-800">
+                            <div className="absolute right-0 mt-2 w-44 sm:w-56 bg-gray-900 text-white rounded-md shadow-xl border border-amber-500/20 z-50 animate-slideDown overflow-hidden">
+                                <div className="p-3 border-b border-amber-500/20 bg-gray-950">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center text-black font-bold text-xs sm:text-sm">
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-800 border border-amber-500/50 rounded-md flex items-center justify-center text-amber-500 font-bold text-xs sm:text-sm font-mono">
                                             {getUserInitials()}
                                         </div>
                                         <div>
-                                            <p className="text-xs sm:text-sm font-semibold truncate max-w-[120px]">{user?.username}</p>
-                                            <p className="text-xs text-gray-400">Developer</p>
+                                            <p className="text-xs sm:text-sm font-semibold truncate max-w-[120px] font-mono">{user?.username}</p>
+                                            <p className="text-xs text-amber-400/70 flex items-center truncate font-mono">
+                                                <Code className="h-3 w-3 mr-1 flex-shrink-0" />
+                                                .developer
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -283,17 +289,17 @@ export default function UserDashboardHeader({ toggleSidebar }) {
                                             setIsUserMenuOpen(false);
                                             navigate('/user/profile');
                                         }}
-                                        className="w-full text-left px-4 py-2 text-xs sm:text-sm text-gray-300 hover:bg-gray-800 flex items-center"
+                                        className="w-full text-left px-4 py-2 text-xs sm:text-sm text-gray-300 hover:bg-amber-500/10 flex items-center font-mono"
                                     >
-                                        <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-400 mr-2" />
-                                        My Profile
+                                        <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-400 mr-2" />
+                                        user.viewProfile()
                                     </button>
                                     <button
                                         onClick={handleLogout}
-                                        className="w-full text-left px-4 py-2 text-xs sm:text-sm text-red-400 hover:bg-gray-800 flex items-center"
+                                        className="w-full text-left px-4 py-2 text-xs sm:text-sm text-red-400 hover:bg-red-500/10 flex items-center font-mono"
                                     >
                                         <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
-                                        Logout
+                                        auth.logout()
                                     </button>
                                 </div>
                             </div>
@@ -328,7 +334,7 @@ export default function UserDashboardHeader({ toggleSidebar }) {
                 }
                 
                 .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background-color: rgba(234, 179, 8, 0.3);
+                    background-color: rgba(245, 158, 11, 0.3);
                     border-radius: 2px;
                 }
             `}</style>

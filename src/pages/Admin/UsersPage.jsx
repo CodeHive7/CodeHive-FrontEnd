@@ -72,65 +72,70 @@ export default function UsersPage() {
 
     return (
         <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-white mb-6">🐝 User Management</h2>
+            <h2 className="text-3xl font-bold text-white mb-6 font-mono">
+                <span className="text-amber-500">admin</span>
+                <span className="text-white">.users</span>
+                <span className="text-amber-400">.getAll()</span>
+            </h2>
 
             {/* User Management Actions */}
-            <div className="bg-[#1C1F2E] border border-yellow-500 rounded-lg shadow-md">
+            <div className="bg-gray-900 border border-amber-500/30 rounded-lg shadow-md">
                 <div className="flex flex-row items-center justify-between p-6 pb-2">
-                    <h3 className="text-sm font-medium text-gray-400">Manage Users</h3>
+                    <h3 className="text-sm font-medium text-gray-400 font-mono">// manage users</h3>
                     <button
-                        className="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-md flex items-center transition-colors"
+                        className="bg-amber-500 hover:bg-amber-400 text-black px-4 py-2 rounded-md flex items-center transition-colors font-mono"
                         onClick={openUserModal}
                     >
-                        <UserPlus className="w-5 h-5 mr-2" /> Add User
+                        <UserPlus className="w-5 h-5 mr-2" /> user.create()
                     </button>
                 </div>
             </div>
 
             {/* Users Table */}
-            <div className="bg-[#1C1F2E] border border-yellow-500 rounded-lg shadow-md">
+            <div className="bg-gray-900 border border-amber-500/30 rounded-lg shadow-md">
                 <div className="flex flex-row items-center justify-between p-6 pb-2">
-                    <h3 className="text-sm font-medium text-gray-400">All Users</h3>
-                    <Users className="h-5 w-5 text-yellow-400" />
+                    <h3 className="text-sm font-medium text-gray-400 font-mono">users.length: {users.length}</h3>
+                    <Users className="h-5 w-5 text-amber-400" />
                 </div>
                 <div className="p-6 pt-0">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-white">
-                            <thead className="border-b border-gray-700">
+                        <table className="w-full text-sm text-white font-mono">
+                            <thead className="border-b border-amber-500/20">
                             <tr className="text-left">
-                                <th className="h-12 px-4 text-gray-400 font-medium">Name</th>
-                                <th className="h-12 px-4 text-gray-400 font-medium">Email</th>
-                                <th className="h-12 px-4 text-gray-400 font-medium">Role</th>
-                                <th className="h-12 px-4 text-gray-400 font-medium">Status</th>
-                                <th className="h-12 px-4 text-gray-400 font-medium">Actions</th>
+                                <th className="h-12 px-4 text-amber-400/70 font-medium">.username</th>
+                                <th className="h-12 px-4 text-amber-400/70 font-medium">.email</th>
+                                <th className="h-12 px-4 text-amber-400/70 font-medium">.roles</th>
+                                <th className="h-12 px-4 text-amber-400/70 font-medium">.status</th>
+                                <th className="h-12 px-4 text-amber-400/70 font-medium">.actions</th>
                             </tr>
                             </thead>
                             <tbody>
                             {users.map((user, i) => (
                                 <tr
                                     key={i}
-                                    className="border-b border-gray-700 hover:bg-gray-900/50 transition-colors"
+                                    className="border-b border-amber-500/10 hover:bg-amber-500/5 transition-colors"
                                 >
                                     <td className="p-4">{user.username}</td>
                                     <td className="p-4">{user.email}</td>
-                                    <td className="p-4">{user.roles.length > 0 ? user.roles.join(", ") : "No Role"}</td>
+                                    <td className="p-4">{user.roles.length > 0 ? user.roles.join(", ") : "null"}</td>
                                     <td className="p-4">
                                             <span
-                                                className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                                                className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
                                                     user.status === "Active" ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
                                                 }`}
                                             >
-                                                {user.status}
+                                                {user.status === "Active" ? "active" : "blocked"}
                                             </span>
                                     </td>
                                     <td className="p-4 flex items-center space-x-3">
                                         <button
-                                            className={`p-1.5 rounded-full ${
+                                            className={`p-1.5 rounded-md ${
                                                 user.status === "Active"
                                                     ? "bg-red-600 hover:bg-red-700 text-white"
                                                     : "bg-green-600 hover:bg-green-700 text-white"
                                             }`}
                                             onClick={() => handleBanUnban(user)}
+                                            title={user.status === "Active" ? "Block User" : "Unblock User"}
                                         >
                                             {user.status === "Active" ?
                                                 <Trash2 className="w-4 h-4"/> :
@@ -138,8 +143,9 @@ export default function UsersPage() {
                                             }
                                         </button>
                                         <button
-                                            className="p-1.5 bg-yellow-500 hover:bg-yellow-400 text-black rounded-full"
+                                            className="p-1.5 bg-amber-500 hover:bg-amber-400 text-black rounded-md"
                                             onClick={() => openRoleModal(user)}
+                                            title="Edit Roles"
                                         >
                                             <Pencil className="w-4 h-4"/>
                                         </button>
@@ -150,7 +156,7 @@ export default function UsersPage() {
                             {users.length === 0 && (
                                 <tr>
                                     <td colSpan="5" className="p-4 text-center text-gray-400">
-                                        No users found
+                                        // no users found - array is empty
                                     </td>
                                 </tr>
                             )}

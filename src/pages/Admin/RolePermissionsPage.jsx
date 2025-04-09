@@ -45,13 +45,17 @@ export default function RolePermissionsPage() {
     return (
         <DndProvider backend={HTML5Backend}>
             <div className="space-y-6">
-                <h2 className="text-3xl font-bold text-white mb-6">🐝 Role Permissions</h2>
+                <h2 className="text-3xl font-bold text-white mb-6 font-mono">
+                    <span className="text-amber-500">admin</span>
+                    <span className="text-white">.roles</span>
+                    <span className="text-amber-400">.permissions()</span>
+                </h2>
 
                 {/* Permissions List */}
-                <div className="bg-[#1C1F2E] border border-yellow-500 rounded-lg shadow-md">
+                <div className="bg-gray-900 border border-amber-500/30 rounded-lg shadow-md">
                     <div className="flex flex-row items-center justify-between p-6 pb-2">
-                        <h3 className="text-sm font-medium text-gray-400">Available Permissions</h3>
-                        <Shield className="h-5 w-5 text-yellow-400" />
+                        <h3 className="text-sm font-medium text-gray-400 font-mono">// available permissions</h3>
+                        <Shield className="h-5 w-5 text-amber-400" />
                     </div>
                     <div className="p-6 pt-2">
                         <div className="flex flex-wrap gap-3">
@@ -60,8 +64,8 @@ export default function RolePermissionsPage() {
                             ))}
 
                             {permissions.length === 0 && (
-                                <div className="py-4 text-center text-gray-400 w-full">
-                                    No permissions available
+                                <div className="py-4 text-center text-gray-400 w-full font-mono">
+                                    permissions.length === 0
                                 </div>
                             )}
                         </div>
@@ -69,15 +73,15 @@ export default function RolePermissionsPage() {
                 </div>
 
                 {/* Roles Section */}
-                <div className="bg-[#1C1F2E] border border-yellow-500 rounded-lg shadow-md">
+                <div className="bg-gray-900 border border-amber-500/30 rounded-lg shadow-md">
                     <div className="flex flex-row items-center justify-between p-6 pb-2">
-                        <h3 className="text-sm font-medium text-gray-400">Manage Roles</h3>
+                        <h3 className="text-sm font-medium text-gray-400 font-mono">// manage roles</h3>
                         <button
                             onClick={() => setIsRoleModalOpen(true)}
-                            className="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-md flex items-center transition-colors"
+                            className="bg-amber-500 hover:bg-amber-400 text-black px-4 py-2 rounded-md flex items-center transition-colors font-mono"
                         >
                             <PlusCircle className="w-5 h-5 mr-2" />
-                            Create Role
+                            role.create()
                         </button>
                     </div>
                     <div className="p-6 pt-2">
@@ -87,8 +91,9 @@ export default function RolePermissionsPage() {
                             ))}
 
                             {roles.length === 0 && (
-                                <div className="py-4 text-center text-gray-400 col-span-3">
-                                    No roles found. Create a role to get started.
+                                <div className="py-4 text-center text-gray-400 col-span-3 font-mono">
+                                    roles.length === 0
+                                    <p className="text-sm mt-1">// create a role to get started</p>
                                 </div>
                             )}
                         </div>
@@ -115,7 +120,7 @@ const DraggablePermission = ({ name }) => {
     return (
         <div
             ref={drag}
-            className={`cursor-pointer bg-gray-800 border border-yellow-500 text-white px-4 py-2 rounded-md text-sm transition transform hover:scale-105 shadow-md ${
+            className={`cursor-pointer bg-gray-800 border border-amber-500/30 text-white px-4 py-2 rounded-md text-sm transition transform hover:scale-105 shadow-md font-mono ${
                 isDragging ? "opacity-50" : "opacity-100"
             }`}
         >
@@ -160,24 +165,28 @@ const RoleCard = ({ role, refresh }) => {
 
     const handleDeleteRole = async () => {
         const result = await Swal.fire({
-            title: "Are you sure?",
-            text: `Do you want to delete the role "${role.name}"?`,
+            title: "Confirm Deletion",
+            text: `role.delete("${role.name}") will permanently remove this role.`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",
             cancelButtonColor: "#3085d6",
-            confirmButtonText: "Yes, delete it!",
-            cancelButtonText: "No, cancel!",
+            confirmButtonText: "role.delete()",
+            cancelButtonText: "cancel()",
+            background: "#111827",
+            color: "#FFFFFF"
         });
 
         if(result.isConfirmed) {
             await deleteRole(role.id, refresh);
             Swal.fire({
                 icon: "success",
-                title: "Role Deleted",
-                text: "The role has been deleted successfully.",
+                title: "Operation Complete",
+                text: "role.delete() executed successfully",
                 timer: 2000,
                 showConfirmButton: false,
+                background: "#111827",
+                color: "#FFFFFF"
             });
         }
     };
@@ -185,8 +194,8 @@ const RoleCard = ({ role, refresh }) => {
     return (
         <div
             ref={drop}
-            className={`bg-[#222435] p-5 rounded-md shadow-md border transition-all ${
-                isOver ? "border-blue-500 scale-105" : "border-yellow-500"
+            className={`bg-gray-950 p-5 rounded-md shadow-md border transition-all ${
+                isOver ? "border-blue-500 scale-105" : "border-amber-500/30"
             }`}
         >
             <div className="flex justify-between items-center">
@@ -195,27 +204,43 @@ const RoleCard = ({ role, refresh }) => {
                         type="text"
                         value={editedRoleName}
                         onChange={(e) => setEditedRoleName(e.target.value)}
-                        className="bg-gray-800 text-white px-2 py-1 rounded-md focus:outline-none focus:border-yellow-500 w-3/4"
+                        className="bg-gray-800 text-white px-2 py-1 rounded-md focus:outline-none focus:border-amber-500 w-3/4 font-mono"
                     />
                 ) : (
-                    <h2 className="text-lg font-bold text-white">{role.name}</h2>
+                    <h2 className="text-lg font-bold text-white font-mono">{role.name}</h2>
                 )}
                 <div className="flex space-x-2">
                     {editMode ? (
                         <>
-                            <button onClick={handleUpdateRole} className="p-1.5 bg-green-600 hover:bg-green-700 text-white rounded-full">
+                            <button 
+                                onClick={handleUpdateRole} 
+                                className="p-1.5 bg-green-600 hover:bg-green-700 text-white rounded-md"
+                                title="Save Changes"
+                            >
                                 <Check className="w-4 h-4" />
                             </button>
-                            <button onClick={() => setEditMode(false)} className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full">
+                            <button 
+                                onClick={() => setEditMode(false)} 
+                                className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md"
+                                title="Cancel"
+                            >
                                 <X className="w-4 h-4" />
                             </button>
                         </>
                     ) : (
                         <>
-                            <button onClick={() => setEditMode(true)} className="p-1.5 bg-yellow-500 hover:bg-yellow-400 text-black rounded-full">
+                            <button 
+                                onClick={() => setEditMode(true)} 
+                                className="p-1.5 bg-amber-500 hover:bg-amber-400 text-black rounded-md"
+                                title="Edit Role"
+                            >
                                 <Pencil className="w-4 h-4" />
                             </button>
-                            <button onClick={handleDeleteRole} className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full">
+                            <button 
+                                onClick={handleDeleteRole} 
+                                className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md"
+                                title="Delete Role"
+                            >
                                 <Trash2 className="w-4 h-4" />
                             </button>
                         </>
@@ -225,7 +250,7 @@ const RoleCard = ({ role, refresh }) => {
 
             <div className="flex flex-wrap gap-2 mt-3">
                 {visiblePermissions.map((perm) => (
-                    <div key={perm} className="bg-yellow-500/10 text-yellow-400 px-3 py-1 rounded-md text-sm flex items-center space-x-2">
+                    <div key={perm} className="bg-amber-500/10 text-amber-400 px-3 py-1 rounded-md text-sm flex items-center space-x-2 font-mono">
                         <span>{perm}</span>
                         <button onClick={() => handleRemovePermission(perm)} className="text-red-500 hover:text-red-700">
                             <Trash2 className="w-4 h-4" />
@@ -234,17 +259,17 @@ const RoleCard = ({ role, refresh }) => {
                 ))}
 
                 {role.permissions.length === 0 && (
-                    <p className="text-gray-400 text-sm">Drag permissions here to assign them to this role</p>
+                    <p className="text-gray-400 text-sm font-mono">// drag permissions here to assign</p>
                 )}
             </div>
 
             {role.permissions.length > 5 && (
                 <button
-                    className="mt-3 text-yellow-400 hover:text-yellow-300 flex items-center space-x-1 transition"
+                    className="mt-3 text-amber-400 hover:text-amber-300 flex items-center space-x-1 transition font-mono"
                     onClick={() => setExpanded(!expanded)}
                 >
                     {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    <span>{expanded ? "Show less" : `Show ${role.permissions.length - 5} more`}</span>
+                    <span>{expanded ? "permissions.collapse()" : `permissions.expand(${role.permissions.length - 5})`}</span>
                 </button>
             )}
         </div>
@@ -262,28 +287,44 @@ const CreateRoleModal = ({ onClose, refresh }) => {
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md z-50">
-            <div className="bg-[#1C1F2E] p-6 rounded-lg shadow-lg w-96 border border-yellow-500 transform transition-all scale-100 opacity-100">
-                <h2 className="text-xl font-semibold text-white mb-4">Create New Role</h2>
-                <input
-                    type="text"
-                    className="w-full p-3 mb-4 border bg-gray-800 text-white rounded-md border-gray-700 focus:border-yellow-500 focus:outline-none"
-                    placeholder="Role Name"
-                    value={roleName}
-                    onChange={(e) => setRoleName(e.target.value)}
-                />
-                <button
-                    className="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-md w-full transition font-semibold"
-                    onClick={handleCreateRole}
-                >
-                    Create Role
-                </button>
-                <button
-                    className="mt-3 text-gray-400 hover:text-white w-full text-center transition"
-                    onClick={onClose}
-                >
-                    Cancel
-                </button>
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
+            <div className="bg-gray-900 rounded-lg shadow-2xl border border-amber-500/30 w-full max-w-sm overflow-hidden">
+                {/* Header */}
+                <div className="relative bg-amber-500 p-4">
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                            <Shield className="h-5 w-5 mr-2 text-black" />
+                            <h2 className="text-lg font-bold text-black font-mono">role.create()</h2>
+                        </div>
+                        <button onClick={onClose} className="p-1 rounded-md bg-black/20 hover:bg-black/40 transition-colors">
+                            <X className="w-4 h-4 text-black" />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="p-6">
+                    <input
+                        type="text"
+                        className="w-full p-3 mb-4 border bg-gray-800 text-white rounded-md border-gray-700 focus:border-amber-500 focus:outline-none font-mono"
+                        placeholder="role.name"
+                        value={roleName}
+                        onChange={(e) => setRoleName(e.target.value)}
+                    />
+                    <div className="flex justify-end mt-6 space-x-3">
+                        <button
+                            className="px-4 py-2 text-gray-400 hover:text-white transition-colors font-mono"
+                            onClick={onClose}
+                        >
+                            cancel()
+                        </button>
+                        <button
+                            className="bg-amber-500 hover:bg-amber-400 text-black px-4 py-2 rounded-md transition-colors font-mono"
+                            onClick={handleCreateRole}
+                        >
+                            create()
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     );
