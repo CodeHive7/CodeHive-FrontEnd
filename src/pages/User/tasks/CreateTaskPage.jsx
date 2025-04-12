@@ -200,13 +200,21 @@ export default function CreateTaskPage() {
                                         <label className="text-amber-400 text-sm font-mono">.dueDate</label>
                                     </div>
                                     <div className="relative">
-                                        <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-amber-500/70 w-5 h-5" />
+                                        <Calendar 
+                                            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-amber-500/70 w-5 h-5 z-10 pointer-events-none" 
+                                        />
                                         <input
                                             name="dueDate"
                                             type="date"
                                             onChange={handleInputChange}
                                             value={taskDetails.dueDate}
-                                            className="w-full p-4 pl-12 text-base rounded-md bg-gray-950 text-white border-2 border-amber-500/40 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono"
+                                            className="w-full p-4 pl-12 text-base rounded-md bg-gray-950 text-white border-2 border-amber-500/40 
+                                                     focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono
+                                                     [color-scheme:dark] appearance-none"
+                                            onClick={(e) => {
+                                                // Ensure focus and open the date picker
+                                                e.target.showPicker && e.target.showPicker();
+                                            }}
                                         />
                                     </div>
                                 </div>
