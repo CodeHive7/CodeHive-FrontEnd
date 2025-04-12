@@ -500,8 +500,37 @@ export default function UserHomePage() {
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-1 font-mono">
+                      <label className="block text-sm font-medium text-gray-300 mb-1 font-mono flex items-center">
                         .roleName <span className="text-amber-500">*</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            Swal.fire({
+                              title: "What is a Role?",
+                              html: `<div class="text-left font-mono">
+                                <p class="mb-3">A role position defines the specific developer type you need for your project.</p>
+                                <p class="mb-3">Examples:</p>
+                                <ul class="list-disc pl-5 space-y-2">
+                                  <li><span class="text-amber-400">Frontend Developer</span> - React, Vue, Angular specialists</li>
+                                  <li><span class="text-amber-400">Backend Developer</span> - Node.js, Python, Java experts</li>
+                                  <li><span class="text-amber-400">UI/UX Designer</span> - For interface and user experience design</li>
+                                  <li><span class="text-amber-400">DevOps Engineer</span> - For deployment and infrastructure</li>
+                                  <li><span class="text-amber-400">QA Tester</span> - To test and ensure code quality</li>
+                                  <li><span class="text-amber-400">Project Manager</span> - To coordinate team efforts</li>
+                                </ul>
+                                <p class="mt-3 text-sm text-gray-400">// Be specific to attract the right talent to your project</p>
+                              </div>`,  
+                              confirmButtonText: "Got it!",
+                              confirmButtonColor: "#F59E0B",
+                              background: "#111827",
+                              color: "#ffffff",
+                            });
+                          }}
+                          className="ml-2 bg-gray-800 hover:bg-amber-500/20 rounded-full w-5 h-5 text-sm flex items-center justify-center text-amber-400 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          aria-label="Learn more about role position"
+                          >
+                            ?
+                          </button>
                       </label>
                       <input
                         type="text"
@@ -898,7 +927,7 @@ export default function UserHomePage() {
                     to={`/projects/${project.id}`}
                     className="mt-5 w-full inline-flex items-center justify-center bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-black px-6 py-2.5 rounded-md text-base font-semibold transition-all group-hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-gray-950 font-mono"
                   >
-                    project.view(id: {project.id.substring(0, 4)}...)
+                    project.view(id: {String(project.id).substring(0, 4)}...)
                     <ChevronRight className="w-5 h-5 ml-1 group-hover:ml-2 transition-all" />
                   </Link>
                 </div>
