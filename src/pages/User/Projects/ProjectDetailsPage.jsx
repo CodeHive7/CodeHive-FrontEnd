@@ -52,8 +52,8 @@ export default function ProjectDetailsPage() {
         if (project.creatorName === loggedInUsername) {
             Swal.fire({
                 icon: "warning",
-                title: "AccessViolationException",
-                text: "Error: Cannot apply to your own project",
+                title: "Cannot Apply",
+                text: "You cannot apply to your own project",
                 background: "#111827",
                 color: "#ffffff",
                 confirmButtonColor: "#F59E0B"
@@ -64,8 +64,8 @@ export default function ProjectDetailsPage() {
         if (project.positions[positionIndex].quantity === 0) {
             Swal.fire({
                 icon: "info",
-                title: "CapacityException",
-                text: "position.quantity === 0",
+                title: "Position Filled",
+                text: "This position has reached its capacity",
                 background: "#111827",
                 color: "#ffffff",
                 confirmButtonColor: "#F59E0B"
@@ -91,8 +91,8 @@ export default function ProjectDetailsPage() {
 
                 Swal.fire({
                     icon: "success",
-                    title: "Application.submit()",
-                    text: "return: Success { status: 200 }",
+                    title: "Application Submitted",
+                    text: "Your application has been successfully submitted",
                     timer: 2000,
                     showConfirmButton: false,
                     background: "#111827",
@@ -101,8 +101,8 @@ export default function ProjectDetailsPage() {
             } catch (error) {
                 Swal.fire({
                     icon: "error",
-                    title: "ApplicationException",
-                    text: error.response?.data || "Error: API request failed with status 500",
+                    title: "Application Failed",
+                    text: error.response?.data || "There was an error submitting your application",
                     background: "#111827",
                     color: "#ffffff",
                     confirmButtonColor: "#F59E0B"
@@ -112,43 +112,37 @@ export default function ProjectDetailsPage() {
 
         if (hasQuestion1 || hasQuestion2) {
             Swal.fire({
-                title: "position.questions[]",
+                title: "Application Questions",
                 html: `
-                    <div class="mb-4 font-mono">
+                    <div class="mb-4">
                         ${hasQuestion1 ? `
                             <div class="mb-3">
-                                <p class="text-left font-semibold mb-2 text-amber-400 font-mono">// ${project.question1}</p>
-                                <textarea id="answer1" class="swal2-textarea w-full bg-gray-800 text-white border-gray-700 font-mono" 
-                                    placeholder="response[0] = '...'" rows="3" required></textarea>
+                                <p class="text-left font-semibold mb-2 text-amber-400">${project.question1}</p>
+                                <textarea id="answer1" class="swal2-textarea w-full bg-gray-800 text-white border-gray-700" 
+                                    placeholder="Your answer..." rows="3" required></textarea>
                             </div>` : ''}
                         ${hasQuestion2 ? `
                             <div>
-                                <p class="text-left font-semibold mb-2 text-amber-400 font-mono">// ${project.question2}</p>
-                                <textarea id="answer2" class="swal2-textarea w-full bg-gray-800 text-white border-gray-700 font-mono" 
-                                    placeholder="response[1] = '...'" rows="3" required></textarea>
+                                <p class="text-left font-semibold mb-2 text-amber-400">${project.question2}</p>
+                                <textarea id="answer2" class="swal2-textarea w-full bg-gray-800 text-white border-gray-700" 
+                                    placeholder="Your answer..." rows="3" required></textarea>
                             </div>` : ''}
                     </div>
-                    <p class="text-left text-sm text-gray-400 mb-2 font-mono">// responses will be shared with project.creator</p>
+                    <p class="text-left text-sm text-gray-400 mb-2">Your responses will be shared with the project creator</p>
                 `,
                 showCancelButton: true,
-                confirmButtonText: "submit()",
-                cancelButtonText: "cancel()",
+                confirmButtonText: "Submit",
+                cancelButtonText: "Cancel",
                 focusConfirm: false,
                 background: "#111827",
                 color: "#ffffff",
                 confirmButtonColor: "#F59E0B",
                 cancelButtonColor: "#4B5563",
-                customClass: {
-                    container: 'custom-swal-container',
-                    popup: 'custom-swal-popup',
-                    confirmButton: 'custom-swal-confirm',
-                    cancelButton: 'custom-swal-cancel'
-                },
                 preConfirm: () => {
                     const answer1 = document.getElementById("answer1")?.value.trim() || "";
                     const answer2 = document.getElementById("answer2")?.value.trim() || "";
                     if ((hasQuestion1 && !answer1) || (hasQuestion2 && !answer2)) {
-                        Swal.showValidationMessage("ValidationError: required fields cannot be null");
+                        Swal.showValidationMessage("Please answer all questions");
                         return false;
                     }
                     return { answer1, answer2 };
@@ -168,42 +162,32 @@ export default function ProjectDetailsPage() {
         switch(stage) {
             case "NOT_STARTED": 
                 return { 
-                    color: "bg-blue-600", 
-                    textColor: "text-blue-100",
-                    borderColor: "border-blue-500/30", 
-                    bgColor: "bg-blue-500/10",
+                    color: "bg-amber-600", 
+                    textColor: "text-white",
                     icon: <Layers className="w-4 h-4 mr-1.5" /> 
                 };
             case "IN_DEVELOPMENT": 
                 return { 
                     color: "bg-amber-600", 
-                    textColor: "text-amber-100",
-                    borderColor: "border-amber-500/30", 
-                    bgColor: "bg-amber-500/10",
+                    textColor: "text-white",
                     icon: <GitBranch className="w-4 h-4 mr-1.5" /> 
                 };
             case "FINISHED": 
                 return { 
                     color: "bg-green-600", 
-                    textColor: "text-green-100",
-                    borderColor: "border-green-500/30", 
-                    bgColor: "bg-green-500/10",
+                    textColor: "text-white",
                     icon: <CheckCircle className="w-4 h-4 mr-1.5" /> 
                 };
             case "NEEDS_FIXES": 
                 return { 
                     color: "bg-red-600", 
-                    textColor: "text-red-100",
-                    borderColor: "border-red-500/30", 
-                    bgColor: "bg-red-500/10",
+                    textColor: "text-white",
                     icon: <Grid className="w-4 h-4 mr-1.5" /> 
                 };
             default: 
                 return { 
-                    color: "bg-purple-600", 
-                    textColor: "text-purple-100",
-                    borderColor: "border-purple-500/30", 
-                    bgColor: "bg-purple-500/10",
+                    color: "bg-amber-600", 
+                    textColor: "text-white",
                     icon: <Code className="w-4 h-4 mr-1.5" /> 
                 };
         }
@@ -212,22 +196,19 @@ export default function ProjectDetailsPage() {
     // Get stage display name
     const getStageDisplayName = (stage) => {
         switch(stage) {
-            case "NOT_STARTED": return "NOT_STARTED";
-            case "IN_DEVELOPMENT": return "IN_DEVELOPMENT";
-            case "FINISHED": return "FINISHED";
-            case "NEEDS_FIXES": return "NEEDS_FIXES";
-            default: return stage || "ONGOING";
+            case "NOT_STARTED": return "Not Started";
+            case "IN_DEVELOPMENT": return "In Development";
+            case "FINISHED": return "Finished";
+            case "NEEDS_FIXES": return "Needs Fixes";
+            default: return stage || "Ongoing";
         }
     };
 
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center">
-                <div className="relative">
-                    <div className="absolute inset-0 rounded-full bg-amber-500/20 animate-ping"></div>
-                    <Loader2 className="w-12 h-12 text-amber-500 animate-spin relative z-10" />
-                </div>
-                <p className="text-gray-400 mt-4 animate-pulse font-mono">project.loading(id: {projectId})</p>
+                <Loader2 className="w-12 h-12 text-amber-500 animate-spin" />
+                <p className="text-gray-400 mt-4">Loading project details...</p>
             </div>
         );
     }
@@ -235,17 +216,17 @@ export default function ProjectDetailsPage() {
     if (!project) {
         return (
             <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-4">
-                <div className="bg-gray-900 rounded-md border border-gray-800 p-8 max-w-md w-full text-center shadow-lg">
-                    <div className="bg-gray-800/50 rounded-md p-4 w-20 h-20 flex items-center justify-center mx-auto mb-6">
-                        <AlertTriangle className="h-10 w-10 text-amber-500" />
-                    </div>
-                    <h2 className="text-xl font-bold text-white mb-2 font-mono">NotFoundException</h2>
-                    <p className="text-gray-400 mb-6 font-mono">Error: project with id={projectId} not found</p>
+                <div className="bg-gray-900 rounded-lg border border-gray-800 p-8 max-w-md w-full text-center shadow-md">
+                    <AlertTriangle className="h-10 w-10 text-amber-500 mx-auto mb-4" />
+                    <h2 className="text-xl font-bold text-white mb-2">Project Not Found</h2>
+                    <p className="text-gray-400 mb-6">
+                        The project with ID {projectId} could not be found
+                    </p>
                     <button 
                         onClick={() => navigate('/user')}
-                        className="bg-amber-500 hover:bg-amber-600 text-black px-6 py-2 rounded-md font-medium transition-colors inline-flex items-center font-mono"
+                        className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-md font-medium transition-colors inline-flex items-center"
                     >
-                        <ArrowLeft className="w-4 h-4 mr-2" /> homepage.return()
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Back to Homepage
                     </button>
                 </div>
             </div>
@@ -257,17 +238,17 @@ export default function ProjectDetailsPage() {
     return (
         <div className="min-h-screen bg-gray-950 text-white">
             {/* Header */}
-            <header className="sticky top-0 z-40 border-b border-gray-800 bg-gray-950/90 backdrop-blur-sm shadow-md">
+            <header className="sticky top-0 z-40 border-b border-gray-800 bg-gray-950 shadow-md">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6">
                     <div className="flex h-16 items-center justify-between">
-                        <Link to="/user" className="text-2xl font-bold text-white flex items-center font-mono">
-                            <span className="text-amber-400">Code</span>Hive
+                        <Link to="/user" className="text-2xl font-bold text-white flex items-center">
+                            <span className="text-amber-500">Code</span>Hive
                         </Link>
                         <button
                             onClick={() => navigate(-1)}
-                            className="flex items-center text-gray-300 hover:text-amber-400 transition-colors bg-gray-800 hover:bg-gray-700 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500/50 font-mono"
+                            className="flex items-center text-gray-300 hover:text-white transition-colors bg-gray-800 hover:bg-gray-700 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                         >
-                            <ArrowLeft className="w-4 h-4 mr-2" /> back()
+                            <ArrowLeft className="w-4 h-4 mr-2" /> Back
                         </button>
                     </div>
                 </div>
@@ -275,138 +256,127 @@ export default function ProjectDetailsPage() {
 
             {/* Main Content */}
             <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-                <div className="bg-gradient-to-br from-gray-900 to-gray-900 rounded-md overflow-hidden shadow-lg border border-gray-800 hover:border-amber-500/30 transition-colors duration-300">
-                    {/* Project Header Section with enhanced visuals */}
-                    <div className="relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-transparent opacity-60"></div>
-                        <div className="relative z-10 p-6 sm:p-8">
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                <div>
-                                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white group-hover:text-amber-300 transition-colors font-mono">
-                                        {project.name}
-                                    </h1>
-                                    <div className="flex flex-wrap gap-2 mt-2">
-                                        <span className="bg-gray-800/80 text-gray-300 px-3 py-1 rounded-md text-xs font-medium inline-flex items-center font-mono">
-                                            <Code className="w-3 h-3 mr-1.5" />
-                                            {project.category || "UNCATEGORIZED"}
+                <div className="bg-gray-900 rounded-lg overflow-hidden shadow-md border border-gray-800">
+                    {/* Project Header Section */}
+                    <div className="p-6 sm:p-8">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <div>
+                                <h1 className="text-2xl sm:text-3xl font-bold text-white">
+                                    {project.name}
+                                </h1>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    <span className="bg-gray-800 text-gray-300 px-3 py-1 rounded-md text-xs font-medium inline-flex items-center">
+                                        <Code className="w-3 h-3 mr-1.5" />
+                                        {project.category || "Uncategorized"}
+                                    </span>
+                                    <span className={`${stageInfo.color} ${stageInfo.textColor} px-3 py-1 rounded-md text-xs font-medium inline-flex items-center`}>
+                                        {stageInfo.icon}
+                                        {getStageDisplayName(project.stage)}
+                                    </span>
+                                    {project.status === "ACCEPTED" && (
+                                        <span className="inline-flex items-center bg-green-600 text-white px-3 py-1 rounded-md text-xs font-medium">
+                                            <CheckCircle className="w-3 h-3 mr-1.5" /> Active
                                         </span>
-                                        <span className={`${stageInfo.bgColor} ${stageInfo.textColor} px-3 py-1 rounded-md text-xs font-medium inline-flex items-center border ${stageInfo.borderColor} font-mono`}>
-                                            {stageInfo.icon}
-                                            {getStageDisplayName(project.stage)}
+                                    )}
+                                    {project.status === "PENDING" && (
+                                        <span className="inline-flex items-center bg-amber-600 text-white px-3 py-1 rounded-md text-xs font-medium">
+                                            <Clock className="w-3 h-3 mr-1.5" /> Pending
                                         </span>
-                                        {project.status === "ACCEPTED" && (
-                                            <span className="inline-flex items-center text-green-400 bg-green-900/20 px-3 py-1 rounded-md text-xs font-medium border border-green-600/30 font-mono">
-                                                <CheckCircle className="w-3 h-3 mr-1.5" /> ACTIVE
-                                            </span>
-                                        )}
-                                        {project.status === "PENDING" && (
-                                            <span className="inline-flex items-center text-amber-400 bg-amber-900/20 px-3 py-1 rounded-md text-xs font-medium border border-amber-600/30 font-mono">
-                                                <Clock className="w-3 h-3 mr-1.5" /> PENDING
-                                            </span>
-                                        )}
-                                        {project.status === "REJECTED" && (
-                                            <span className="inline-flex items-center text-red-400 bg-red-900/20 px-3 py-1 rounded-md text-xs font-medium border border-red-600/30 font-mono">
-                                                <XCircle className="w-3 h-3 mr-1.5" /> REJECTED
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button 
-                                        onClick={() => {
-                                            navigator.clipboard.writeText(window.location.href);
-                                            Swal.fire({
-                                                toast: true,
-                                                position: 'bottom-end',
-                                                icon: 'success',
-                                                title: 'navigator.clipboard.writeText(url)',
-                                                showConfirmButton: false,
-                                                timer: 2000,
-                                                background: '#111827',
-                                                color: '#ffffff'
-                                            });
-                                        }}
-                                        className="p-2 bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
-                                        aria-label="Share project"
-                                    >
-                                        <Share2 className="w-5 h-5 text-gray-400 hover:text-amber-400" />
-                                    </button>
-                                    <button 
-                                        onClick={() => {
-                                            // Would be connected to message function in a real app
-                                            Swal.fire({
-                                                icon: 'info',
-                                                title: 'user.message()',
-                                                text: `// send message to ${project.creatorName}`,
-                                                background: '#111827',
-                                                color: '#ffffff',
-                                                confirmButtonColor: '#F59E0B',
-                                                showCancelButton: true,
-                                                confirmButtonText: "send()",
-                                                cancelButtonText: "cancel()"
-                                            });
-                                        }}
-                                        className="p-2 bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
-                                        aria-label="Message creator"
-                                    >
-                                        <MessageSquare className="w-5 h-5 text-gray-400 hover:text-amber-400" />
-                                    </button>
+                                    )}
+                                    {project.status === "REJECTED" && (
+                                        <span className="inline-flex items-center bg-red-600 text-white px-3 py-1 rounded-md text-xs font-medium">
+                                            <XCircle className="w-3 h-3 mr-1.5" /> Rejected
+                                        </span>
+                                    )}
                                 </div>
                             </div>
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(window.location.href);
+                                        Swal.fire({
+                                            toast: true,
+                                            position: 'bottom-end',
+                                            icon: 'success',
+                                            title: 'Link copied to clipboard',
+                                            showConfirmButton: false,
+                                            timer: 2000,
+                                            background: '#111827',
+                                            color: '#ffffff'
+                                        });
+                                    }}
+                                    className="p-2 bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
+                                    aria-label="Share project"
+                                >
+                                    <Share2 className="w-5 h-5 text-gray-400 hover:text-white" />
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        Swal.fire({
+                                            icon: 'info',
+                                            title: 'Send Message',
+                                            text: `Would you like to send a message to ${project.creatorName}?`,
+                                            background: '#111827',
+                                            color: '#ffffff',
+                                            confirmButtonColor: '#F59E0B',
+                                            showCancelButton: true,
+                                            confirmButtonText: "Send",
+                                            cancelButtonText: "Cancel"
+                                        });
+                                    }}
+                                    className="p-2 bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
+                                    aria-label="Message creator"
+                                >
+                                    <MessageSquare className="w-5 h-5 text-gray-400 hover:text-white" />
+                                </button>
+                            </div>
+                        </div>
 
-                            {/* Project Metadata with improved layout */}
-                            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 bg-gray-950/50 p-4 rounded-md border border-gray-800/50">
-                                <div className="flex items-center">
-                                    <div className="bg-amber-500/10 rounded-md p-2 mr-3">
-                                        <User className="w-5 h-5 text-amber-400" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500 font-mono">.creator</p>
-                                        <p className="font-medium text-white font-mono">{project.creatorName}</p>
-                                    </div>
+                        {/* Project Metadata */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 bg-gray-800 p-4 rounded-md">
+                            <div className="flex items-center">
+                                <User className="w-5 h-5 text-amber-500 mr-3" />
+                                <div>
+                                    <p className="text-xs text-gray-500">Creator</p>
+                                    <p className="font-medium text-white">{project.creatorName}</p>
                                 </div>
-                                
-                                {project.createdAt && (
-                                    <div className="flex items-center">
-                                        <div className="bg-amber-500/10 rounded-md p-2 mr-3">
-                                            <Calendar className="w-5 h-5 text-amber-400" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-gray-500 font-mono">.createdAt</p>
-                                            <p className="font-medium text-white font-mono">
-                                                {new Date(project.createdAt).toLocaleDateString(undefined, {
-                                                    year: 'numeric',
-                                                    month: 'short',
-                                                    day: 'numeric'
-                                                })}
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
-                                
+                            </div>
+                            
+                            {project.createdAt && (
                                 <div className="flex items-center">
-                                    <div className="bg-amber-500/10 rounded-md p-2 mr-3">
-                                        <Users className="w-5 h-5 text-amber-400" />
-                                    </div>
+                                    <Calendar className="w-5 h-5 text-amber-500 mr-3" />
                                     <div>
-                                        <p className="text-xs text-gray-500 font-mono">.positions.length</p>
-                                        <p className="font-medium text-white font-mono">
-                                            {project.positions.reduce((acc, pos) => acc + pos.quantity, 0)}
+                                        <p className="text-xs text-gray-500">Created On</p>
+                                        <p className="font-medium text-white">
+                                            {new Date(project.createdAt).toLocaleDateString(undefined, {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric'
+                                            })}
                                         </p>
                                     </div>
+                                </div>
+                            )}
+                            
+                            <div className="flex items-center">
+                                <Users className="w-5 h-5 text-amber-500 mr-3" />
+                                <div>
+                                    <p className="text-xs text-gray-500">Open Positions</p>
+                                    <p className="font-medium text-white">
+                                        {project.positions.reduce((acc, pos) => acc + pos.quantity, 0)}
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Description Section with improved typography and spacing */}
+                    {/* Description Section */}
                     <div className="px-6 sm:px-8 py-6">
                         <div className="mb-8">
-                            <h3 className="text-lg font-semibold text-amber-400 mb-4 flex items-center font-mono">
-                                <span className="mr-2">project.description</span>
-                                <div className="h-px bg-amber-500/30 flex-grow"></div>
+                            <h3 className="text-lg font-semibold text-amber-500 mb-4">
+                                Description
                             </h3>
-                            <div className="bg-gray-950/70 p-5 rounded-md border border-gray-800 text-gray-300 leading-relaxed font-mono">
+                            <div className="bg-gray-800 p-5 rounded-lg border border-gray-700 text-gray-300 leading-relaxed">
                                 {project.description.split('\n').map((paragraph, i) => (
                                     <p key={i} className={i > 0 ? 'mt-4' : ''}>
                                         {paragraph}
@@ -415,42 +385,36 @@ export default function ProjectDetailsPage() {
                             </div>
                         </div>
 
-                        {/* Project Link with enhanced visual */}
+                        {/* Project Link */}
                         {project.websiteUrl && (
                             <div className="mb-8">
-                                <h3 className="text-lg font-semibold text-amber-400 mb-4 flex items-center font-mono">
-                                    <span className="mr-2">project.resources</span>
-                                    <div className="h-px bg-amber-500/30 flex-grow"></div>
+                                <h3 className="text-lg font-semibold text-amber-500 mb-4">
+                                    Project Website
                                 </h3>
                                 <a
                                     href={project.websiteUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center bg-gray-950/70 p-4 rounded-md border border-gray-800 text-amber-400 hover:border-amber-500/50 hover:bg-amber-500/5 transition-all group"
+                                    className="flex items-center bg-gray-800 p-4 rounded-lg border border-gray-700 text-amber-500 hover:border-amber-500"
                                 >
-                                    <div className="bg-amber-500/10 rounded-md p-2 mr-3">
-                                        <Globe className="w-5 h-5 text-amber-400" />
-                                    </div>
+                                    <Globe className="w-5 h-5 text-amber-500 mr-3" />
                                     <div className="flex-grow">
-                                        <div className="text-sm text-gray-400 font-mono">.websiteUrl</div>
-                                        <div className="text-amber-400 font-medium truncate max-w-lg font-mono">
+                                        <div className="text-sm text-gray-400">Website URL</div>
+                                        <div className="text-amber-500 font-medium truncate max-w-lg">
                                             {project.websiteUrl}
                                         </div>
                                     </div>
-                                    <ExternalLink className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
+                                    <ExternalLink className="w-4 h-4 ml-2" />
                                 </a>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Positions Section with enhanced cards */}
-                <div className="mt-12">
-                    <h2 className="text-2xl font-bold text-white mb-8 text-center font-mono">
-                        <span className="relative inline-block">
-                            <span className="relative z-10">project.positions[]</span>
-                            <span className="absolute bottom-1 left-0 w-full h-3 bg-amber-500 opacity-20 rounded"></span>
-                        </span>
+                {/* Positions Section */}
+                <div className="mt-8">
+                    <h2 className="text-2xl font-bold text-white mb-6 text-center">
+                        Available Positions
                     </h2>
 
                     {project.positions.length > 0 ? (
@@ -458,64 +422,57 @@ export default function ProjectDetailsPage() {
                             {project.positions.map((position) => (
                                 <div
                                     key={position.id}
-                                    className="group bg-gradient-to-br from-gray-900 to-gray-900 rounded-md overflow-hidden shadow-lg border border-gray-800 hover:border-amber-500/30 transform transition-all duration-300 hover:scale-[1.03] hover:shadow-xl"
+                                    className="bg-gray-900 rounded-lg overflow-hidden shadow-md border border-gray-800"
                                 >
-                                    {/* Position visual enhancement with spotlight effect */}
-                                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(245,158,11,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                                    
-                                    <div className="p-6 relative">
-                                        {/* Position Header with improved layout */}
+                                    <div className="p-6">
+                                        {/* Position Header */}
                                         <div className="mb-4">
                                             <div className="flex justify-between items-start">
-                                                <h3 className="text-xl font-bold text-white group-hover:text-amber-300 transition-colors font-mono">
+                                                <h3 className="text-xl font-bold text-white">
                                                     {position.roleName}
                                                 </h3>
-                                                <span className={`text-xs flex items-center px-2 py-1 rounded-md font-mono
+                                                <span className={`text-xs flex items-center px-2 py-1 rounded-md
                                                     ${position.quantity > 0 
-                                                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' 
-                                                        : 'bg-gray-800 text-gray-400 border border-gray-700'
+                                                        ? 'bg-amber-600 text-white' 
+                                                        : 'bg-gray-800 text-gray-400'
                                                     }`}
                                                 >
                                                     {position.quantity > 0 
                                                         ? <CheckCircle className="w-3 h-3 mr-1" /> 
                                                         : <XCircle className="w-3 h-3 mr-1" />
                                                     }
-                                                    .quantity = {position.quantity}
+                                                    {position.quantity} available
                                                 </span>
                                             </div>
                                         </div>
 
-                                        {/* Position Details with improved visuals */}
+                                        {/* Position Details */}
                                         <div className="space-y-4 mb-6">
                                             <div className="flex items-center text-sm">
-                                                <div className="bg-amber-500/10 rounded-md p-1.5 mr-2">
-                                                    <Briefcase className="w-4 h-4 text-amber-400" />
-                                                </div>
-                                                <span className={position.paid ? "text-green-400 font-mono" : "text-gray-300 font-mono"}>
-                                                    {position.paid ? ".paid = true" : ".paid = false"}
+                                                <Briefcase className="w-4 h-4 mr-2 text-amber-500" />
+                                                <span className={position.paid ? "text-green-400" : "text-gray-300"}>
+                                                    {position.paid ? "Paid Position" : "Volunteer Position"}
                                                 </span>
                                             </div>
                                             
                                             <div className="flex items-center text-sm">
-                                                <div className="bg-amber-500/10 rounded-md p-1.5 mr-2">
-                                                    <Shield className="w-4 h-4 text-amber-400" />
-                                                </div>
-                                                <span className="text-gray-300 font-mono">
-                                                    .requiresReview = true
+                                                <Shield className="w-4 h-4 mr-2 text-amber-500" />
+                                                <span className="text-gray-300">
+                                                    Application requires review
                                                 </span>
                                             </div>
                                         </div>
 
-                                        {/* Apply Button with enhanced states */}
+                                        {/* Apply Button */}
                                         <button
                                             onClick={() => handleApply(position.id)}
                                             disabled={position.quantity === 0 || project.creatorName === loggedInUsername}
-                                            className={`w-full px-4 py-3 rounded-md font-medium transition-all duration-300 flex items-center justify-center font-mono
+                                            className={`w-full px-4 py-3 rounded-md font-medium transition-colors flex items-center justify-center
                                                 ${position.quantity === 0 
-                                                    ? "bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700" 
+                                                    ? "bg-gray-800 text-gray-500 cursor-not-allowed" 
                                                     : project.creatorName === loggedInUsername
-                                                        ? "bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700"
-                                                        : "bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-black shadow-md hover:shadow-lg border border-transparent"
+                                                        ? "bg-gray-800 text-gray-500 cursor-not-allowed"
+                                                        : "bg-amber-600 hover:bg-amber-700 text-white"
                                                 }`}
                                         >
                                             {position.quantity === 0 
@@ -525,13 +482,13 @@ export default function ProjectDetailsPage() {
                                                     : <CheckCircle className="w-4 h-4 mr-2" />
                                             }
                                             {position.quantity === 0 
-                                                ? "position.filled" 
+                                                ? "Position Filled" 
                                                 : project.creatorName === loggedInUsername
-                                                    ? "self.isOwner"
-                                                    : "position.apply()"
+                                                    ? "Your Project"
+                                                    : "Apply for Position"
                                             }
                                             {!(position.quantity === 0 || project.creatorName === loggedInUsername) && (
-                                                <ChevronRight className="w-4 h-4 ml-1 group-hover:ml-2 transition-all" />
+                                                <ChevronRight className="w-4 h-4 ml-1" />
                                             )}
                                         </button>
                                     </div>
@@ -539,60 +496,16 @@ export default function ProjectDetailsPage() {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center p-12 bg-gradient-to-br from-gray-900 to-gray-900 rounded-md border border-gray-800">
-                            <div className="inline-block p-6 bg-gray-800/50 rounded-md mb-4">
-                                <Users className="h-10 w-10 text-amber-500/50" />
-                            </div>
-                            <h3 className="text-lg font-medium text-gray-300 mb-2 font-mono">positions.length === 0</h3>
-                            <p className="text-gray-400 max-w-md mx-auto font-mono">
-                                // no positions are currently available for this project
+                        <div className="text-center p-12 bg-gray-900 rounded-lg border border-gray-800">
+                            <Users className="h-10 w-10 text-amber-500 mx-auto mb-4" />
+                            <h3 className="text-lg font-medium text-gray-300 mb-2">No Positions Available</h3>
+                            <p className="text-gray-400 max-w-md mx-auto">
+                                There are currently no positions available for this project.
                             </p>
                         </div>
                     )}
                 </div>
             </div>
-
-            {/* Honeycomb decoration (visible on larger screens) with improved styling */}
-            <div className="hidden lg:block fixed top-1/4 right-0 opacity-10 pointer-events-none">
-                <div className="w-64 h-64 border-2 border-amber-500/20 rounded-full"></div>
-            </div>
-            <div className="hidden lg:block fixed bottom-1/4 left-0 opacity-10 pointer-events-none">
-                <div className="w-48 h-48 border-2 border-amber-500/20 rounded-full"></div>
-            </div>
-
-            {/* Background pattern with subtle animation */}
-            <div className="fixed inset-0 opacity-5 pointer-events-none z-[-1] animate-pulse"
-                style={{
-                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath fill='%23F59E0B' opacity='0.1' d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100'/%3E%3C/svg%3E\")",
-                    backgroundSize: "112px 200px",
-                    animationDuration: "10s"
-                }}>
-            </div>
-
-            {/* Custom styling for SweetAlert */}
-            <style>{`
-                .custom-swal-popup {
-                    background: #111827 !important;
-                    border: 1px solid #2D3748 !important;
-                    border-radius: 0.5rem !important;
-                    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-                }
-                .custom-swal-confirm {
-                    background: #F59E0B !important;
-                    color: black !important;
-                    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-                }
-                .custom-swal-cancel {
-                    background: #4B5563 !important;
-                    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-                }
-                .swal2-textarea {
-                    background-color: #1F2937 !important;
-                    color: white !important;
-                    border-color: #374151 !important;
-                    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-                }
-            `}</style>
         </div>
     );
 }
