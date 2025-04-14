@@ -809,7 +809,7 @@ const removeEducation = async (index) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-white mb-6">🐝 My Profile</h2>
+      <h2 className="text-3xl font-bold text-white mb-6"> My Profile</h2>
 
       <div className="bg-[#1C1F2E] border border-yellow-500 rounded-lg shadow-md overflow-hidden">
         {/* Profile Header */}
