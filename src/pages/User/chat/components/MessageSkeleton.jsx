@@ -1,63 +1,7 @@
-export default function MessageSkeleton({ count = 1, align = "left", terminalStyle = false }) {
+export default function MessageSkeleton({ count = 1, align = "left" }) {
     const renderSkeleton = (index) => {
         const isRight = align === "right" || (count > 1 && index % 2 === 0);
         
-        // Terminal-style message skeleton
-        if (terminalStyle) {
-            return (
-                <div 
-                    key={index}
-                    className={`flex ${isRight ? 'justify-end' : 'justify-start'} mb-4`}
-                >
-                    <div 
-                        className={`animate-pulse rounded-md p-4 max-w-[80%] border
-                          ${isRight 
-                            ? 'bg-amber-500/10 border-amber-500/20 rounded-tr-none' 
-                            : 'bg-gray-900 border-gray-700 rounded-tl-none'}`}
-                    >
-                        {/* Terminal-like header */}
-                        <div className={`flex items-center ${isRight ? 'justify-end' : 'justify-start'} mb-3`}>
-                            {!isRight && (
-                                <div className="flex items-center">
-                                    <div className="h-3 w-3 bg-gray-600 rounded-full mr-2"></div>
-                                    <div className="h-3 w-14 bg-gray-700 rounded"></div>
-                                    <div className="text-xs text-gray-600 ml-2 font-mono">~$</div>
-                                </div>
-                            )}
-                            {isRight && (
-                                <div className="flex items-center">
-                                    <div className="text-xs text-amber-600/50 mr-2 font-mono">&gt;</div>
-                                    <div className="h-3 w-14 bg-amber-700/30 rounded"></div>
-                                </div>
-                            )}
-                        </div>
-                        
-                        {/* Message content lines with code-like appearance */}
-                        <div className="space-y-2.5">
-                            <div className="h-3 bg-gray-800 rounded-sm w-full"></div>
-                            <div className="h-3 bg-gray-800 rounded-sm w-5/6"></div>
-                            {index % 2 === 0 && (
-                                <div className="h-3 bg-gray-800 rounded-sm w-4/6"></div>
-                            )}
-                            {index % 3 === 0 && (
-                                <div className="h-3 bg-gray-800 rounded-sm w-3/6"></div>
-                            )}
-                        </div>
-                        
-                        {/* Code timestamp */}
-                        <div className={`flex ${isRight ? 'justify-start' : 'justify-end'} mt-3`}>
-                            <div className="flex items-center">
-                                <div className="h-2 w-6 bg-gray-700 rounded-sm"></div>
-                                <div className="mx-1 h-2 w-1 bg-gray-700 rounded-sm"></div>
-                                <div className="h-2 w-6 bg-gray-700 rounded-sm"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-        
-        // Standard message skeleton (original style)
         return (
             <div 
                 key={index}
