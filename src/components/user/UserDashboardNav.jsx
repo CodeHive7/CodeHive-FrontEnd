@@ -66,12 +66,12 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
 
     // Toggle menus for projects and tasks - with stopPropagation
     const toggleProjectsMenu = useCallback((e) => {
-        e.stopPropagation(); // Prevent event bubbling
+        e.stopPropagation();
         setIsProjectsOpen(prev => !prev);
     }, []);
     
     const toggleTasksMenu = useCallback((e) => {
-        e.stopPropagation(); // Prevent event bubbling
+        e.stopPropagation();
         setIsTasksOpen(prev => !prev);
     }, []);
 
@@ -126,7 +126,7 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
     }, [isSidebarOpen, toggleSidebar]);
 
     // Handle link navigation on mobile
-    const handleLinkClick = useCallback((e) => {
+    const handleLinkClick = useCallback(() => {
         // Only close sidebar on mobile
         if (window.innerWidth < 1024) {
             toggleSidebar();
@@ -141,51 +141,49 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
             onTouchEnd={handleTouchEnd}
         >
             {/* Sidebar Header with Logo */}
-            <div className="relative p-2 xs:p-3 sm:p-4 border-b border-amber-500/20 flex-shrink-0">
+            <div className="p-4 border-b border-gray-800 flex items-center">
                 <Link 
                     to="/userHome" 
-                    className="flex items-center gap-1.5 xs:gap-2 group focus:outline-none focus:ring-2 focus:ring-amber-500/60 rounded-md p-0.5"
+                    className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-amber-500 rounded-md p-0.5"
                     aria-label="CodeHive Homepage"
                 >
-                    <div className="relative flex-shrink-0 bg-gray-900 border border-gray-800 rounded-md w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 flex items-center justify-center">
-                        <HiTerminal className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 text-amber-500 transition-transform duration-300 group-hover:scale-110" />
+                    <div className="bg-gray-800 rounded-md w-8 h-8 flex items-center justify-center">
+                        <HiTerminal className="h-5 w-5 text-amber-500" />
                     </div>
-                    <div className="overflow-hidden">
-                        <h1 className="font-bold text-sm xs:text-base sm:text-lg whitespace-nowrap font-mono">
-                            <span className="text-white">Code</span>
-                            <span className="text-amber-500">Hive</span>
-                        </h1>
-                    </div>
+                    <h1 className="font-bold text-lg">
+                        <span className="text-white">Code</span>
+                        <span className="text-amber-500">Hive</span>
+                    </h1>
                 </Link>
             </div>
 
             {/* User Info Section */}
-            <div className="relative px-2 xs:px-3 sm:px-4 py-1.5 xs:py-2 sm:py-3 border-b border-amber-500/20 flex-shrink-0">
-                <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 overflow-hidden">
-                    <div className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 bg-gray-800 border border-amber-500/50 rounded-md flex items-center justify-center text-amber-500 font-mono text-xs sm:text-sm flex-shrink-0">
+            <div className="px-4 py-3 border-b border-gray-800">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gray-800 border border-amber-500/50 rounded-md flex items-center justify-center text-amber-500">
                         {user?.username?.charAt(0).toUpperCase() || "U"}
                     </div>
-                    <div className="flex flex-col min-w-0 overflow-hidden">
-                        <span className="font-medium text-white text-[10px] xs:text-xs sm:text-sm md:text-base truncate font-mono">{user?.username || "User"}</span>
-                        <span className="text-[8px] xs:text-[10px] sm:text-xs text-amber-400/70 flex items-center truncate font-mono">
-                            <Shield className="h-2 w-2 xs:h-2.5 xs:w-2.5 sm:h-3 sm:w-3 mr-0.5 xs:mr-1 flex-shrink-0" />
-                            .developer
-                        </span>
+                    <div className="overflow-hidden">
+                        <p className="font-medium text-white text-sm truncate">{user?.username || "User"}</p>
+                        <p className="text-xs text-amber-400/70 flex items-center">
+                            <Shield className="h-3 w-3 mr-1" />
+                            Developer
+                        </p>
                     </div>
                 </div>
             </div>
 
-            {/* Navigation Menu with improved text sizes */}
-            <nav className="flex-grow overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-amber-500/20 scrollbar-track-transparent p-1.5 xs:p-2 sm:p-3 flex-shrink">
-                <div className="space-y-0.5 xs:space-y-1 sm:space-y-1.5">
+            {/* Navigation Menu */}
+            <nav className="flex-grow overflow-y-auto p-2 custom-scrollbar">
+                <div className="space-y-1">
                     {routes.map((route) =>
                         route.subRoutes ? (
-                            <div key={route.id} className="mb-0.5 xs:mb-1 sm:mb-1.5">
+                            <div key={route.id} className="mb-1">
                                 <button
                                     onClick={route.id === "projects" ? toggleProjectsMenu : toggleTasksMenu}
                                     className={`
-                                        flex items-center justify-between w-full px-1.5 xs:px-2 sm:px-3 py-1 xs:py-1.5 sm:py-2 rounded-lg
-                                        transition-all duration-200 group
+                                        flex items-center justify-between w-full px-3 py-2 rounded-md
+                                        transition-all duration-200
                                         ${(activeSection === route.id || isSubRouteActive(route.id)) 
                                             ? "bg-amber-500/20 text-amber-300" 
                                             : "text-gray-300 hover:bg-gray-800/40 hover:text-white"}
@@ -193,37 +191,30 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                                     `}
                                     aria-expanded={route.id === "projects" ? isProjectsOpen : isTasksOpen}
                                 >
-                                    <div className="flex items-center min-w-0">
-                                        <div className={`
-                                            mr-1.5 xs:mr-2 sm:mr-2.5 flex items-center justify-center h-3.5 w-3.5 xs:h-4 xs:w-4 sm:h-5 sm:w-5 flex-shrink-0
+                                    <div className="flex items-center">
+                                        <route.icon className={`
+                                            h-5 w-5 mr-2.5
                                             ${(activeSection === route.id || isSubRouteActive(route.id)) 
                                                 ? "text-amber-400" 
-                                                : "text-gray-400 group-hover:text-amber-400"}
-                                            transition-colors duration-200
-                                        `}>
-                                            <route.icon className="h-3.5 w-3.5 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
-                                        </div>
-                                        <span className="text-xs sm:text-sm md:text-base font-medium truncate font-mono">
-                                            {route.id}.menu()
-                                        </span>
+                                                : "text-gray-400"}
+                                        `} />
+                                        <span className="text-sm font-medium">{route.label}</span>
                                     </div>
-                                    <div className={`
-                                        transform transition-transform duration-200 flex-shrink-0
+                                    <ChevronDown className={`
+                                        h-3.5 w-3.5 transform transition-transform duration-200
                                         ${route.id === "projects" && isProjectsOpen || route.id === "tasks" && isTasksOpen 
                                             ? "rotate-180" 
                                             : ""}
-                                    `}>
-                                        <ChevronDown className="h-2.5 w-2.5 xs:h-3 xs:w-3 sm:h-3.5 sm:w-3.5" />
-                                    </div>
+                                    `} />
                                 </button>
 
                                 {/* Dropdown for Projects/Tasks */}
                                 <div 
                                     className={`
-                                        mt-0.5 xs:mt-1 overflow-hidden transition-all duration-200 ease-out
+                                        mt-1 overflow-hidden transition-all duration-200 ease-out
                                         ${route.id === "projects" && isProjectsOpen || route.id === "tasks" && isTasksOpen
-                                            ? "max-h-96 opacity-100" 
-                                            : "max-h-0 opacity-0 invisible"}
+                                            ? "max-h-72 opacity-100" 
+                                            : "max-h-0 opacity-0"}
                                     `}
                                     aria-hidden={!(route.id === "projects" && isProjectsOpen || route.id === "tasks" && isTasksOpen)}
                                 >
@@ -235,27 +226,25 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                                                 to={subroute.href}
                                                 onClick={handleLinkClick}
                                                 className={`
-                                                    flex items-center pl-6 xs:pl-7 sm:pl-9 pr-1.5 xs:pr-2 sm:pr-3 py-1 xs:py-1.5 sm:py-2 ml-0.5 rounded-lg 
-                                                    text-xs sm:text-sm md:text-base
+                                                    flex items-center pl-9 pr-3 py-2 ml-0.5 rounded-md 
+                                                    text-sm font-medium
                                                     transition-all duration-200
                                                     ${isRouteActive(subroute.href)
                                                         ? "bg-amber-500/20 text-amber-300"
                                                         : "text-gray-400 hover:bg-gray-800/30 hover:text-white"}
                                                     focus:outline-none focus:ring-2 focus:ring-amber-500/40 
-                                                    relative group font-mono
+                                                    relative
                                                 `}
                                             >
-                                                {/* Animated indicator line for active subroute */}
+                                                {/* Simple indicator line for active subroute */}
                                                 {isRouteActive(subroute.href) && (
-                                                    <div className="absolute left-0 top-0 bottom-0 w-0.5 xs:w-1 sm:w-1.5 bg-amber-500 rounded-r animate-fadeIn"></div>
+                                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-r"></div>
                                                 )}
                                                 
                                                 {subroute.icon && (
-                                                    <subroute.icon className={`h-2.5 w-2.5 xs:h-3 xs:w-3 sm:h-4 sm:w-4 mr-1 xs:mr-1.5 sm:mr-2 flex-shrink-0 ${isRouteActive(subroute.href) ? "text-amber-400" : ""}`} />
+                                                    <subroute.icon className={`h-4 w-4 mr-2 ${isRouteActive(subroute.href) ? "text-amber-400" : ""}`} />
                                                 )}
-                                                <span className="truncate">
-                                                    {`${route.id}.${subroute.id.replace(/-/g, '_')}`}
-                                                </span>
+                                                <span className="truncate">{subroute.label}</span>
                                             </Link>
                                         ))
                                     }
@@ -267,30 +256,25 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
                                 to={route.href}
                                 onClick={handleLinkClick}
                                 className={`
-                                    flex items-center px-1.5 xs:px-2 sm:px-3 py-1 xs:py-1.5 sm:py-2 rounded-lg 
-                                    text-xs sm:text-sm md:text-base
-                                    transition-all duration-200 group relative
+                                    flex items-center px-3 py-2 rounded-md 
+                                    text-sm font-medium
+                                    transition-all duration-200 relative
                                     ${isRouteActive(route.href)
                                         ? "bg-amber-500/20 text-amber-300"
                                         : "text-gray-300 hover:bg-gray-800/40 hover:text-white"}
-                                    focus:outline-none focus:ring-2 focus:ring-amber-500/40 font-mono
+                                    focus:outline-none focus:ring-2 focus:ring-amber-500/40
                                 `}
                             >
-                                {/* Animated indicator line for active route */}
+                                {/* Simple indicator line for active route */}
                                 {isRouteActive(route.href) && (
-                                    <div className="absolute left-0 top-0 bottom-0 w-0.5 xs:w-1 sm:w-1.5 bg-amber-500 rounded-r animate-pulse"></div>
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-r"></div>
                                 )}
                                 
-                                <div className={`
-                                    mr-1.5 xs:mr-2 sm:mr-2.5 flex items-center justify-center h-3.5 w-3.5 xs:h-4 xs:w-4 sm:h-5 sm:w-5 flex-shrink-0
-                                    ${isRouteActive(route.href) 
-                                        ? "text-amber-400" 
-                                        : "text-gray-400 group-hover:text-amber-400"}
-                                    transition-colors duration-200
-                                `}>
-                                    <route.icon className="h-3.5 w-3.5 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
-                                </div>
-                                <span className="truncate">{route.id}.view()</span>
+                                <route.icon className={`
+                                    h-5 w-5 mr-2.5
+                                    ${isRouteActive(route.href) ? "text-amber-400" : "text-gray-400"}
+                                `} />
+                                <span className="truncate">{route.label}</span>
                             </Link>
                         )
                     )}
@@ -298,49 +282,32 @@ const UserDashboardNav = ({ isSidebarOpen, toggleSidebar }) => {
             </nav>
 
             {/* Footer with Logout Button */}
-            <div className="p-1.5 xs:p-2 sm:p-3 border-t border-amber-500/20 mt-auto flex-shrink-0">
+            <div className="p-3 border-t border-gray-800 mt-auto">
                 <button 
-                    onClick={(e) => {
-                        e.stopPropagation(); // Prevent event bubbling
-                        logoutHandler();
-                    }}
-                    className="flex items-center justify-center w-full gap-1 xs:gap-1.5 sm:gap-2 px-1.5 xs:px-2 sm:px-3 py-1 xs:py-1.5 sm:py-2
-                        text-xs sm:text-sm md:text-base text-red-400 hover:bg-red-500/10 hover:text-red-300
-                        rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500/40 font-mono"
+                    onClick={logoutHandler}
+                    className="flex items-center justify-center w-full gap-2 px-3 py-2
+                        text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300
+                        rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500/40"
                 >
-                    <LogOut className="h-2.5 w-2.5 xs:h-3 xs:w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <span className="truncate">auth.logout()</span>
+                    <LogOut className="h-4 w-4" />
+                    <span>Log Out</span>
                 </button>
             </div>
 
-            {/* Optimized Animation Styles */}
+            {/* Simplified Scrollbar Styles */}
             <style>{`
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
-                .animate-fadeIn {
-                    animation: fadeIn 0.2s ease-out;
-                }
-
-                /* Custom Scrollbar */
-                .scrollbar-thin {
+                .custom-scrollbar {
                     scrollbar-width: thin;
                 }
-                .scrollbar-thumb-amber-500\\/20::-webkit-scrollbar-thumb {
-                    background-color: rgba(245, 158, 11, 0.2);
-                    border-radius: 3px;
-                }
-                .scrollbar-thin::-webkit-scrollbar {
+                .custom-scrollbar::-webkit-scrollbar {
                     width: 3px;
                 }
-                .scrollbar-track-transparent::-webkit-scrollbar-track {
+                .custom-scrollbar::-webkit-scrollbar-track {
                     background: transparent;
                 }
-                
-                /* Prevent scroll chaining */
-                .overscroll-contain {
-                    overscroll-behavior: contain;
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background-color: rgba(245, 158, 11, 0.2);
+                    border-radius: 3px;
                 }
             `}</style>
         </div>
