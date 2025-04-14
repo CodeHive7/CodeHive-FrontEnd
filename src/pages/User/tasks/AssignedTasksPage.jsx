@@ -34,8 +34,8 @@ export default function AssignedTasksPage() {
             await updateTaskStatus(taskId, status);
             Swal.fire({
                 icon: "success",
-                title: "task.update()",
-                text: `return { status: 200, message: "Task moved to ${status}" }`,
+                title: "Task Updated",
+                text: `Task successfully moved to ${status}`,
                 timer: 2000,
                 showConfirmButton: false,
                 background: "#111827",
@@ -45,8 +45,8 @@ export default function AssignedTasksPage() {
         } catch (error) {
             Swal.fire({
                 icon: "error",
-                title: "TaskUpdateException",
-                text: "Error: Failed to update task status. Check connection and retry.",
+                title: "Update Failed",
+                text: "Failed to update task status. Please check your connection and try again.",
                 background: "#111827",
                 color: "#ffffff",
                 confirmButtonColor: "#F59E0B"
@@ -58,7 +58,7 @@ export default function AssignedTasksPage() {
         return (
             <div className="flex flex-col items-center justify-center h-64">
                 <Loader2 className="w-12 h-12 text-amber-500 animate-spin mb-4" />
-                <p className="text-gray-400 font-mono">tasks.loading()</p>
+                <p className="text-gray-400">Loading your tasks...</p>
             </div>
         );
     }
@@ -68,10 +68,10 @@ export default function AssignedTasksPage() {
     return (
         <DndProvider backend={HTML5Backend}>
             <div className="space-y-6">
-                <h2 className="text-3xl font-bold text-white mb-6 font-mono">
-                    <span className="text-amber-500">user</span>
-                    <span className="text-white">.tasks</span>
-                    <span className="text-amber-400">.assigned[]</span>
+                <h2 className="text-3xl font-bold text-white mb-6">
+                    <span className="text-amber-500">My</span>
+                    <span className="text-white"> Assigned </span>
+                    <span className="text-amber-400">Tasks</span>
                 </h2>
 
                 <div className="bg-gray-900 border border-amber-500/30 rounded-lg shadow-md overflow-hidden">
@@ -82,8 +82,8 @@ export default function AssignedTasksPage() {
                                 <ClipboardList className="w-6 h-6 text-amber-400" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-semibold text-white font-mono">Kanban.render()</h3>
-                                <p className="text-gray-400 text-sm font-mono">// drag tasks to update their status</p>
+                                <h3 className="text-xl font-semibold text-white">Task Board</h3>
+                                <p className="text-gray-400 text-sm">Drag tasks to update their status</p>
                             </div>
                         </div>
                     </div>
@@ -95,8 +95,8 @@ export default function AssignedTasksPage() {
                                 <div className="bg-amber-500/10 p-4 rounded-md mb-3">
                                     <AlertTriangle className="w-10 h-10 text-amber-500/70" />
                                 </div>
-                                <p className="text-gray-400 text-lg font-mono">tasks.length === 0</p>
-                                <p className="text-gray-500 text-sm mt-1 font-mono">// when tasks are assigned to you, they will appear here</p>
+                                <p className="text-gray-400 text-lg">No tasks available</p>
+                                <p className="text-gray-500 text-sm mt-1">When tasks are assigned to you, they will appear here</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -157,9 +157,9 @@ function TaskColumn({ status, tasks, onDropTask, setSelectedTask }) {
     
     const getColumnTitle = () => {
         switch (status) {
-            case "TODO": return "tasks.filter(status: TODO)";
-            case "DOING": return "tasks.filter(status: IN_PROGRESS)";
-            case "DONE": return "tasks.filter(status: COMPLETED)";
+            case "TODO": return "To Do";
+            case "DOING": return "In Progress";
+            case "DONE": return "Completed";
             default: return status;
         }
     };
@@ -171,11 +171,11 @@ function TaskColumn({ status, tasks, onDropTask, setSelectedTask }) {
         >
             <div className={`p-4 ${styles.headerBg} flex items-center gap-2 border-b border-gray-700`}>
                 {styles.icon}
-                <h3 className="text-lg font-semibold text-white font-mono">
+                <h3 className="text-lg font-semibold text-white">
                     {getColumnTitle()}
                 </h3>
-                <span className="ml-auto text-xs bg-black/30 text-gray-300 px-2 py-1 rounded-md font-mono">
-                    .length = {tasks.length}
+                <span className="ml-auto text-xs bg-black/30 text-gray-300 px-2 py-1 rounded-md">
+                    {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
                 </span>
             </div>
 
@@ -188,8 +188,8 @@ function TaskColumn({ status, tasks, onDropTask, setSelectedTask }) {
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full text-center py-8">
-                        <p className="text-gray-400 text-sm font-mono">array.isEmpty()</p>
-                        <p className="text-gray-500 text-xs mt-1 font-mono">// drag tasks here</p>
+                        <p className="text-gray-400 text-sm">No tasks yet</p>
+                        <p className="text-gray-500 text-xs mt-1">Drag tasks here</p>
                     </div>
                 )}
             </div>
@@ -225,7 +225,7 @@ function TaskCard({ task, setSelectedTask }) {
         <div
             ref={drag}
             onClick={() => setSelectedTask(task)}
-            className={`p-3 rounded-md cursor-pointer transition-all transform hover:translate-y-[-2px] hover:shadow-lg ${isDragging ? "opacity-50" : "opacity-100"} ${getPriorityStyles()} bg-gray-950 hover:bg-gray-900 font-mono`}
+            className={`p-3 rounded-md cursor-pointer transition-all transform hover:translate-y-[-2px] hover:shadow-lg ${isDragging ? "opacity-50" : "opacity-100"} ${getPriorityStyles()} bg-gray-950 hover:bg-gray-900`}
         >
             <div className="flex justify-between items-start mb-2">
                 <h4 className="font-medium text-white">{task.title}</h4>
@@ -236,7 +236,7 @@ function TaskCard({ task, setSelectedTask }) {
             {task.dueDate && (
                 <div className="text-xs flex items-center text-gray-400 mt-1">
                     <Calendar className="h-3 w-3 mr-1" />
-                    <span className="font-mono">{new Date(task.dueDate).toLocaleDateString()}</span>
+                    <span>{new Date(task.dueDate).toLocaleDateString()}</span>
                 </div>
             )}
         </div>
@@ -249,7 +249,7 @@ function TaskModal({ task, onClose }) {
             <div className="bg-gray-900 rounded-md shadow-xl border border-amber-500/30 w-full max-w-md overflow-hidden">
                 {/* Modal Header */}
                 <div className="bg-gradient-to-r from-amber-500/10 to-transparent p-4 border-b border-amber-500/30 flex justify-between items-center">
-                    <h3 className="text-xl font-bold text-white font-mono">task.details</h3>
+                    <h3 className="text-xl font-bold text-white">Task Details</h3>
                     <button onClick={onClose} className="text-gray-400 hover:text-white">
                         <XCircle className="h-5 w-5" />
                     </button>
@@ -258,17 +258,17 @@ function TaskModal({ task, onClose }) {
                 {/* Modal Body */}
                 <div className="p-5">
                     <div className="mb-4">
-                        <h3 className="text-2xl font-semibold text-white mb-2 font-mono">{task.title}</h3>
+                        <h3 className="text-2xl font-semibold text-white mb-2">{task.title}</h3>
                         <div className="flex items-center gap-2 mb-4">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium font-mono
+                            <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium
                                 ${task.priority === "HIGH" ? "bg-red-500/20 text-red-400" : 
                                   task.priority === "MEDIUM" ? "bg-amber-500/20 text-amber-400" : 
                                   "bg-green-500/20 text-green-400"}`}
                             >
-                                <Flag className="w-3 h-3 mr-1" /> .priority = "{task.priority}"
+                                <Flag className="w-3 h-3 mr-1" /> {task.priority} Priority
                             </span>
                             {task.status && (
-                                <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium font-mono
+                                <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium
                                     ${task.status === "DONE" ? "bg-green-500/20 text-green-400" : 
                                       task.status === "DOING" ? "bg-blue-500/20 text-blue-400" : 
                                       "bg-amber-500/20 text-amber-400"}`}
@@ -276,29 +276,30 @@ function TaskModal({ task, onClose }) {
                                     {task.status === "DONE" ? <CheckCircle className="w-3 h-3 mr-1" /> :
                                      task.status === "DOING" ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> :
                                      <XCircle className="w-3 h-3 mr-1" />}
-                                    .status = "{task.status}"
+                                    {task.status === "DOING" ? "In Progress" : 
+                                     task.status === "DONE" ? "Completed" : "To Do"}
                                 </span>
                             )}
                         </div>
                     </div>
 
                     <div className="bg-gray-950 p-4 rounded-md border border-amber-500/30 mb-4">
-                        <p className="text-gray-300 whitespace-pre-line font-mono">{task.description || "// No description provided"}</p>
+                        <p className="text-gray-300 whitespace-pre-line">{task.description || "No description provided"}</p>
                     </div>
 
                     <div className="space-y-3">
                         {task.dueDate && (
                             <div className="flex items-center text-sm">
                                 <Calendar className="w-4 h-4 text-amber-400 mr-2" />
-                                <span className="text-gray-400 font-mono">.dueDate:</span>
-                                <span className="ml-2 text-white font-mono">{new Date(task.dueDate).toLocaleDateString()}</span>
+                                <span className="text-gray-400">Due Date:</span>
+                                <span className="ml-2 text-white">{new Date(task.dueDate).toLocaleDateString()}</span>
                             </div>
                         )}
                         {task.projectName && (
                             <div className="flex items-center text-sm">
                                 <ClipboardList className="w-4 h-4 text-amber-400 mr-2" />
-                                <span className="text-gray-400 font-mono">.project:</span>
-                                <span className="ml-2 text-white font-mono">{task.projectName}</span>
+                                <span className="text-gray-400">Project:</span>
+                                <span className="ml-2 text-white">{task.projectName}</span>
                             </div>
                         )}
                     </div>
@@ -308,9 +309,9 @@ function TaskModal({ task, onClose }) {
                 <div className="border-t border-amber-500/30 p-4 flex justify-end">
                     <button
                         onClick={onClose}
-                        className="bg-amber-500 hover:bg-amber-400 text-black px-4 py-2 rounded-md font-medium transition-colors font-mono"
+                        className="bg-amber-500 hover:bg-amber-400 text-black px-4 py-2 rounded-md font-medium transition-colors"
                     >
-                        modal.close()
+                        Close
                     </button>
                 </div>
             </div>
