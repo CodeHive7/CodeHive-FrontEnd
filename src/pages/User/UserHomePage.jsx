@@ -1,5 +1,3 @@
-
-// filepath: /home/simoacharouaou/CodeHive-FrontEnd/src/pages/User/UserHomePage.jsx
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/Auth/AuthContext.jsx";
@@ -96,8 +94,8 @@ export default function UserHomePage() {
       console.error("Error loading projects", error);
       Swal.fire({
         icon: "error",
-        title: "ProjectFetchException",
-        text: "Error: API request failed. Check network connection.",
+        title: "Error Loading Projects",
+        text: "We couldn't load the projects. Please check your connection.",
         confirmButtonColor: "#F59E0B",
         background: "#111827",
         color: "#ffffff"
@@ -121,8 +119,8 @@ export default function UserHomePage() {
       await applyForPosition(projectId, positionId);
       Swal.fire({
         icon: "success",
-        title: "application.submit()",
-        text: "return { status: 200, message: 'Application successfully sent' }",
+        title: "Application Sent",
+        text: "Your application was successfully submitted",
         confirmButtonColor: "#F59E0B",
         background: "#111827",
         color: "#ffffff"
@@ -131,8 +129,8 @@ export default function UserHomePage() {
       console.error("Error applying for position", error);
       Swal.fire({
         icon: "error",
-        title: "ApplicationException",
-        text: "Error: Failed to submit application. Retry operation.",
+        title: "Application Failed",
+        text: "We couldn't submit your application. Please try again.",
         confirmButtonColor: "#F59E0B",
         background: "#111827",
         color: "#ffffff"
@@ -153,8 +151,8 @@ export default function UserHomePage() {
     if (!validateCurrentStep()) {
       Swal.fire({
         icon: "warning",
-        title: "ValidationError",
-        text: "Error: Required fields cannot be null. Check form inputs.",
+        title: "Missing Information",
+        text: "Please fill in all required fields before continuing.",
         confirmButtonColor: "#F59E0B",
         background: "#111827",
         color: "#ffffff"
@@ -172,8 +170,8 @@ export default function UserHomePage() {
     if (!validateCurrentStep()) {
       Swal.fire({
         icon: "warning",
-        title: "ValidationError",
-        text: "Error: Required fields cannot be null. Check form inputs.",
+        title: "Missing Information",
+        text: "Please fill in all required fields before submitting.",
         confirmButtonColor: "#F59E0B",
         background: "#111827",
         color: "#ffffff"
@@ -183,8 +181,8 @@ export default function UserHomePage() {
     if (!newProject.positions.length || !newProject.positions[0].roleName) {
       Swal.fire({
         icon: "warning",
-        title: "PositionError",
-        text: "Error: positions.length must be > 0 with valid roleName",
+        title: "Position Required",
+        text: "Please add at least one position with a role name.",
         confirmButtonColor: "#F59E0B",
         background: "#111827",
         color: "#ffffff"
@@ -193,8 +191,8 @@ export default function UserHomePage() {
     }
     try {
       Swal.fire({
-        title: "project.create()",
-        text: "status: PENDING...",
+        title: "Creating Project",
+        text: "Please wait while we create your project...",
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
@@ -205,8 +203,8 @@ export default function UserHomePage() {
       await createProject(newProject);
       Swal.fire({
         icon: "success",
-        title: "project.create()",
-        text: "return { status: 201, data: newProject }",
+        title: "Project Created",
+        text: "Your project was successfully created!",
         timer: 2000,
         showConfirmButton: false,
         confirmButtonColor: "#F59E0B",
@@ -230,8 +228,8 @@ export default function UserHomePage() {
     } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "ProjectCreationException",
-        text: error.response?.data || "Error: API request failed with status 500.",
+        title: "Project Creation Failed",
+        text: error.response?.data || "We couldn't create your project. Please try again.",
         confirmButtonColor: "#F59E0B",
         background: "#111827",
         color: "#ffffff"
@@ -250,7 +248,7 @@ export default function UserHomePage() {
   const getStageBadgeColor = (stage) => {
     switch (stage) {
       case "NOT_STARTED":
-        return "bg-blue-600";
+        return "bg-amber-600";
       case "IN_DEVELOPMENT":
         return "bg-amber-600";
       case "FINISHED":
@@ -258,22 +256,22 @@ export default function UserHomePage() {
       case "NEEDS_FIXES":
         return "bg-red-600";
       default:
-        return "bg-purple-600";
+        return "bg-amber-600";
     }
   };
 
   const getStageDisplayName = (stage) => {
     switch (stage) {
       case "NOT_STARTED":
-        return "NOT_STARTED";
+        return "Not Started";
       case "IN_DEVELOPMENT":
-        return "IN_DEVELOPMENT";
+        return "In Development";
       case "FINISHED":
-        return "COMPLETED";
+        return "Completed";
       case "NEEDS_FIXES":
-        return "NEEDS_FIXES";
+        return "Needs Fixes";
       default:
-        return stage || "ONGOING";
+        return stage || "Ongoing";
     }
   };
 
@@ -297,54 +295,52 @@ export default function UserHomePage() {
       case 1:
         return (
           <div className="space-y-5">
-            <h3 className="text-xl font-semibold text-center text-white font-mono">
+            <h3 className="text-xl font-semibold text-center text-white">
               <span className="bg-amber-500/10 px-3 py-1 rounded">
-                project.init()
+                Project Basics
               </span>
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1 font-mono">
-                  .name <span className="text-amber-500">*</span>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Project Name <span className="text-amber-500">*</span>
                 </label>
                 <input
                   type="text"
-                  placeholder="project.name = '...'"
+                  placeholder="Enter your project name"
                   value={newProject.name}
                   onChange={(e) =>
                     setNewProject({ ...newProject, name: e.target.value })
                   }
-                  className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors font-mono"
+                  className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1 font-mono">
-                  .description <span className="text-amber-500">*</span>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Description <span className="text-amber-500">*</span>
                 </label>
                 <div className="relative">
-                  <div className="absolute top-0 left-0 px-3 py-3 text-gray-500 font-mono">/**</div>
                   <textarea
                     placeholder="Describe your project in detail"
                     value={newProject.description}
                     onChange={(e) =>
                       setNewProject({ ...newProject, description: e.target.value })
                     }
-                    className="w-full p-3 pl-10 border border-gray-700 bg-gray-800 text-white rounded-md h-32 focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors font-mono"
+                    className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md h-32 focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
                     required
                   />
-                  <div className="absolute bottom-0 left-0 px-3 py-3 text-gray-500 font-mono">*/</div>
                 </div>
-                <p className="text-gray-400 text-xs mt-1 font-mono">
-                  // provide a clear description to attract the right developers
+                <p className="text-gray-400 text-xs mt-1">
+                  Provide a clear description to attract the right developers
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1 font-mono">
-                  .category <span className="text-amber-500">*</span>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Category <span className="text-amber-500">*</span>
                 </label>
                 <select
-                  className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors font-mono"
+                  className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
                   value={newProject.selectedCategory}
                   onChange={(e) =>
                     setNewProject({
@@ -354,7 +350,7 @@ export default function UserHomePage() {
                   }
                   required
                 >
-                  <option value="">Categories.select()</option>
+                  <option value="">Select a category</option>
                   {categories.map((category) => (
                     <option key={category.id} value={category.name}>
                       {category.name}
@@ -363,8 +359,8 @@ export default function UserHomePage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1 font-mono">
-                  .websiteUrl <span className="text-gray-500">(optional)</span>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Website URL <span className="text-gray-500">(optional)</span>
                 </label>
                 <input
                   type="url"
@@ -373,7 +369,7 @@ export default function UserHomePage() {
                   onChange={(e) =>
                     setNewProject({ ...newProject, websiteUrl: e.target.value })
                   }
-                  className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors font-mono"
+                  className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
                 />
               </div>
             </div>
@@ -382,15 +378,15 @@ export default function UserHomePage() {
       case 2:
         return (
           <div className="space-y-5">
-            <h3 className="text-xl font-semibold text-center text-white font-mono">
+            <h3 className="text-xl font-semibold text-center text-white">
               <span className="bg-amber-500/10 px-3 py-1 rounded">
-                project.configure()
+                Project Details
               </span>
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1 font-mono">
-                  .stage <span className="text-amber-500">*</span>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Project Stage <span className="text-amber-500">*</span>
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   {["NOT_STARTED", "IN_DEVELOPMENT", "NEEDS_FIXES", "FINISHED"].map(
@@ -402,11 +398,11 @@ export default function UserHomePage() {
                           newProject.stage === stage
                             ? "border-amber-500 bg-amber-500/10"
                             : "border-gray-700 bg-gray-800 hover:border-gray-600"
-                        } font-mono`}
+                        }`}
                       >
                         <div className="mb-2">{getStageIcon(stage)}</div>
                         <span className="text-sm font-medium">
-                          {stage}
+                          {getStageDisplayName(stage)}
                         </span>
                       </div>
                     )
@@ -414,51 +410,51 @@ export default function UserHomePage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1 font-mono">
-                  .problemToFix <span className="text-gray-500">(optional)</span>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Problem to Fix <span className="text-gray-500">(optional)</span>
                 </label>
                 <textarea
-                  placeholder="problem.describe()"
+                  placeholder="Describe any specific problems that need solving"
                   value={newProject.problemToFix}
                   onChange={(e) =>
                     setNewProject({ ...newProject, problemToFix: e.target.value })
                   }
-                  className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md h-24 focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors font-mono"
+                  className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md h-24 focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
                 />
-                <p className="text-gray-400 text-xs mt-1 font-mono">
-                  // describing the problem helps potential contributors understand the project
+                <p className="text-gray-400 text-xs mt-1">
+                  Describing problems helps potential contributors understand the project
                 </p>
               </div>
               <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-300 font-mono">
-                  .questions[] <span className="text-gray-500">(optional)</span>
+                <label className="block text-sm font-medium text-gray-300">
+                  Screening Questions <span className="text-gray-500">(optional)</span>
                 </label>
                 <div>
                   <input
                     type="text"
-                    placeholder="questions[0] = '...'"
+                    placeholder="Question 1"
                     value={newProject.question1}
                     onChange={(e) =>
                       setNewProject({ ...newProject, question1: e.target.value })
                     }
-                    className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors font-mono"
+                    className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
                   />
                 </div>
                 {newProject.question1 && (
                   <div>
                     <input
                       type="text"
-                      placeholder="questions[1] = '...'"
+                      placeholder="Question 2"
                       value={newProject.question2}
                       onChange={(e) =>
                         setNewProject({ ...newProject, question2: e.target.value })
                       }
-                      className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors font-mono"
+                      className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
                     />
                   </div>
                 )}
-                <p className="text-gray-400 text-xs font-mono">
-                  // these questions will be presented to developers applying to your project
+                <p className="text-gray-400 text-xs">
+                  These questions will be presented to developers applying to your project
                 </p>
               </div>
             </div>
@@ -467,9 +463,9 @@ export default function UserHomePage() {
       case 3:
         return (
           <div className="space-y-5">
-            <h3 className="text-xl font-semibold text-center text-white font-mono">
+            <h3 className="text-xl font-semibold text-center text-white">
               <span className="bg-amber-500/10 px-3 py-1 rounded">
-                project.positions[]
+                Team Positions
               </span>
             </h3>
             <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
@@ -479,8 +475,8 @@ export default function UserHomePage() {
                   className="bg-gray-900/80 p-5 rounded-md border border-gray-800 hover:border-gray-700 transition-colors"
                 >
                   <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-medium text-gray-200 font-mono">
-                      positions[{index}]
+                    <h4 className="font-medium text-gray-200">
+                      Position {index + 1}
                     </h4>
                     {newProject.positions.length > 1 && (
                       <button
@@ -491,23 +487,23 @@ export default function UserHomePage() {
                           );
                           setNewProject({ ...newProject, positions: updatedPositions });
                         }}
-                        className="text-red-400 hover:text-red-300 text-sm flex items-center font-mono"
+                        className="text-red-400 hover:text-red-300 text-sm flex items-center"
                         aria-label="Remove position"
                       >
-                        <X className="w-4 h-4 mr-1" /> delete()
+                        <X className="w-4 h-4 mr-1" /> Remove
                       </button>
                     )}
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-1 font-mono flex items-center">
-                        .roleName <span className="text-amber-500">*</span>
+                      <label className="block text-sm font-medium text-gray-300 mb-1 flex items-center">
+                        Role Name <span className="text-amber-500">*</span>
                         <button
                           type="button"
                           onClick={() => {
                             Swal.fire({
                               title: "What is a Role?",
-                              html: `<div class="text-left font-mono">
+                              html: `<div class="text-left">
                                 <p class="mb-3">A role position defines the specific developer type you need for your project.</p>
                                 <p class="mb-3">Examples:</p>
                                 <ul class="list-disc pl-5 space-y-2">
@@ -518,7 +514,7 @@ export default function UserHomePage() {
                                   <li><span class="text-amber-400">QA Tester</span> - To test and ensure code quality</li>
                                   <li><span class="text-amber-400">Project Manager</span> - To coordinate team efforts</li>
                                 </ul>
-                                <p class="mt-3 text-sm text-gray-400">// Be specific to attract the right talent to your project</p>
+                                <p class="mt-3 text-sm text-gray-400">Be specific to attract the right talent to your project</p>
                               </div>`,  
                               confirmButtonText: "Got it!",
                               confirmButtonColor: "#F59E0B",
@@ -534,21 +530,21 @@ export default function UserHomePage() {
                       </label>
                       <input
                         type="text"
-                        placeholder="role = '...'"
+                        placeholder="e.g., Frontend Developer"
                         value={position.roleName}
                         onChange={(e) => {
                           const updatedPositions = [...newProject.positions];
                           updatedPositions[index].roleName = e.target.value;
                           setNewProject({ ...newProject, positions: updatedPositions });
                         }}
-                        className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors font-mono"
+                        className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
                         required
                       />
                     </div>
                     <div className="flex flex-wrap gap-4">
                       <div className="flex-grow">
-                        <label className="block text-sm font-medium text-gray-300 mb-1 font-mono">
-                          .quantity
+                        <label className="block text-sm font-medium text-gray-300 mb-1">
+                          Number of Positions
                         </label>
                         <input
                           type="number"
@@ -563,12 +559,12 @@ export default function UserHomePage() {
                             );
                             setNewProject({ ...newProject, positions: updatedPositions });
                           }}
-                          className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors font-mono"
+                          className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1 opacity-0 font-mono">
-                          .paid
+                        <label className="block text-sm font-medium text-gray-300 mb-1 opacity-0">
+                          Paid
                         </label>
                         <div
                           onClick={() => {
@@ -580,7 +576,7 @@ export default function UserHomePage() {
                             position.paid
                               ? "bg-green-900/30 border-green-700 text-green-400"
                               : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-600"
-                          } font-mono`}
+                          }`}
                         >
                           <input
                             type="checkbox"
@@ -588,7 +584,7 @@ export default function UserHomePage() {
                             onChange={() => {}}
                             className="mr-2 accent-amber-500"
                           />
-                          .paid = {position.paid ? "true" : "false"}
+                          Paid Position
                         </div>
                       </div>
                     </div>
@@ -606,17 +602,17 @@ export default function UserHomePage() {
                     ],
                   })
                 }
-                className="w-full py-3 px-4 border border-dashed border-amber-500/40 rounded-md bg-amber-500/5 text-amber-400 hover:bg-amber-500/10 hover:text-amber-300 transition-colors flex items-center justify-center font-mono"
+                className="w-full py-3 px-4 border border-dashed border-amber-500/40 rounded-md bg-amber-500/5 text-amber-400 hover:bg-amber-500/10 hover:text-amber-300 transition-colors flex items-center justify-center"
               >
-                <PlusCircle className="w-4 h-4 mr-2" /> positions.push()
+                <PlusCircle className="w-4 h-4 mr-2" /> Add Another Position
               </button>
             </div>
-            <div className="p-4 bg-blue-900/20 border border-blue-800/30 rounded-md">
+            <div className="p-4 bg-amber-900/10 border border-amber-800/20 rounded-md">
               <div className="flex items-start">
-                <Info className="text-blue-400 w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
-                <p className="text-blue-200 text-sm font-mono">
-                  // add all the positions you need for your project. you can add multiple
-                  // positions with different roles and specify if they are paid.
+                <Info className="text-amber-400 w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
+                <p className="text-amber-200 text-sm">
+                  Add all the positions you need for your project. You can add multiple
+                  positions with different roles and specify if they are paid.
                 </p>
               </div>
             </div>
@@ -633,7 +629,7 @@ export default function UserHomePage() {
       <header className="sticky top-0 z-40 border-b border-gray-800 bg-gray-950/95 backdrop-blur-sm shadow-md">
         <div className="flex h-14 sm:h-16 items-center justify-between px-2 xs:px-3 sm:px-4 md:px-6 container mx-auto">
           {/* Logo with responsive sizing */}
-          <h1 className="text-xl xs:text-2xl sm:text-3xl font-bold text-white whitespace-nowrap font-mono">
+          <h1 className="text-xl xs:text-2xl sm:text-3xl font-bold text-white whitespace-nowrap">
             <span className="text-amber-400">Code</span>Hive
           </h1>
           
@@ -650,11 +646,11 @@ export default function UserHomePage() {
                         px-1.5 xs:px-2 sm:px-3 md:px-4 
                         py-1 xs:py-1.5 sm:py-2 
                         rounded-md flex items-center 
-                        transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                        transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
               aria-label="Create a new project"
             >
               <PlusCircle className="w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 mr-1 xs:mr-1.5 sm:mr-2" />
-              <span className="text-[10px] xs:text-xs sm:text-sm">project.create()</span>
+              <span className="text-[10px] xs:text-xs sm:text-sm">Create Project</span>
             </button>
             
             {/* Chat Button */}
@@ -665,11 +661,11 @@ export default function UserHomePage() {
                         px-1.5 xs:px-2 sm:px-3 md:px-4 
                         py-1 xs:py-1.5 sm:py-2 
                         rounded-md flex items-center 
-                        transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 font-mono"
+                        transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600"
               aria-label="Open chat"
             >
               <MessageSquare className="w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 mr-1 xs:mr-1.5 sm:mr-2" />
-              <span className="text-[10px] xs:text-xs sm:text-sm">chat.open()</span>
+              <span className="text-[10px] xs:text-xs sm:text-sm">Messages</span>
             </Link>
             
             {/* Dashboard Button */}
@@ -701,9 +697,9 @@ export default function UserHomePage() {
 
       {/* Projects Section */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-12">
-        <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6 text-center font-mono">
+        <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6 text-center">
           <span className="relative inline-block">
-            <span className="relative z-10">projects.explore()</span>
+            <span className="relative z-10">Available Projects</span>
             <span className="absolute bottom-1 left-0 w-full h-3 bg-amber-500 opacity-20 rounded"></span>
           </span>
         </h2>
@@ -715,10 +711,10 @@ export default function UserHomePage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type="text"
-                placeholder="search(keyword: string)"
+                placeholder="Search projects..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-gray-950 border border-gray-800 rounded-md focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 focus:outline-none transition-all font-mono"
+                className="w-full pl-10 pr-4 py-3 bg-gray-950 border border-gray-800 rounded-md focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 focus:outline-none transition-all"
                 aria-label="Search projects"
               />
               {searchTerm && (
@@ -733,14 +729,14 @@ export default function UserHomePage() {
             </div>
             <div className="flex flex-wrap gap-2">
               {[
-                { id: "all", label: "projects.all()" },
-                { id: "IN_DEVELOPMENT", label: "projects.filter('IN_DEVELOPMENT')" },
-                { id: "paid", label: "projects.filter({ paid: true })" },
+                { id: "all", label: "All Projects" },
+                { id: "IN_DEVELOPMENT", label: "In Development" },
+                { id: "paid", label: "Paid Positions" },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors font-mono ${
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     activeTab === tab.id
                       ? "bg-amber-500 text-black"
                       : "bg-gray-800 text-gray-300 hover:bg-gray-700"
@@ -782,40 +778,40 @@ export default function UserHomePage() {
             </div>
             {searchTerm || activeTab !== "all" ? (
               <>
-                <p className="text-gray-300 text-xl font-medium font-mono">
-                  projects.filter(query).length === 0
+                <p className="text-gray-300 text-xl font-medium">
+                  No matching projects found
                 </p>
-                <p className="text-gray-400 mt-2 max-w-md mx-auto font-mono">
-                  // no matching results. try adjusting your search terms or filters
+                <p className="text-gray-400 mt-2 max-w-md mx-auto">
+                  Try adjusting your search terms or filters
                 </p>
                 <button
                   onClick={() => {
                     setSearchTerm("");
                     setActiveTab("all");
                   }}
-                  className="mt-6 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-md text-white transition-colors inline-flex items-center focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                  className="mt-6 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-md text-white transition-colors inline-flex items-center focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
                   <X className="w-4 h-4 mr-2" />
-                  filters.reset()
+                  Clear filters
                 </button>
               </>
             ) : (
               <>
-                <p className="text-gray-300 text-xl font-medium font-mono">
-                  projects.length === 0
+                <p className="text-gray-300 text-xl font-medium">
+                  No projects available
                 </p>
-                <p className="text-gray-400 mt-2 max-w-md mx-auto font-mono">
-                  // be the first to create a project and start collaborating with other devs
+                <p className="text-gray-400 mt-2 max-w-md mx-auto">
+                  Be the first to create a project and start collaborating with other developers
                 </p>
                 <button
                   onClick={() => {
                     setIsModalOpen(true);
                     setCurrentStep(1);
                   }}
-                  className="mt-6 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-medium rounded-md transition-colors inline-flex items-center focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                  className="mt-6 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-medium rounded-md transition-colors inline-flex items-center focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
                   <PlusCircle className="w-5 h-5 mr-2" />
-                  project.create()
+                  Create Project
                 </button>
               </>
             )}
@@ -843,7 +839,7 @@ export default function UserHomePage() {
                 <div
                   className={`absolute top-0 right-0 ${getStageBadgeColor(
                     project.stage
-                  )} px-3 py-1 text-white text-xs font-bold rounded-bl-md flex items-center transition-all font-mono`}
+                  )} px-3 py-1 text-white text-xs font-bold rounded-bl-md flex items-center transition-all`}
                 >
                   {getStageIcon(project.stage)}
                   {getStageDisplayName(project.stage)}
@@ -851,28 +847,28 @@ export default function UserHomePage() {
 
                 <div className="p-6 flex flex-col flex-grow">
                   {/* Header */}
-                  <h3 className="text-2xl font-bold text-white group-hover:text-amber-300 transition-colors font-mono">
+                  <h3 className="text-2xl font-bold text-white group-hover:text-amber-300 transition-colors">
                     {project.name}
                   </h3>
                   {/* Category */}
                   <p className="text-gray-400 text-sm mt-1">
-                    <span className="bg-gray-800 px-2 py-1 rounded text-xs font-mono">
-                      category: "{project.category || "UNCATEGORIZED"}"
+                    <span className="bg-gray-800 px-2 py-1 rounded text-xs">
+                      {project.category || "Uncategorized"}
                     </span>
                   </p>
                   {/* Description */}
                   <div className="mt-3 text-gray-300 flex-grow">
                     {project.description && (
-                      <p className="relative font-mono">
+                      <p className="relative">
                         {project.description.length > 120 && !expandedDescriptions[project.id]
                           ? project.description.substring(0, 120) + "..."
                           : project.description}
                         {project.description.length > 120 && (
                           <button
                             onClick={() => toggleDescription(project.id)}
-                            className="text-amber-400 hover:underline ml-1 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/50 rounded font-mono"
+                            className="text-amber-400 hover:underline ml-1 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/50 rounded"
                           >
-                            {expandedDescriptions[project.id] ? ".collapse()" : ".expand()"}
+                            {expandedDescriptions[project.id] ? "Show less" : "Read more"}
                           </button>
                         )}
                       </p>
@@ -880,14 +876,14 @@ export default function UserHomePage() {
                   </div>
                   {/* Team Info & Positions */}
                   <div className="mt-4 border-t border-gray-800 pt-4">
-                    <div className="flex items-center mb-2 text-sm text-gray-400 font-mono">
+                    <div className="flex items-center mb-2 text-sm text-gray-400">
                       <Users className="w-4 h-4 mr-1.5 text-gray-500" />
                       <span>
-                        positions.length = {project.positions.reduce((acc, pos) => acc + pos.quantity, 0)}
+                        {project.positions.reduce((acc, pos) => acc + pos.quantity, 0)} Positions
                       </span>
                     </div>
-                    <h4 className="text-sm font-semibold text-amber-400 mb-2 flex items-center font-mono">
-                      <span className="mr-2">positions.filter(open: true)</span>
+                    <h4 className="text-sm font-semibold text-amber-400 mb-2 flex items-center">
+                      <span className="mr-2">Open Positions</span>
                       <div className="h-px bg-amber-500/30 flex-grow"></div>
                     </h4>
                     {project.positions.length > 0 ? (
@@ -895,7 +891,7 @@ export default function UserHomePage() {
                         {project.positions.map((position, index) => (
                           <div
                             key={index}
-                            className="inline-flex items-center bg-gray-800/70 border border-gray-700 px-2 py-1 rounded-md text-xs sm:text-sm transition-all hover:bg-gray-700/70 hover:border-amber-500/50 group mb-1 font-mono"
+                            className="inline-flex items-center bg-gray-800/70 border border-gray-700 px-2 py-1 rounded-md text-xs sm:text-sm transition-all hover:bg-gray-700/70 hover:border-amber-500/50 group mb-1"
                           >
                             <div className="w-2 h-2 rounded-full bg-amber-400 mr-1"></div>
                             <span className="truncate max-w-[80px] sm:max-w-[120px]">
@@ -903,21 +899,20 @@ export default function UserHomePage() {
                             </span>
                             <div className="flex items-center ml-1 px-1 py-0.5 bg-gray-900/50 rounded">
                               <span className="text-gray-300 text-xs">
-                                count: {position.quantity}
+                                x{position.quantity}
                               </span>
                             </div>
                             {position.paid && (
                               <span className="ml-1 bg-green-900/60 text-green-300 text-xs px-1.5 py-0.5 rounded">
-                                paid=true
+                                Paid
                               </span>
                             )}
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-400 text-sm font-mono">
-                        {/* Empty array indicator */}
-                        positions.length === 0
+                      <p className="text-gray-400 text-sm">
+                        No positions available
                       </p>
                     )}
                   </div>
@@ -925,9 +920,9 @@ export default function UserHomePage() {
                   {/* Action Button */}
                   <Link
                     to={`/projects/${project.id}`}
-                    className="mt-5 w-full inline-flex items-center justify-center bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-black px-6 py-2.5 rounded-md text-base font-semibold transition-all group-hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-gray-950 font-mono"
+                    className="mt-5 w-full inline-flex items-center justify-center bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white px-6 py-2.5 rounded-md text-base font-semibold transition-all group-hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-gray-950"
                   >
-                    project.view(id: {String(project.id).substring(0, 4)}...)
+                    View Project
                     <ChevronRight className="w-5 h-5 ml-1 group-hover:ml-2 transition-all" />
                   </Link>
                 </div>
@@ -946,9 +941,9 @@ export default function UserHomePage() {
           >
             {/* Modal Header */}
             <div className="sticky top-0 z-10 bg-gray-950 px-6 py-4 border-b border-gray-800 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-white flex items-center font-mono">
+              <h2 className="text-2xl font-bold text-white flex items-center">
                 <PlusCircle className="w-5 h-5 mr-2 text-amber-400" />
-                <span>new Project();</span>
+                <span>Create New Project</span>
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -961,7 +956,7 @@ export default function UserHomePage() {
 
             {/* Progress Indicator */}
             <div className="px-6 py-4">
-              <div className="flex justify-between mb-2 font-mono">
+              <div className="flex justify-between mb-2">
                 {[1, 2, 3].map((step) => (
                   <span
                     key={step}
@@ -969,7 +964,7 @@ export default function UserHomePage() {
                       currentStep >= step ? "text-amber-400" : "text-gray-500"
                     }`}
                   >
-                    step_{step}()
+                    Step {step}
                   </span>
                 ))}
               </div>
@@ -989,31 +984,31 @@ export default function UserHomePage() {
               {currentStep > 1 ? (
                 <button
                   onClick={handlePrevStep}
-                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 font-mono"
+                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600"
                 >
-                  step.prev()
+                  Previous
                 </button>
               ) : (
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 font-mono"
+                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600"
                 >
-                  modal.close()
+                  Cancel
                 </button>
               )}
               {currentStep < totalSteps ? (
                 <button
                   onClick={handleNextStep}
-                  className="px-6 py-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-black font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                  className="px-6 py-2 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
-                  step.next()
+                  Next
                 </button>
               ) : (
                 <button
                   onClick={handleCreateProject}
-                  className="px-6 py-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-black font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                  className="px-6 py-2 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
-                  project.save()
+                  Create Project
                 </button>
               )}
             </div>
@@ -1025,7 +1020,7 @@ export default function UserHomePage() {
       <div className="hidden md:block absolute top-1/3 -right-24 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
       <div className="hidden md:block absolute bottom-1/4 -left-24 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
-      {/* Subtle code pattern background */}
+      {/* Subtle honey/hexagon pattern background */}
       <div className="fixed inset-0 opacity-5 pointer-events-none z-[-1]"
            style={{
              backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath fill='%23F59E0B' opacity='0.1' d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100'/%3E%3C/svg%3E\")",
