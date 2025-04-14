@@ -2,11 +2,10 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { registerUser } from "../../services/Auth/authService.js";
 import { ErrorAlert } from "../ui/ErrorAlert.jsx";
-import { SuccessAlert } from "../ui/SuccessAlert.jsx";
-import { HiTerminal, HiCode, HiOutlineCode } from 'react-icons/hi';
+import { HiTerminal } from 'react-icons/hi';
 import { BiCodeAlt } from 'react-icons/bi';
-import { BsGithub, BsGoogle } from 'react-icons/bs';
-import { VscTerminalPowershell } from 'react-icons/vsc';
+import { BsGithub, BsGoogle, BsCheckCircleFill } from 'react-icons/bs';
+import { IoMailOutline } from 'react-icons/io5';
 
 const RegisterForm = () => {
     const [formData, setFormData] = useState({
@@ -18,7 +17,6 @@ const RegisterForm = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [successMessage, setSuccessMessage] = useState(null);
     const [isRegistered, setIsRegistered] = useState(false);
     const [registeredEmail, setRegisteredEmail] = useState("");
 
@@ -37,12 +35,10 @@ const RegisterForm = () => {
                 password: formData.password,
             });
             
-            // Store the registered email and set success state
             setRegisteredEmail(formData.email);
             setIsRegistered(true);
             setError(null);
             
-            // Reset form data
             setFormData({
                 username: "",
                 email: "",
@@ -61,77 +57,79 @@ const RegisterForm = () => {
     if (isRegistered) {
         return (
             <div className="w-full max-w-2xl mx-auto">
-                <div className="bg-gray-950 rounded-lg shadow-xl border border-gray-800 overflow-hidden">
-                    <div className="p-6 sm:p-8">
-                        <div className="flex items-center justify-center mb-6">
+                <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800 overflow-hidden">
+                    <div className="p-8">
+                        <div className="flex items-center justify-center mb-8">
                             <HiTerminal className="text-amber-500 w-8 h-8" />
                             <h1 className="ml-3 text-2xl font-bold text-white">
                                 Code<span className="text-amber-500">Hive</span>
                             </h1>
                         </div>
                         
-                        <div className="text-center mb-6">
-                            <HiCode className="w-16 h-16 text-green-500 mx-auto mb-2" />
-                            <h2 className="text-xl font-semibold text-green-500">
-                                <span className="text-white font-mono">true</span> <span className="text-green-400 font-mono">===</span> registration.success
+                        <div className="text-center mb-8">
+                            <div className="bg-amber-500/10 p-4 rounded-full inline-block mb-4">
+                                <BsCheckCircleFill className="w-12 h-12 text-amber-500" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-white mb-2">
+                                Registration Successful
                             </h2>
-                            <p className="text-gray-400 mt-2 border-l-2 border-green-500 pl-3 text-left text-sm font-mono">
-                                // Your account was created successfully!
+                            <p className="text-gray-400">
+                                Your account was created successfully!
                             </p>
                         </div>
 
-                        <div className="bg-gray-900 border border-gray-700 rounded-md p-4 mb-6">
-                            <h3 className="text-amber-500 font-mono text-sm mb-3">
-                                await verifyEmail();
+                        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 mb-6">
+                            <h3 className="text-lg font-medium text-white mb-4 flex items-center">
+                                <IoMailOutline className="mr-2 text-amber-500" />
+                                Verify your email address
                             </h3>
-                            <div className="flex flex-col md:flex-row gap-4">
-                                <div className="md:w-1/2">
+                            
+                            <div className="space-y-6">
+                                <div>
                                     <p className="text-gray-300 mb-2">
                                         We've sent a verification link to:
                                     </p>
-                                    <p className="bg-gray-950 p-2 rounded border border-gray-700 text-amber-500 font-mono mb-4 break-all">
+                                    <p className="bg-gray-900 p-3 rounded-md border border-gray-700 text-amber-400 break-all">
                                         {registeredEmail}
                                     </p>
                                 </div>
                                 
-                                <div className="md:w-1/2">
-                                    <h3 className="font-mono text-blue-400 mb-2">function nextSteps() {`{`}</h3>
-                                    <ol className="ml-4 space-y-2 text-gray-300 font-mono mb-2">
-                                        <li className="flex items-start">
-                                            <span className="bg-gray-800 text-amber-400 rounded px-1 mr-2 font-mono">1.</span>
+                                <div className="border-l-4 border-amber-500 pl-4 py-2">
+                                    <h4 className="text-white mb-2">Next steps:</h4>
+                                    <ol className="space-y-2 text-gray-300">
+                                        <li className="flex items-center">
+                                            <span className="bg-amber-500/20 text-amber-400 rounded-full w-6 h-6 flex items-center justify-center mr-2">1</span>
                                             Check your inbox
                                         </li>
-                                        <li className="flex items-start">
-                                            <span className="bg-gray-800 text-amber-400 rounded px-1 mr-2 font-mono">2.</span>
-                                            Click verification link
+                                        <li className="flex items-center">
+                                            <span className="bg-amber-500/20 text-amber-400 rounded-full w-6 h-6 flex items-center justify-center mr-2">2</span>
+                                            Click the verification link
                                         </li>
-                                        <li className="flex items-start">
-                                            <span className="bg-gray-800 text-amber-400 rounded px-1 mr-2 font-mono">3.</span>
+                                        <li className="flex items-center">
+                                            <span className="bg-amber-500/20 text-amber-400 rounded-full w-6 h-6 flex items-center justify-center mr-2">3</span>
                                             Return to login
                                         </li>
                                     </ol>
-                                    <p className="font-mono text-blue-400">{`}`}</p>
                                 </div>
                             </div>
                             
                             <div className="mt-6">
                                 <Link 
                                     to="/login"
-                                    className="w-full h-10 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-md flex items-center justify-center"
+                                    className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-md flex items-center justify-center"
                                 >
-                                    <BiCodeAlt className="mr-2" size={18} />
-                                    <span className="font-mono">return to login();</span>
+                                    Return to Login
                                 </Link>
                             </div>
                         </div>
                         
                         <div className="text-center text-sm text-gray-500">
-                            <p className="mb-1 font-mono">// Didn't receive the email?</p>
+                            <p className="mb-2">Didn't receive the email?</p>
                             <button 
-                                className="text-amber-500 hover:text-amber-400 font-mono"
+                                className="text-amber-500 hover:text-amber-400"
                                 onClick={() => setIsRegistered(false)}
                             >
-                                retry(registration);
+                                Try registering again
                             </button>
                         </div>
                     </div>
@@ -142,20 +140,20 @@ const RegisterForm = () => {
 
     return (
         <div className="w-full max-w-2xl mx-auto">
-            <div className="bg-gray-950 rounded-lg shadow-xl border border-gray-800 overflow-hidden">
-                <div className="p-6 sm:p-8">
-                    <div className="flex items-center justify-center mb-6">
+            <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800 overflow-hidden">
+                <div className="p-8">
+                    <div className="flex items-center justify-center mb-8">
                         <HiTerminal className="text-amber-500 w-8 h-8" />
                         <h1 className="ml-3 text-2xl font-bold text-white">
                             Code<span className="text-amber-500">Hive</span>
                         </h1>
                     </div>
                     
-                    <h2 className="text-xl font-semibold text-white mb-1">
-                        <span className="text-green-400 font-mono">function</span> <span className="text-blue-400">register</span><span className="text-yellow-500">()</span>
+                    <h2 className="text-2xl font-semibold text-white mb-2">
+                        Create an Account
                     </h2>
-                    <p className="text-gray-400 mb-6 border-l-2 border-amber-500 pl-3 font-mono text-sm">
-                        // Join a network of developer collaboration
+                    <p className="text-gray-400 mb-6">
+                        Join a network of developer collaboration
                     </p>
 
                     <ErrorAlert
@@ -166,7 +164,7 @@ const RegisterForm = () => {
                     <div className="flex gap-4 mb-6">
                         <button 
                             type="button"
-                            className="flex-1 h-11 bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded-md flex items-center justify-center text-gray-200 transition-colors"
+                            className="flex-1 h-11 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-md flex items-center justify-center text-white transition-colors"
                             onClick={() => window.location.href = '/api/auth/github/login'}
                         >
                             <BsGithub className="mr-2" size={18} />
@@ -174,7 +172,7 @@ const RegisterForm = () => {
                         </button>
                         <button 
                             type="button"
-                            className="flex-1 h-11 bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded-md flex items-center justify-center text-gray-200 transition-colors"
+                            className="flex-1 h-11 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-md flex items-center justify-center text-white transition-colors"
                         >
                             <BsGoogle className="mr-2" size={16} />
                             <span>Google</span>
@@ -186,7 +184,7 @@ const RegisterForm = () => {
                             <div className="w-full border-t border-gray-800"></div>
                         </div>
                         <div className="relative flex justify-center text-xs">
-                            <span className="bg-gray-950 px-2 text-gray-500 font-mono">// or continue with</span>
+                            <span className="bg-gray-900 px-2 text-gray-500">or continue with email</span>
                         </div>
                     </div>
 
@@ -194,93 +192,98 @@ const RegisterForm = () => {
                         {/* Full name and username in one row */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
-                                <label htmlFor="fullName" className="block text-sm font-medium text-gray-300 mb-1 font-mono">
-                                    const fullName =
+                                <label htmlFor="fullName" className="block text-sm font-medium text-gray-300 mb-1">
+                                    Full Name
                                 </label>
                                 <input
                                     id="fullName"
-                                    placeholder="'Your Full Name'"
+                                    placeholder="Enter your full name"
                                     type="text"
                                     disabled={isLoading}
-                                    className="h-12 bg-gray-900 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-sm text-white placeholder-gray-500 font-mono"
+                                    className="h-12 bg-gray-800 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-white placeholder-gray-500"
                                     value={formData.fullName}
                                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                    required
                                 />
                             </div>
                             <div>
-                                <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1 font-mono">
-                                    const username =
+                                <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1">
+                                    Username
                                 </label>
                                 <input
                                     id="username"
-                                    placeholder="'dev_username'"
+                                    placeholder="Choose a username"
                                     type="text"
                                     disabled={isLoading}
-                                    className="h-12 bg-gray-900 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-sm text-white placeholder-gray-500 font-mono"
+                                    className="h-12 bg-gray-800 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-white placeholder-gray-500"
                                     value={formData.username}
                                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                                    required
                                 />
                             </div>
                         </div>
 
                         {/* Email in its own row */}
                         <div className="mb-4">
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1 font-mono">
-                                const email =
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
+                                Email Address
                             </label>
                             <input
                                 id="email"
-                                placeholder="'your.email@example.com'"
+                                placeholder="your.email@example.com"
                                 type="email"
                                 disabled={isLoading}
-                                className="h-12 bg-gray-900 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-sm text-white placeholder-gray-500 font-mono"
+                                className="h-12 bg-gray-800 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-white placeholder-gray-500"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                required
                             />
                         </div>
 
                         {/* Password and confirm password in one row */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                             <div>
-                                <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1 font-mono">
-                                    const password =
+                                <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
+                                    Password
                                 </label>
                                 <input
                                     id="password"
-                                    placeholder="'secure_password'"
+                                    placeholder="Create a password"
                                     type="password"
                                     disabled={isLoading}
-                                    className="h-12 bg-gray-900 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-sm text-white placeholder-gray-500 font-mono"
+                                    className="h-12 bg-gray-800 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-white placeholder-gray-500"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    required
                                 />
                             </div>
                             <div>
-                                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-1 font-mono">
-                                    password.confirm =
+                                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-1">
+                                    Confirm Password
                                 </label>
                                 <input
                                     id="confirmPassword"
-                                    placeholder="'secure_password'"
+                                    placeholder="Confirm your password"
                                     type="password"
                                     disabled={isLoading}
-                                    className="h-12 bg-gray-900 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-sm text-white placeholder-gray-500 font-mono"
+                                    className="h-12 bg-gray-800 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-white placeholder-gray-500"
                                     value={formData.confirmPassword}
                                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                    required
                                 />
                             </div>
                         </div>
 
-                        <div className="bg-gray-900 border border-gray-700 rounded-md p-3 flex items-center mb-4">
-                            <HiOutlineCode className="h-5 w-5 text-amber-500 mr-2 flex-shrink-0" />
-                            <p className="text-gray-300 text-sm font-mono">
-                                // You'll need to verify your email before logging in
+                        <div className="bg-gray-800 border border-gray-700 rounded-md p-4 flex items-center mb-6">
+                            <IoMailOutline className="h-5 w-5 text-amber-400 mr-3 flex-shrink-0" />
+                            <p className="text-gray-300 text-sm">
+                                You'll need to verify your email before logging in
                             </p>
                         </div>
 
                         <button
                             type="submit"
-                            className="w-full h-12 mt-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-md transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="w-full h-12 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-md transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                             disabled={isLoading}
                         >
                             {isLoading ? (
@@ -298,23 +301,20 @@ const RegisterForm = () => {
                                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                         />
                                     </svg>
-                                    Executing...
+                                    Processing...
                                 </>
                             ) : (
-                                <>
-                                    <BiCodeAlt size={18} />
-                                    <span>Submit()</span>
-                                </>
+                                "Create Account"
                             )}
                         </button>
                     </form>
                 </div>
                 
-                <div className="p-5 bg-gray-900 border-t border-gray-800 text-center">
-                    <p className="text-sm text-gray-500 font-mono">
-                        <span className="text-blue-400">if</span> (<span className="text-green-400">account</span>) {" "}
+                <div className="p-5 bg-gray-800 border-t border-gray-700 text-center">
+                    <p className="text-gray-400">
+                        Already have an account?{" "}
                         <Link to="/login" className="text-amber-500 hover:text-amber-400 font-medium">
-                            login();
+                            Log in
                         </Link>
                     </p>
                 </div>
