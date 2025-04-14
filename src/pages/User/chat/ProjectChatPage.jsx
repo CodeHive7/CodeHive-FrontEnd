@@ -52,8 +52,8 @@ export default function ProjectChatPage() {
                 console.warn("Chat initialization safety timeout triggered");
                 setLoading(false);
                 setError({
-                    title: "ConnectionTimeoutError",
-                    message: "Error: Socket connection timeout after 25000ms. Please retry operation."
+                    title: "Connection Timeout",
+                    message: "Unable to connect to the chat. Please check your connection and try again."
                 });
             }, 25000); // Increased timeout to 25s
             
@@ -119,8 +119,8 @@ export default function ProjectChatPage() {
                 if (!mounted) return;
                 
                 setError({
-                    title: "ConnectionError",
-                    message: error.message || "Error: WebSocket connection failed. Check network status."
+                    title: "Connection Failed",
+                    message: "Unable to connect to the chat service. Please check your network connection."
                 });
                 setLoading(false);
                 
@@ -219,11 +219,11 @@ export default function ProjectChatPage() {
     // Show error state if needed
     if (error) {
         return (
-            <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center p-4 font-mono">
+            <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center p-4">
                 <div className="max-w-md w-full bg-gray-900 border border-red-500/30 rounded-lg shadow-lg overflow-hidden">
                     <div className="bg-gray-800 px-4 py-2 border-b border-gray-700 flex items-center">
-                        <Terminal className="h-4 w-4 text-red-400 mr-2" />
-                        <span className="text-red-400 font-semibold">fatal_error.log</span>
+                        <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
+                        <span className="text-red-400 font-semibold">Connection Problem</span>
                     </div>
                     
                     <div className="p-6 space-y-4">
@@ -231,13 +231,13 @@ export default function ProjectChatPage() {
                             <AlertCircle className="h-5 w-5 text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
                             <div>
                                 <p className="text-amber-500 font-bold">{error.title}</p>
-                                <p className="text-gray-300 mt-1 font-mono">{error.message}</p>
+                                <p className="text-gray-300 mt-1">{error.message}</p>
                             </div>
                         </div>
                         
                         <div className="pt-4 border-t border-gray-800 text-sm">
-                            <div className="text-gray-500">
-                                <span className="text-green-400">➜</span> <span className="text-blue-400">debug</span> Try one of the following:
+                            <div className="text-gray-300">
+                                What would you like to do?
                             </div>
                             <div className="flex mt-4 space-x-3">
                                 <button 
@@ -245,24 +245,24 @@ export default function ProjectChatPage() {
                                         disconnect();
                                         navigate("/user/messages");
                                     }}
-                                    className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded text-white text-sm transition-colors flex items-center"
+                                    className="px-4 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded text-white text-sm transition-colors flex items-center"
                                 >
-                                    <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
-                                    chat.navigate('/messages')
+                                    <ArrowLeft className="h-4 w-4 mr-2" />
+                                    Back to Messages
                                 </button>
                                 <button 
                                     onClick={() => window.location.reload()}
-                                    className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded text-amber-400 text-sm transition-colors flex items-center"
+                                    className="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded text-amber-400 text-sm transition-colors flex items-center"
                                 >
-                                    <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-                                    connection.retry()
+                                    <RefreshCw className="h-4 w-4 mr-2" />
+                                    Try Again
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                {/* Subtle code pattern background */}
+                {/* Subtle background pattern */}
                 <div className="fixed inset-0 opacity-5 pointer-events-none z-[-1]"
                     style={{
                         backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath fill='%23F59E0B' opacity='0.1' d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100'/%3E%3C/svg%3E\")",
@@ -274,21 +274,20 @@ export default function ProjectChatPage() {
     }
     
     return (
-        <div className="min-h-screen bg-gray-950 text-white flex flex-col font-mono">
+        <div className="min-h-screen bg-gray-950 text-white flex flex-col">
             <ChatHeader 
                 loading={loading}
                 project={project}
                 connected={connected}
                 showProjectInfo={showProjectInfo}
                 setShowProjectInfo={setShowProjectInfo}
-                terminalStyle={true} // Add this prop to enable the terminal style
             />
             
             <div className="flex-grow flex flex-col p-4 max-w-4xl mx-auto w-full relative">
                 
                 {loading ? (
                     <div className="flex-grow flex items-center justify-center">
-                        <MessageSkeleton count={4} terminalStyle={true} />
+                        <MessageSkeleton count={4} />
                     </div>
                 ) : (
                     <ChatMessages 
@@ -296,7 +295,6 @@ export default function ProjectChatPage() {
                         loadingMessages={loadingMessages}
                         currentUser={user}
                         messagesEndRef={messagesEndRef}
-                        terminalStyle={true} // Add this prop
                     />
                 )}
                 
@@ -305,12 +303,11 @@ export default function ProjectChatPage() {
                         onSendMessage={handleSendMessage}
                         connected={connected}
                         connecting={connecting}
-                        terminalStyle={true} // Add this prop
                     />
                 )}
             </div>
             
-            {/* Subtle code pattern background */}
+            {/* Subtle background pattern */}
             <div className="fixed inset-0 opacity-5 pointer-events-none z-[-1]"
                 style={{
                     backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath fill='%23F59E0B' opacity='0.1' d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100'/%3E%3C/svg%3E\")",
