@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { registerUser } from "../../services/Auth/authService.js";
 import { ErrorAlert } from "../ui/ErrorAlert.jsx";
 import { HiTerminal } from 'react-icons/hi';
 import { BiCodeAlt } from 'react-icons/bi';
-import { BsGithub, BsGoogle, BsCheckCircleFill } from 'react-icons/bs';
+import { BsGithub, BsGoogle, BsCheckCircleFill, BsShieldLock } from 'react-icons/bs';
 import { IoMailOutline } from 'react-icons/io5';
+import { FaRegCheckCircle, FaRegTimesCircle } from 'react-icons/fa';
 
 const RegisterForm = () => {
     const [formData, setFormData] = useState({
@@ -19,13 +20,99 @@ const RegisterForm = () => {
     const [error, setError] = useState(null);
     const [isRegistered, setIsRegistered] = useState(false);
     const [registeredEmail, setRegisteredEmail] = useState("");
+    const [passwordStrength, setPasswordStrength] = useState({
+        score: 0,
+        hasMinLength: false,
+        hasUppercase: false,
+        hasLowercase: false, 
+        hasNumber: false,
+        hasSpecialChar: false
+    });
+    const [passwordFocused, setPasswordFocused] = useState(false);
+
+    // Check password strength whenever password changes
+    useEffect(() => {
+        if (formData.password) {
+            const strength = checkPasswordStrength(formData.password);
+            setPasswordStrength(strength);
+        } else {
+            setPasswordStrength({
+                score: 0,
+                hasMinLength: false,
+                hasUppercase: false,
+                hasLowercase: false,
+                hasNumber: false,
+                hasSpecialChar: false
+            });
+        }
+    }, [formData.password]);
+
+    // Password strength checker function
+    const checkPasswordStrength = (password) => {
+        const hasMinLength = password.length >= 8;
+        const hasUppercase = /[A-Z]/.test(password);
+        const hasLowercase = /[a-z]/.test(password);
+        const hasNumber = /[0-9]/.test(password);
+        const hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
+        
+        // Calculate score (0-4)
+        let score = 0;
+        if (hasMinLength) score++;
+        if (hasUppercase) score++;
+        if (hasLowercase) score++;
+        if (hasNumber) score++;
+        if (hasSpecialChar) score++;
+        
+        // Adjust score based on length
+        if (password.length >= 12) score = Math.min(score + 1, 5);
+        
+        return {
+            score,
+            hasMinLength,
+            hasUppercase,
+            hasLowercase,
+            hasNumber,
+            hasSpecialChar
+        };
+    };
+
+    const getStrengthLabel = (score) => {
+        if (score === 0) return "Very Weak";
+        if (score === 1) return "Weak";
+        if (score === 2) return "Fair";
+        if (score === 3) return "Good";
+        if (score === 4) return "Strong";
+        return "Very Strong";
+    };
+
+    const getStrengthColor = (score) => {
+        if (score === 0) return "bg-red-500";
+        if (score === 1) return "bg-red-500";
+        if (score === 2) return "bg-yellow-500";
+        if (score === 3) return "bg-yellow-400";
+        if (score === 4) return "bg-green-500";
+        return "bg-green-400";
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Password validation
         if (formData.password !== formData.confirmPassword) {
             setError("Passwords do not match.");
             return;
         }
+        
+        if (formData.password.length < 8) {
+            setError("Password must be at least 8 characters long.");
+            return;
+        }
+        
+        if (passwordStrength.score < 3) {
+            setError("Please create a stronger password that meets the requirements below.");
+            return;
+        }
+        
         setIsLoading(true);
         try {
             const response = await registerUser({
@@ -241,7 +328,7 @@ const RegisterForm = () => {
                         </div>
 
                         {/* Password and confirm password in one row */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-1">
                             <div>
                                 <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
                                     Password
@@ -251,11 +338,41 @@ const RegisterForm = () => {
                                     placeholder="Create a password"
                                     type="password"
                                     disabled={isLoading}
-                                    className="h-12 bg-gray-800 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-white placeholder-gray-500"
+                                    className={`h-12 bg-gray-800 border ${
+                                        formData.password && passwordStrength.score < 3 
+                                            ? 'border-yellow-600' 
+                                            : formData.password && passwordStrength.score >= 3
+                                                ? 'border-green-500'
+                                                : 'border-gray-700'
+                                    } focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-white placeholder-gray-500`}
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    onFocus={() => setPasswordFocused(true)}
+                                    onBlur={() => setTimeout(() => setPasswordFocused(false), 200)}
                                     required
                                 />
+                                
+                                {/* Password strength indicator */}
+                                {formData.password && (
+                                    <div className="mt-2">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-xs text-gray-400">Password strength:</span>
+                                            <span className={`text-xs font-medium ${
+                                                passwordStrength.score <= 1 ? 'text-red-400' : 
+                                                passwordStrength.score <= 2 ? 'text-yellow-400' : 
+                                                'text-green-400'
+                                            }`}>
+                                                {getStrengthLabel(passwordStrength.score)}
+                                            </span>
+                                        </div>
+                                        <div className="h-1.5 w-full bg-gray-700 rounded-full overflow-hidden">
+                                            <div 
+                                                className={`h-full ${getStrengthColor(passwordStrength.score)} transition-all`}
+                                                style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             <div>
                                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-1">
@@ -266,13 +383,67 @@ const RegisterForm = () => {
                                     placeholder="Confirm your password"
                                     type="password"
                                     disabled={isLoading}
-                                    className="h-12 bg-gray-800 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-white placeholder-gray-500"
+                                    className={`h-12 bg-gray-800 border ${
+                                        formData.confirmPassword && formData.password !== formData.confirmPassword
+                                            ? 'border-red-500'
+                                            : formData.confirmPassword && formData.password === formData.confirmPassword
+                                                ? 'border-green-500'
+                                                : 'border-gray-700'
+                                    } focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-white placeholder-gray-500`}
                                     value={formData.confirmPassword}
                                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                                     required
                                 />
+                                
+                                {formData.confirmPassword && (
+                                    <div className="mt-1.5 flex items-center">
+                                        {formData.password === formData.confirmPassword ? (
+                                            <span className="text-xs text-green-400 flex items-center">
+                                                <FaRegCheckCircle className="mr-1" />
+                                                Passwords match
+                                            </span>
+                                        ) : (
+                                            <span className="text-xs text-red-400 flex items-center">
+                                                <FaRegTimesCircle className="mr-1" />
+                                                Passwords do not match
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
+                        
+                        {/* Password requirements */}
+                        {(passwordFocused || formData.password) && (
+                            <div className="mt-1 mb-4 p-3 bg-gray-800/50 border border-gray-700 rounded-md">
+                                <div className="flex items-center text-xs text-gray-300 mb-2">
+                                    <BsShieldLock className="mr-2 text-amber-500" />
+                                    <span className="font-medium">Password requirements:</span>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                                    <div className={`flex items-center text-xs ${passwordStrength.hasMinLength ? 'text-green-400' : 'text-gray-500'}`}>
+                                        {passwordStrength.hasMinLength ? <FaRegCheckCircle className="mr-1" /> : <FaRegTimesCircle className="mr-1" />}
+                                        At least 8 characters
+                                    </div>
+                                    <div className={`flex items-center text-xs ${passwordStrength.hasUppercase ? 'text-green-400' : 'text-gray-500'}`}>
+                                        {passwordStrength.hasUppercase ? <FaRegCheckCircle className="mr-1" /> : <FaRegTimesCircle className="mr-1" />}
+                                        At least one uppercase letter
+                                    </div>
+                                    <div className={`flex items-center text-xs ${passwordStrength.hasLowercase ? 'text-green-400' : 'text-gray-500'}`}>
+                                        {passwordStrength.hasLowercase ? <FaRegCheckCircle className="mr-1" /> : <FaRegTimesCircle className="mr-1" />}
+                                        At least one lowercase letter
+                                    </div>
+                                    <div className={`flex items-center text-xs ${passwordStrength.hasNumber ? 'text-green-400' : 'text-gray-500'}`}>
+                                        {passwordStrength.hasNumber ? <FaRegCheckCircle className="mr-1" /> : <FaRegTimesCircle className="mr-1" />}
+                                        At least one number
+                                    </div>
+                                    <div className={`flex items-center text-xs ${passwordStrength.hasSpecialChar ? 'text-green-400' : 'text-gray-500'}`}>
+                                        {passwordStrength.hasSpecialChar ? <FaRegCheckCircle className="mr-1" /> : <FaRegTimesCircle className="mr-1" />}
+                                        At least one special character
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="bg-gray-800 border border-gray-700 rounded-md p-4 flex items-center mb-6">
                             <IoMailOutline className="h-5 w-5 text-amber-400 mr-3 flex-shrink-0" />
