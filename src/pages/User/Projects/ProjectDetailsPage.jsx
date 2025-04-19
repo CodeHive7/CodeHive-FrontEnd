@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { fetchProjectById, applyForPosition } from "../../../services/userService/UserService.js";
+import { fetchProjectById, applyForPosition , updateProject , deleteProject } from "../../../services/userService/UserService.js";
 import { 
   ArrowLeft, Globe, User, Briefcase, CheckCircle, Users, Calendar, 
   Loader2, Clock, XCircle, ChevronRight, Shield, Code, GitBranch, 
-  Grid, Layers, ExternalLink, MessageSquare, Share2, AlertTriangle
+  Grid, Layers, ExternalLink, MessageSquare, Share2, AlertTriangle,
+  Edit, Trash2, X, Plus, PlusCircle
 } from "lucide-react";
 import { getAccessToken } from "../../../services/Auth/tokenService.js";
 import Swal from "sweetalert2";
@@ -15,6 +16,9 @@ export default function ProjectDetailsPage() {
     const [project, setProject] = useState(null);
     const [loading, setLoading] = useState(true);
     const [loggedInUsername, setLoggedInUsername] = useState("");
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [updatedProject, setUpdatedProject] = useState(null);
+    const [isOwner, setIsOwner] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -22,10 +26,33 @@ export default function ProjectDetailsPage() {
         decodeToken();
     }, []);
 
+    useEffect(() => {
+        if (project && loggedInUsername) {
+            setIsOwner(project.creatorName === loggedInUsername);
+        }
+    }, [project, loggedInUsername]);
+
     const loadProject = async () => {
         try {
             const data = await fetchProjectById(projectId);
             setProject(data);
+            // Initialize update form with current project data
+            setUpdatedProject({
+                name: data.name,
+                description: data.description,
+                stage: data.stage,
+                websiteUrl: data.websiteUrl || "",
+                problemToFix: data.problemToFix || "",
+                question1: data.question1 || "",
+                question2: data.question2 || "",
+                selectedCategory: data.category,
+                positions: data.positions.map(pos => ({
+                    id: pos.id,
+                    roleName: pos.roleName,
+                    paid: pos.paid,
+                    quantity: pos.quantity
+                }))
+            });
         } catch (error) {
             console.error("Error fetching project details", error);
         } finally {
@@ -155,6 +182,98 @@ export default function ProjectDetailsPage() {
         } else {
             processApplication({ answer1: "", answer2: "" });
         }
+    };
+
+    const handleUpdateProject = async () => {
+        try {
+            Swal.fire({
+                title: "Updating Project",
+                text: "Please wait...",
+                allowOutsideClick: false,
+                background: "#111827",
+                color: "#FFFFFF",
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+            
+            await updateProject(projectId, updatedProject);
+            
+            Swal.fire({
+                icon: "success",
+                title: "Success",
+                text: "Project updated successfully",
+                timer: 2000,
+                background: "#111827",
+                color: "#FFFFFF",
+                showConfirmButton: false,
+            });
+            
+            setIsUpdateModalOpen(false);
+            loadProject(); // Refresh project data
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: error.response?.data || "Failed to update project",
+                background: "#111827",
+                color: "#FFFFFF",
+                confirmButtonColor: "#F59E0B",
+            });
+        }
+    };
+
+    const handleDeleteProject = () => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This action cannot be undone. All project data will be permanently deleted.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, delete it",
+            cancelButtonText: "Cancel",
+            background: "#111827",
+            color: "#FFFFFF",
+            confirmButtonColor: "#DC2626",
+            cancelButtonColor: "#4B5563",
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    Swal.fire({
+                        title: "Deleting Project",
+                        text: "Please wait...",
+                        allowOutsideClick: false,
+                        background: "#111827",
+                        color: "#FFFFFF",
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                    });
+                    
+                    await deleteProject(projectId);
+                    
+                    Swal.fire({
+                        icon: "success",
+                        title: "Deleted",
+                        text: "Your project has been deleted successfully",
+                        timer: 2000,
+                        background: "#111827",
+                        color: "#FFFFFF",
+                        showConfirmButton: false,
+                    });
+                    
+                    navigate("/user/dashboard/projects");
+                } catch (error) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: error.response?.data || "Failed to delete project",
+                        background: "#111827",
+                        color: "#FFFFFF",
+                        confirmButtonColor: "#F59E0B",
+                    });
+                }
+            }
+        });
     };
 
     // Get stage badge color and icon
@@ -291,6 +410,25 @@ export default function ProjectDetailsPage() {
                                 </div>
                             </div>
                             <div className="flex gap-2">
+                                {/* Owner Actions */}
+                                {isOwner && (
+                                    <div className="flex gap-2 mr-2">
+                                        <button 
+                                            onClick={() => setIsUpdateModalOpen(true)}
+                                            className="flex items-center px-3 py-2 bg-amber-600 hover:bg-amber-700 text-black font-medium rounded-md transition-colors"
+                                        >
+                                            <Edit className="w-4 h-4 mr-2" /> Edit
+                                        </button>
+                                        <button 
+                                            onClick={handleDeleteProject}
+                                            className="flex items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors"
+                                        >
+                                            <Trash2 className="w-4 h-4 mr-2" /> Delete
+                                        </button>
+                                    </div>
+                                )}
+                                
+                                {/* Share & Message buttons */}
                                 <button 
                                     onClick={() => {
                                         navigator.clipboard.writeText(window.location.href);
@@ -408,6 +546,22 @@ export default function ProjectDetailsPage() {
                                 </a>
                             </div>
                         )}
+
+                        {/* Problem to Fix (if available) */}
+                        {project.problemToFix && (
+                            <div className="mb-8">
+                                <h3 className="text-lg font-semibold text-amber-500 mb-4">
+                                    Problem to Solve
+                                </h3>
+                                <div className="bg-gray-800 p-5 rounded-lg border border-gray-700 text-gray-300 leading-relaxed">
+                                    {project.problemToFix.split('\n').map((paragraph, i) => (
+                                        <p key={i} className={i > 0 ? 'mt-4' : ''}>
+                                            {paragraph}
+                                        </p>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -506,6 +660,318 @@ export default function ProjectDetailsPage() {
                     )}
                 </div>
             </div>
+
+            {/* Update Project Modal */}
+            {isUpdateModalOpen && updatedProject && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 overflow-y-auto animate-fadeIn" 
+                     onClick={() => setIsUpdateModalOpen(false)}>
+                    <div
+                        className="relative bg-gray-950 w-full max-w-3xl rounded-lg shadow-xl border border-gray-800 max-h-[90vh] flex flex-col animate-slideUp"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Modal Header */}
+                        <div className="sticky top-0 z-10 bg-gray-950 p-5 border-b border-gray-800 flex justify-between items-center">
+                            <h2 className="text-xl font-bold text-white flex items-center">
+                                <Edit className="w-5 h-5 mr-2.5 text-amber-400" />
+                                <span>Update Project</span>
+                            </h2>
+                            <button
+                                onClick={() => setIsUpdateModalOpen(false)}
+                                className="bg-gray-800 hover:bg-gray-700 p-2 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                aria-label="Close"
+                            >
+                                <X className="w-5 h-5 text-gray-400" />
+                            </button>
+                        </div>
+            
+                        {/* Form Content - Scrollable */}
+                        <div className="px-5 py-6 overflow-y-auto flex-grow custom-scrollbar" 
+                             style={{ maxHeight: "calc(80vh - 140px)" }}>
+                            <div className="space-y-6">
+                                {/* Basic Project Info */}
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-semibold text-amber-500">Basic Information</h3>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                            Project Name <span className="text-amber-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="Enter project name"
+                                            value={updatedProject.name}
+                                            onChange={(e) => setUpdatedProject({
+                                                ...updatedProject,
+                                                name: e.target.value
+                                            })}
+                                            className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
+                                            required
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                            Description <span className="text-amber-500">*</span>
+                                        </label>
+                                        <textarea
+                                            placeholder="Describe your project"
+                                            value={updatedProject.description}
+                                            onChange={(e) => setUpdatedProject({
+                                                ...updatedProject,
+                                                description: e.target.value
+                                            })}
+                                            className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md h-32 focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
+                                            required
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                            Project Stage <span className="text-amber-500">*</span>
+                                        </label>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {["NOT_STARTED", "IN_DEVELOPMENT", "NEEDS_FIXES", "FINISHED"].map(
+                                                (stage) => (
+                                                    <div
+                                                        key={stage}
+                                                        onClick={() => setUpdatedProject({ ...updatedProject, stage })}
+                                                        className={`p-3 border rounded-md cursor-pointer transition-all flex flex-col items-center ${
+                                                            updatedProject.stage === stage
+                                                                ? "border-amber-500 bg-amber-500/10"
+                                                                : "border-gray-700 bg-gray-800 hover:border-gray-600"
+                                                        }`}
+                                                    >
+                                                        <div className="mb-2">{getStageInfo(stage).icon}</div>
+                                                        <span className="text-sm font-medium">
+                                                            {getStageDisplayName(stage)}
+                                                        </span>
+                                                    </div>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                            Website URL <span className="text-gray-500">(optional)</span>
+                                        </label>
+                                        <input
+                                            type="url"
+                                            placeholder="https://example.com"
+                                            value={updatedProject.websiteUrl}
+                                            onChange={(e) => setUpdatedProject({
+                                                ...updatedProject,
+                                                websiteUrl: e.target.value
+                                            })}
+                                            className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Additional Details */}
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-semibold text-amber-500">Additional Details</h3>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                            Problem to Solve <span className="text-gray-500">(optional)</span>
+                                        </label>
+                                        <textarea
+                                            placeholder="What problem does this project solve?"
+                                            value={updatedProject.problemToFix}
+                                            onChange={(e) => setUpdatedProject({
+                                                ...updatedProject,
+                                                problemToFix: e.target.value
+                                            })}
+                                            className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md h-24 focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
+                                        />
+                                    </div>
+                                    
+                                    <div className="space-y-3">
+                                        <label className="block text-sm font-medium text-gray-300">
+                                            Application Questions <span className="text-gray-500">(optional)</span>
+                                        </label>
+                                        <div>
+                                            <input
+                                                type="text"
+                                                placeholder="Question 1"
+                                                value={updatedProject.question1}
+                                                onChange={(e) => setUpdatedProject({
+                                                    ...updatedProject,
+                                                    question1: e.target.value
+                                                })}
+                                                className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
+                                            />
+                                        </div>
+                                        {updatedProject.question1 && (
+                                            <div>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Question 2"
+                                                    value={updatedProject.question2}
+                                                    onChange={(e) => setUpdatedProject({
+                                                        ...updatedProject,
+                                                        question2: e.target.value
+                                                    })}
+                                                    className="w-full p-3 border border-gray-700 bg-gray-800 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Positions */}
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-semibold text-amber-500">Team Positions</h3>
+                                    
+                                    <div className="max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                                        {updatedProject.positions.map((position, index) => (
+                                            <div key={index} className="bg-gray-800/70 p-4 rounded-md border border-gray-700 mb-4">
+                                                <div className="flex justify-between items-center mb-3">
+                                                    <h4 className="text-white font-medium">Position {index + 1}</h4>
+                                                    {updatedProject.positions.length > 1 && (
+                                                        <button
+                                                            onClick={() => {
+                                                                const updatedPositions = updatedProject.positions.filter((_, i) => i !== index);
+                                                                setUpdatedProject({ ...updatedProject, positions: updatedPositions });
+                                                            }}
+                                                            className="text-red-400 hover:text-red-300 transition-colors text-sm flex items-center"
+                                                        >
+                                                            <X className="w-4 h-4 mr-1" />
+                                                            Remove
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                
+                                                <div className="space-y-3">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-300 mb-1">
+                                                            Role Name <span className="text-amber-500">*</span>
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="e.g. Frontend Developer"
+                                                            value={position.roleName}
+                                                            onChange={(e) => {
+                                                                const updatedPositions = [...updatedProject.positions];
+                                                                updatedPositions[index].roleName = e.target.value;
+                                                                setUpdatedProject({ ...updatedProject, positions: updatedPositions });
+                                                            }}
+                                                            className="w-full p-2.5 border border-gray-700 bg-gray-900 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
+                                                        />
+                                                    </div>
+                                                    
+                                                    <div className="flex justify-between gap-4">
+                                                        <div className="w-1/2">
+                                                            <label className="block text-sm font-medium text-gray-300 mb-1">
+                                                                Quantity
+                                                            </label>
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                value={position.quantity}
+                                                                onChange={(e) => {
+                                                                    const updatedPositions = [...updatedProject.positions];
+                                                                    updatedPositions[index].quantity = parseInt(e.target.value) || 0;
+                                                                    setUpdatedProject({ ...updatedProject, positions: updatedPositions });
+                                                                }}
+                                                                className="w-full p-2.5 border border-gray-700 bg-gray-900 text-white rounded-md focus:border-amber-500 focus:ring focus:ring-amber-500 focus:outline-none transition-colors"
+                                                            />
+                                                        </div>
+                                                        
+                                                        <div className="w-1/2 flex items-end">
+                                                            <label className="flex items-center p-2.5 border border-gray-700 bg-gray-900 rounded-md w-full cursor-pointer hover:bg-gray-800 transition-colors">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={position.paid}
+                                                                    onChange={(e) => {
+                                                                        const updatedPositions = [...updatedProject.positions];
+                                                                        updatedPositions[index].paid = e.target.checked;
+                                                                        setUpdatedProject({ ...updatedProject, positions: updatedPositions });
+                                                                    }}
+                                                                    className="mr-2 text-amber-500 focus:ring-amber-500 rounded"
+                                                                />
+                                                                <span className="text-gray-300 text-sm">Paid Position</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    
+                                    <button
+                                        onClick={() => setUpdatedProject({
+                                            ...updatedProject,
+                                            positions: [...updatedProject.positions, { roleName: "", paid: false, quantity: 1 }]
+                                        })}
+                                        className="w-full p-2.5 border border-dashed border-amber-500/50 bg-amber-500/5 rounded-md text-amber-400 hover:bg-amber-500/10 hover:border-amber-500 transition-all flex items-center justify-center text-sm"
+                                    >
+                                        <PlusCircle className="w-4 h-4 mr-2" />
+                                        Add Position
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+            
+                        {/* Form Actions */}
+                        <div className="sticky bottom-0 z-10 bg-gray-950 px-5 py-4 border-t border-gray-800 flex justify-between">
+                            <button
+                                onClick={() => setIsUpdateModalOpen(false)}
+                                className="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleUpdateProject}
+                                className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-black font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-md"
+                            >
+                                Update Project
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Animations and background effects */}
+            <style>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes slideUp {
+                    from {
+                        transform: translateY(20px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                }
+                .animate-fadeIn {
+                    animation: fadeIn 0.3s ease-out;
+                }
+                .animate-slideUp {
+                    animation: slideUp 0.3s ease-out;
+                }
+                
+                /* Custom Scrollbar for Modal */
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 6px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: rgba(17, 24, 39, 0.5);
+                    border-radius: 3px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background-color: rgba(245, 158, 11, 0.4);
+                    border-radius: 3px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background-color: rgba(245, 158, 11, 0.6);
+                }
+            `}</style>
         </div>
     );
 }
