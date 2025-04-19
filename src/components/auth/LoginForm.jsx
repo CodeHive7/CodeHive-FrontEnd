@@ -1,14 +1,12 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/Auth/AuthContext.jsx";
 import axios from "axios";
 import { ErrorAlert } from "../ui/ErrorAlert.jsx";
 import { SuccessAlert } from "../ui/SuccessAlert.jsx";
-// Fix the imports - use specific imports to avoid issues
-import { BiCodeAlt, BiLogIn } from 'react-icons/bi';
 import { BsGithub, BsGoogle } from 'react-icons/bs';
-import { VscTerminalPowershell } from 'react-icons/vsc';
-import { HiCode, HiOutlineCode, HiTerminal } from 'react-icons/hi';
+import { IoMailOutline } from 'react-icons/io5';
+import { HiTerminal } from 'react-icons/hi';
 
 const LoginForm = () => {
     const [formData, setFormData] = useState({
@@ -23,19 +21,47 @@ const LoginForm = () => {
     const navigate = useNavigate();
     const { loginHandler } = useAuth();
 
+    // Function to check if input is an email
+    const isEmail = (input) => {
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailPattern.test(input);
+    };
+
     async function onSubmit(event) {
         event.preventDefault();
         setIsLoading(true);
         setError(null);
         
         try {
-            await loginHandler(formData);
+            const userInput = formData.username.trim();
+            
+            // Prepare login payload based on whether input is email or username
+            const loginPayload = {
+                password: formData.password
+            };
+            
+            if (isEmail(userInput)) {
+                // If input is an email, set it as email field
+                loginPayload.email = userInput;
+                // Still include username for backward compatibility
+                loginPayload.username = "";
+            } else {
+                // If input is a username, set it as username field
+                loginPayload.username = userInput;
+                // Include empty email for consistency
+                loginPayload.email = "";
+            }
+            
+            // Send structured login request
+            await loginHandler(loginPayload);
             navigate("/dashboard");
         } catch (err) {
             if (err.response?.status === 400 && 
                 err.response?.data?.includes("verify")) {
+                // Use extracted email for verification if available
+                const inputValue = formData.username.trim();
+                setUserEmail(isEmail(inputValue) ? inputValue : "");
                 setNeedsVerification(true);
-                setUserEmail(formData.username);
             } else {
                 setError(err.response?.data || "Authentication failed");
             }
@@ -65,7 +91,7 @@ const LoginForm = () => {
     if (needsVerification) {
         return (
             <div className="w-full max-w-xl mx-auto">
-                <div className="bg-gray-950 rounded-lg shadow-xl border border-gray-800 overflow-hidden">
+                <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800 overflow-hidden">
                     <div className="p-6 sm:p-8">
                         <div className="flex items-center justify-center mb-8">
                             <HiTerminal className="text-amber-500 w-8 h-8" />
@@ -74,12 +100,11 @@ const LoginForm = () => {
                             </h1>
                         </div>
                         
-                        <h2 className="text-xl font-semibold text-white mb-2">
-                            <HiOutlineCode className="inline mr-2" />
+                        <h2 className="text-2xl font-semibold text-white mb-2">
                             Email Verification Required
                         </h2>
-                        <p className="text-gray-400 mb-6 border-l-2 border-amber-500 pl-3">
-                            // Verify your email to access the developer network
+                        <p className="text-gray-400 mb-6">
+                            Verify your email to access your account
                         </p>
 
                         <ErrorAlert
@@ -94,24 +119,23 @@ const LoginForm = () => {
                         />
 
                         <div className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 gap-6">
                                 <div>
-                                    <label className="block text-sm text-gray-300 font-mono mb-1">
-                                        const emailAddress = 
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                                        Email Address
                                     </label>
                                     <input
                                         type="email"
                                         value={userEmail}
                                         onChange={(e) => setUserEmail(e.target.value)}
                                         placeholder="your.email@example.com"
-                                        className="h-12 bg-gray-900 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-sm text-white placeholder-gray-500 font-mono"
+                                        className="h-12 bg-gray-800 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-white placeholder-gray-500"
                                     />
                                 </div>
                                 
-                                <div className="bg-gray-900 border border-gray-700 p-3 rounded-md flex items-start">
-                                    <BiCodeAlt className="h-5 w-5 text-amber-500 mr-2 flex-shrink-0 mt-1" />
+                                <div className="bg-gray-800 border border-gray-700 p-4 rounded-md flex items-start">
+                                    <IoMailOutline className="h-5 w-5 text-amber-400 mr-3 flex-shrink-0 mt-0.5" />
                                     <p className="text-gray-300 text-sm">
-                                        <span className="font-mono text-green-400">// Note:</span><br />
                                         Check your inbox and spam folder for the verification email
                                     </p>
                                 </div>
@@ -132,7 +156,6 @@ const LoginForm = () => {
                                     </span>
                                 ) : (
                                     <span className="flex items-center">
-                                        <BiCodeAlt className="mr-2" size={18} />
                                         Send Verification Email
                                     </span>
                                 )}
@@ -141,9 +164,9 @@ const LoginForm = () => {
                             <div className="text-center mt-4">
                                 <button
                                     onClick={() => setNeedsVerification(false)}
-                                    className="text-amber-500 hover:text-amber-400 text-sm font-mono"
+                                    className="text-amber-500 hover:text-amber-400 text-sm"
                                 >
-                                    return <span className="text-green-500">login</span>;
+                                    Return to Login
                                 </button>
                             </div>
                         </div>
@@ -155,20 +178,20 @@ const LoginForm = () => {
 
     return (
         <div className="w-full max-w-xl mx-auto">
-            <div className="bg-gray-950 rounded-lg shadow-xl border border-gray-800 overflow-hidden">
+            <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800 overflow-hidden">
                 <div className="p-6 sm:p-8">
-                    <div className="flex items-center justify-center mb-6">
+                    <div className="flex items-center justify-center mb-8">
                         <HiTerminal className="text-amber-500 w-8 h-8" />
                         <h1 className="ml-3 text-2xl font-bold text-white">
                             Code<span className="text-amber-500">Hive</span>
                         </h1>
                     </div>
                     
-                    <h2 className="text-xl font-semibold text-white mb-1">
-                        <span className="text-green-400 font-mono">function</span> <span className="text-blue-400">login</span><span className="text-yellow-500">()</span>
+                    <h2 className="text-2xl font-semibold text-white mb-2">
+                        Welcome Back
                     </h2>
-                    <p className="text-gray-400 mb-6 border-l-2 border-amber-500 pl-3 font-mono text-sm">
-                        // Access the collaborative development network
+                    <p className="text-gray-400 mb-6">
+                        Sign in to access your account
                     </p>
 
                     <ErrorAlert
@@ -182,10 +205,10 @@ const LoginForm = () => {
                         onClose={() => setSuccessMessage(null)}
                     />
                     
-                    <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="flex gap-4 mb-6">
                         <button 
                             type="button"
-                            className="h-11 bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded-md flex items-center justify-center text-gray-200 transition-colors"
+                            className="flex-1 h-11 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-md flex items-center justify-center text-white transition-colors"
                             onClick={() => window.location.href = '/api/auth/github/login'}
                         >
                             <BsGithub className="mr-2" size={18} />
@@ -193,7 +216,7 @@ const LoginForm = () => {
                         </button>
                         <button 
                             type="button"
-                            className="h-11 bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded-md flex items-center justify-center text-gray-200 transition-colors"
+                            className="flex-1 h-11 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-md flex items-center justify-center text-white transition-colors"
                         >
                             <BsGoogle className="mr-2" size={16} />
                             <span>Google</span>
@@ -205,54 +228,53 @@ const LoginForm = () => {
                             <div className="w-full border-t border-gray-800"></div>
                         </div>
                         <div className="relative flex justify-center text-xs">
-                            <span className="bg-gray-950 px-2 text-gray-500 font-mono">// or continue with</span>
+                            <span className="bg-gray-900 px-2 text-gray-500">or continue with email</span>
                         </div>
                     </div>
 
                     <form onSubmit={onSubmit} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1 font-mono">
-                                    const username =
+                        <div>
+                            <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1">
+                                Username or Email
+                            </label>
+                            <input
+                                id="username"
+                                placeholder="Enter your username or email"
+                                type="text"
+                                autoCapitalize="none"
+                                autoComplete="username"
+                                autoCorrect="off"
+                                disabled={isLoading}
+                                className="h-12 bg-gray-800 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-white placeholder-gray-500"
+                                value={formData.username}
+                                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                            />
+                        </div>
+                        
+                        <div>
+                            <div className="flex items-center justify-between mb-1">
+                                <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+                                    Password
                                 </label>
-                                <input
-                                    id="username"
-                                    placeholder="your_username"
-                                    type="text"
-                                    autoCapitalize="none"
-                                    autoComplete="username"
-                                    autoCorrect="off"
-                                    disabled={isLoading}
-                                    className="h-12 bg-gray-900 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-sm text-white placeholder-gray-500 font-mono"
-                                    value={formData.username}
-                                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                                />
+                                <Link to="/forgot-password" className="text-xs text-amber-500 hover:text-amber-400">
+                                    Forgot password?
+                                </Link>
                             </div>
-                            <div>
-                                <div className="flex items-center justify-between mb-1">
-                                    <label htmlFor="password" className="block text-sm font-medium text-gray-300 font-mono">
-                                        const password =
-                                    </label>
-                                    <a href="/forgot-password" className="text-xs text-amber-500 hover:text-amber-400 font-mono">
-                                        .reset()
-                                    </a>
-                                </div>
-                                <input
-                                    id="password"
-                                    type="password"
-                                    placeholder="••••••••"
-                                    disabled={isLoading}
-                                    className="h-12 bg-gray-900 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-sm text-white placeholder-gray-500 font-mono"
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                />
-                            </div>
+                            <input
+                                id="password"
+                                type="password"
+                                placeholder="Enter your password"
+                                disabled={isLoading}
+                                className="h-12 bg-gray-800 border border-gray-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 w-full rounded-md px-4 py-2 text-white placeholder-gray-500"
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            />
                         </div>
 
-                        <div className="bg-gray-900 border border-gray-700 rounded-md p-3 flex items-center">
-                            <HiOutlineCode className="h-5 w-5 text-amber-500 mr-2 flex-shrink-0" />
-                            <p className="text-gray-300 text-sm font-mono">
-                                // Join the network of developers collaborating on real projects
+                        <div className="bg-gray-800 border border-gray-700 rounded-md p-4 flex items-center mt-2">
+                            <IoMailOutline className="h-5 w-5 text-amber-400 mr-3 flex-shrink-0" />
+                            <p className="text-gray-300 text-sm">
+                                Join the network of developers collaborating on real projects
                             </p>
                         </div>
 
@@ -276,24 +298,21 @@ const LoginForm = () => {
                                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                         />
                                     </svg>
-                                    Authenticating...
+                                    Processing...
                                 </>
                             ) : (
-                                <>
-                                    <BiLogIn size={18} />
-                                    <span>Connect to Hive</span>
-                                </>
+                                "Sign In"
                             )}
                         </button>
                     </form>
                 </div>
                 
-                <div className="p-5 bg-gray-900 border-t border-gray-800 text-center">
-                    <p className="text-sm text-gray-500 font-mono">
-                        <span className="text-blue-400">if</span> (<span className="text-green-400">!</span>user) {" "}
-                        <a href="/register" className="text-amber-500 hover:text-amber-400 font-medium">
-                            register();
-                        </a>
+                <div className="p-5 bg-gray-800 border-t border-gray-700 text-center">
+                    <p className="text-gray-400">
+                        Don't have an account?{" "}
+                        <Link to="/register" className="text-amber-500 hover:text-amber-400 font-medium">
+                            Create account
+                        </Link>
                     </p>
                 </div>
             </div>

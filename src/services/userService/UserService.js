@@ -61,6 +61,26 @@ export const updateUserProfile = async (updatedUserProfile) => {
     }
 };
 
+export const deleteMyProject = async (projectId) => {
+    try {
+        const response = await apiClient.delete(`/project/${projectId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error deleting project", error);
+        throw error;
+    }
+};
+
+export const updateProject = async (projectId, projectData) => {
+    try {
+        const response = await apiClient.put(`/project/${projjectId}`, projectData);
+        return response.data;
+    } catch (error) {
+        console.error("Error updating project", error);
+        throw error;
+    }
+};
+
 export const fetchMyProjects = async () => {
     try {
         const response = await apiClient.get("/project/my-projects");

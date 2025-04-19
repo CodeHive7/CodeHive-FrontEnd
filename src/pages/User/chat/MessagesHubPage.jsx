@@ -85,8 +85,8 @@ export default function MessagesHubPage() {
                 console.error("Error fetching projects:", error);
                 Swal.fire({
                     icon: "error",
-                    title: "FetchProjectsException",
-                    text: "Error: API request failed with status 500. Check network connection.",
+                    title: "Connection Error",
+                    text: "Unable to load your projects. Please check your internet connection and try again.",
                     confirmButtonColor: "#F59E0B",
                     background: "#111827",
                     color: "#ffffff"
@@ -136,16 +136,16 @@ export default function MessagesHubPage() {
     // Get stage display name
     const getStageDisplayName = (stage) => {
         switch(stage) {
-            case "NOT_STARTED": return "NOT_STARTED";
-            case "IN_DEVELOPMENT": return "IN_DEVELOPMENT";
-            case "FINISHED": return "COMPLETED";
-            case "NEEDS_FIXES": return "NEEDS_FIXES";
-            default: return stage || "ONGOING";
+            case "NOT_STARTED": return "Not Started";
+            case "IN_DEVELOPMENT": return "In Development";
+            case "FINISHED": return "Completed";
+            case "NEEDS_FIXES": return "Needs Fixes";
+            default: return stage || "Ongoing";
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-950 text-white font-mono">
+        <div className="min-h-screen bg-gray-950 text-white">
             {/* Top Navigation */}
             <header className="sticky top-0 z-40 bg-gray-950/95 backdrop-blur-sm border-b border-gray-800 shadow-md">
                 <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -158,7 +158,7 @@ export default function MessagesHubPage() {
                         </button>
                         <h1 className="text-2xl font-bold text-white flex items-center">
                             <MessageSquare className="mr-2 h-6 w-6 text-amber-400" />
-                            <span className="text-amber-400">chat</span>.hubs()
+                            <span className="text-amber-400">Project</span> Messages
                         </h1>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -167,7 +167,7 @@ export default function MessagesHubPage() {
                             className="flex items-center text-sm text-gray-300 hover:text-amber-400 transition-colors"
                         >
                             <Home className="w-4 h-4 mr-1" />
-                            <span className="hidden md:inline">dashboard.view()</span>
+                            <span className="hidden md:inline">Dashboard</span>
                         </Link>
                     </div>
                 </div>
@@ -177,13 +177,13 @@ export default function MessagesHubPage() {
                 {/* Interactive Header with Animation */}
                 <div className="text-center mb-12">
                     <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                        <span className="text-amber-400">project</span>.<span className="text-white">communication</span>
-                        <span className="text-amber-400">()</span>
+                        <span className="text-amber-400">Project </span>
+                        <span className="text-white">Communication</span>
                     </h2>
                     <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                        // effective communication is the backbone of successful projects
+                        Effective communication is the backbone of successful projects.
                         <br />
-                        // select a communication channel below to interact with your team
+                        Select a project below to chat with your team members.
                     </p>
                 </div>
 
@@ -192,7 +192,7 @@ export default function MessagesHubPage() {
                     <div className="relative flex-grow">
                         <input
                             type="text"
-                            placeholder="search(keyword: string)"
+                            placeholder="Search projects..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full bg-gray-800/70 border border-gray-700 rounded-md px-4 py-2 pl-10 text-white focus:outline-none focus:border-amber-500 focus:ring focus:ring-amber-500/20 transition-all"
@@ -218,7 +218,7 @@ export default function MessagesHubPage() {
                             }`}
                         >
                             <Activity className="w-4 h-4 mr-1" />
-                            projects.all()
+                            All Projects
                         </button>
                         <button 
                             onClick={() => setSelectedCategory("created")}
@@ -229,7 +229,7 @@ export default function MessagesHubPage() {
                             }`}
                         >
                             <Sparkles className="w-4 h-4 mr-1" />
-                            projects.filter(owner: true)
+                            My Projects
                         </button>
                         <button 
                             onClick={() => setSelectedCategory("joined")}
@@ -240,7 +240,7 @@ export default function MessagesHubPage() {
                             }`}
                         >
                             <Code className="w-4 h-4 mr-1" />
-                            projects.filter(member: true)
+                            Joined Projects
                         </button>
                     </div>
                 </div>
@@ -254,7 +254,7 @@ export default function MessagesHubPage() {
                                 <Terminal className="h-6 w-6 text-amber-500" />
                             </div>
                         </div>
-                        <p className="text-gray-400 mt-4">chats.loading() <span className="animate-pulse">|</span></p>
+                        <p className="text-gray-400 mt-4">Loading your messages <span className="animate-pulse">...</span></p>
                     </div>
                 ) : filteredProjects.length === 0 ? (
                     <div className="text-center py-20 bg-gray-900/30 rounded-md border border-gray-800">
@@ -264,8 +264,8 @@ export default function MessagesHubPage() {
                         
                         {searchQuery || selectedCategory !== "all" ? (
                             <>
-                                <p className="text-gray-300 text-xl font-mono">projects.filter(query).length === 0</p>
-                                <p className="text-gray-400 mt-2 font-mono">// no matching conversations found with current filters</p>
+                                <p className="text-gray-300 text-xl">No matching projects found</p>
+                                <p className="text-gray-400 mt-2">No conversations match your current search or filters</p>
                                 <button 
                                     onClick={() => {
                                         setSearchQuery("");
@@ -274,18 +274,18 @@ export default function MessagesHubPage() {
                                     className="mt-4 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-md text-amber-400 flex items-center mx-auto"
                                 >
                                     <X className="w-4 h-4 mr-2" />
-                                    filters.reset()
+                                    Clear Filters
                                 </button>
                             </>
                         ) : (
                             <>
-                                <p className="text-gray-300 text-xl font-mono">conversations.length === 0</p>
-                                <p className="text-gray-400 mt-2 font-mono">// join or create a project to start collaborating</p>
+                                <p className="text-gray-300 text-xl">No conversations yet</p>
+                                <p className="text-gray-400 mt-2">Join or create a project to start collaborating</p>
                                 <Link 
                                     to="/user/my-projects" 
                                     className="mt-4 inline-block px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-medium rounded-md"
                                 >
-                                    myProjects.view()
+                                    View My Projects
                                 </Link>
                             </>
                         )}
@@ -306,7 +306,7 @@ export default function MessagesHubPage() {
                                     {/* Creator badge */}
                                     {project.isCreator && (
                                         <div className="absolute top-0 left-0 bg-amber-500 px-3 py-1 text-black text-xs font-bold rounded-br-md">
-                                            owner: true
+                                            Owner
                                         </div>
                                     )}
                                     
@@ -319,22 +319,22 @@ export default function MessagesHubPage() {
 
                                     <div className="pt-6">
                                         <h3 className="text-xl font-bold text-amber-400 group-hover:text-amber-300 transition-colors">
-                                            {project.name || "undefined"}
+                                            {project.name || "Unnamed Project"}
                                         </h3>
                                         
                                         <div className="flex items-center mt-2 text-sm">
                                             <span className="bg-gray-800/70 px-2 py-1 rounded text-xs text-gray-300 mr-2">
-                                                category: "{project.category || "uncategorized"}"
+                                                {project.category || "Uncategorized"}
                                             </span>
                                             
                                             <div className="flex items-center text-gray-400">
                                                 <Users className="w-4 h-4 mr-1" />
-                                                <span>teamspace</span>
+                                                <span>Team Space</span>
                                             </div>
                                         </div>
                                         
-                                        <p className="text-gray-400 text-sm mt-3 line-clamp-2 min-h-[40px] font-mono">
-                                            {project.description || "// no description available"}
+                                        <p className="text-gray-400 text-sm mt-3 line-clamp-2 min-h-[40px]">
+                                            {project.description || "No description available"}
                                         </p>
                                     </div>
                                     
@@ -342,8 +342,8 @@ export default function MessagesHubPage() {
                                         <Clock className="w-3.5 h-3.5 mr-1" />
                                         <span>
                                             {project.createdAt 
-                                                ? `created: ${new Date(project.createdAt).toLocaleDateString()}`
-                                                : "recently_created"}
+                                                ? `Created: ${new Date(project.createdAt).toLocaleDateString()}`
+                                                : "Recently created"}
                                         </span>
                                     </div>
                                 </div>
@@ -353,7 +353,7 @@ export default function MessagesHubPage() {
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center">
                                             <MessageCircle className="h-5 w-5 text-amber-500 mr-2" />
-                                            <span className="text-sm text-gray-300">chat.open()</span>
+                                            <span className="text-sm text-gray-300">Open Chat</span>
                                         </div>
                                         <ChevronRight className="h-5 w-5 text-amber-400 group-hover:translate-x-1 transition-transform" />
                                     </div>
@@ -366,15 +366,15 @@ export default function MessagesHubPage() {
                 {/* Help text */}
                 {!loading && filteredProjects.length > 0 && (
                     <div className="mt-10 text-center text-gray-400 text-sm bg-gray-900/30 p-4 rounded-md border border-gray-800/50">
-                        <p>// click on any project card to open the team communication channel</p>
-                        <p className="mt-1">// only members with status === "ACCEPTED" can access project chats</p>
+                        <p>Click on any project card to open the team communication channel</p>
+                        <p className="mt-1">Only accepted team members can access project chats</p>
                     </div>
                 )}
             </div>
             
             {/* Footer */}
             <footer className="mt-auto py-4 text-center text-gray-500 text-sm border-t border-gray-800 bg-gray-950">
-                <p className="font-mono">/* CodeHive | Building better projects together */</p>
+                <p>CodeHive | Building better projects together</p>
             </footer>
             
             {/* Subtle code pattern background */}

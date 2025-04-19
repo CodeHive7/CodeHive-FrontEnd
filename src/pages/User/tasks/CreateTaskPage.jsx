@@ -59,8 +59,8 @@ export default function CreateTaskPage() {
         if (!selectedProject || !taskDetails.title || !taskDetails.assignedToUserId) {
             Swal.fire({
                 icon: "warning",
-                title: "ValidationError",
-                text: "Error: Required fields cannot be null. Check project, title and assignee.",
+                title: "Missing Information",
+                text: "Please fill in the required fields: project, title and team member.",
                 background: "#111827",
                 color: "#ffffff",
                 confirmButtonColor: "#F59E0B"
@@ -72,8 +72,8 @@ export default function CreateTaskPage() {
             await createTask(selectedProject, taskDetails);
             Swal.fire({
                 icon: "success",
-                title: "task.create()",
-                text: "return { status: 201, message: 'Task created successfully' }",
+                title: "Success",
+                text: "Task created successfully",
                 timer: 2000,
                 showConfirmButton: false,
                 background: "#111827",
@@ -89,8 +89,8 @@ export default function CreateTaskPage() {
         } catch (error) {
             Swal.fire({
                 icon: "error",
-                title: "TaskCreationException",
-                text: "Error: API request failed with status 500. Retry operation.",
+                title: "Error",
+                text: "Failed to create task. Please try again later.",
                 background: "#111827",
                 color: "#ffffff",
                 confirmButtonColor: "#F59E0B"
@@ -105,17 +105,16 @@ export default function CreateTaskPage() {
                     <div className="absolute inset-0 rounded-full bg-amber-500/20 animate-ping"></div>
                     <Loader2 className="w-16 h-16 text-amber-500 animate-spin relative z-10" />
                 </div>
-                <p className="text-gray-400 text-lg font-mono animate-pulse">projects.loading();</p>
+                <p className="text-gray-400 text-lg">Loading projects...</p>
             </div>
         );
     }
 
     return (
         <div className="space-y-8 max-w-5xl mx-auto px-4 py-6">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-8 font-mono">
-                <span className="text-amber-500">Task</span>
-                <span className="text-white">::</span>
-                <span className="text-amber-400">create()</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">
+                <span className="text-amber-500">Create </span>
+                <span className="text-amber-400">New Task</span>
             </h2>
 
             <div className="bg-gray-900 border-2 border-amber-500/30 rounded-lg shadow-xl overflow-hidden">
@@ -126,8 +125,8 @@ export default function CreateTaskPage() {
                             <Terminal className="w-8 h-8 text-amber-400" />
                         </div>
                         <div>
-                            <h3 className="text-2xl font-semibold text-white font-mono">new Task();</h3>
-                            <p className="text-gray-400 text-base font-mono mt-1">// initialize and assign to team member</p>
+                            <h3 className="text-2xl font-semibold text-white">New Task</h3>
+                            <p className="text-gray-400 text-base mt-1">Create and assign to a team member</p>
                         </div>
                     </div>
                 </div>
@@ -139,20 +138,20 @@ export default function CreateTaskPage() {
                             <div className="bg-amber-500/20 p-6 rounded-full mb-5">
                                 <AlertTriangle className="w-14 h-14 text-amber-500" />
                             </div>
-                            <p className="text-gray-300 text-xl font-mono">projects.length === 0</p>
-                            <p className="text-gray-500 text-base mt-3 font-mono">// first create a Project instance</p>
+                            <p className="text-gray-300 text-xl">No projects available</p>
+                            <p className="text-gray-500 text-base mt-3">You need to create a project first</p>
                         </div>
                     ) : (
                         <div className="space-y-7">
                             {/* Select Project */}
                             <div className="relative">
                                 <div className="absolute top-0 left-0 ml-4 -mt-3 px-2 bg-gray-900 z-10">
-                                    <label className="text-amber-400 text-sm font-mono">project.select(id)</label>
+                                    <label className="text-amber-400 text-sm">Select Project</label>
                                 </div>
                                 <select
                                     value={selectedProject}
                                     onChange={handleProjectChange}
-                                    className="w-full p-4 text-base rounded-md bg-gray-950 text-white border-2 border-amber-500/40 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono"
+                                    className="w-full p-4 text-base rounded-md bg-gray-950 text-white border-2 border-amber-500/40 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
                                 >
                                     {projects.map((project) => (
                                         <option key={project.id} value={project.id}>{project.name}</option>
@@ -163,33 +162,33 @@ export default function CreateTaskPage() {
                             {/* Task Title */}
                             <div className="relative">
                                 <div className="absolute top-0 left-0 ml-4 -mt-3 px-2 bg-gray-900 z-10">
-                                    <label className="text-amber-400 text-sm font-mono">.title</label>
+                                    <label className="text-amber-400 text-sm">Task Title</label>
                                 </div>
                                 <input
                                     name="title"
-                                    placeholder="task.title = '...'"
+                                    placeholder="Enter task title..."
                                     onChange={handleInputChange}
                                     value={taskDetails.title}
-                                    className="w-full p-4 text-base rounded-md bg-gray-950 text-white border-2 border-amber-500/40 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono"
+                                    className="w-full p-4 text-base rounded-md bg-gray-950 text-white border-2 border-amber-500/40 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
                                 />
                             </div>
 
                             {/* Task Description */}
                             <div className="relative">
                                 <div className="absolute top-0 left-0 ml-4 -mt-3 px-2 bg-gray-900 z-10">
-                                    <label className="text-amber-400 text-sm font-mono">.description</label>
+                                    <label className="text-amber-400 text-sm">Description</label>
                                 </div>
                                 <div className="relative">
-                                    <div className="absolute top-0 left-0 px-4 py-4 text-gray-500 font-mono text-lg">/**</div>
+                                    <div className="absolute top-0 left-0 px-4 py-4 text-gray-500 text-lg">/**</div>
                                     <textarea
                                         name="description"
                                         placeholder="Task description goes here..."
                                         rows="5"
                                         onChange={handleInputChange}
                                         value={taskDetails.description}
-                                        className="w-full p-4 pl-12 text-base rounded-md bg-gray-950 text-white border-2 border-amber-500/40 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono"
+                                        className="w-full p-4 pl-12 text-base rounded-md bg-gray-950 text-white border-2 border-amber-500/40 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
                                     />
-                                    <div className="absolute bottom-0 left-0 px-4 py-4 text-gray-500 font-mono text-lg">*/</div>
+                                    <div className="absolute bottom-0 left-0 px-4 py-4 text-gray-500 text-lg">*/</div>
                                 </div>
                             </div>
 
@@ -197,7 +196,7 @@ export default function CreateTaskPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="relative">
                                     <div className="absolute top-0 left-0 ml-4 -mt-3 px-2 bg-gray-900 z-10">
-                                        <label className="text-amber-400 text-sm font-mono">.dueDate</label>
+                                        <label className="text-amber-400 text-sm">Due Date</label>
                                     </div>
                                     <div className="relative">
                                         <Calendar 
@@ -209,7 +208,7 @@ export default function CreateTaskPage() {
                                             onChange={handleInputChange}
                                             value={taskDetails.dueDate}
                                             className="w-full p-4 pl-12 text-base rounded-md bg-gray-950 text-white border-2 border-amber-500/40 
-                                                     focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono
+                                                     focus:border-amber-500 focus:ring-1 focus:ring-amber-500
                                                      [color-scheme:dark] appearance-none"
                                             onClick={(e) => {
                                                 // Ensure focus and open the date picker
@@ -221,7 +220,7 @@ export default function CreateTaskPage() {
 
                                 <div className="relative">
                                     <div className="absolute top-0 left-0 ml-4 -mt-3 px-2 bg-gray-900 z-10">
-                                        <label className="text-amber-400 text-sm font-mono">.priority</label>
+                                        <label className="text-amber-400 text-sm">Priority</label>
                                     </div>
                                     <div className="relative">
                                         <Flag className="absolute left-4 top-1/2 transform -translate-y-1/2 text-amber-500/70 w-5 h-5" />
@@ -229,11 +228,11 @@ export default function CreateTaskPage() {
                                             name="priority"
                                             value={taskDetails.priority}
                                             onChange={handleInputChange}
-                                            className="w-full p-4 pl-12 text-base rounded-md bg-gray-950 text-white border-2 border-amber-500/40 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono appearance-none"
+                                            className="w-full p-4 pl-12 text-base rounded-md bg-gray-950 text-white border-2 border-amber-500/40 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 appearance-none"
                                         >
-                                            <option value="LOW">Priority.LOW 🐢</option>
-                                            <option value="MEDIUM">Priority.MEDIUM ⚡</option>
-                                            <option value="HIGH">Priority.HIGH 🔥</option>
+                                            <option value="LOW">Low Priority 🐢</option>
+                                            <option value="MEDIUM">Medium Priority ⚡</option>
+                                            <option value="HIGH">High Priority 🔥</option>
                                         </select>
                                         <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
                                             <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,18 +246,18 @@ export default function CreateTaskPage() {
                             {/* Select Assigned User */}
                             <div className="relative">
                                 <div className="absolute top-0 left-0 ml-4 -mt-3 px-2 bg-gray-900 z-10">
-                                    <label className="text-amber-400 text-sm font-mono">.assignTo(userId)</label>
+                                    <label className="text-amber-400 text-sm">Assign To</label>
                                 </div>
                                 {applicants.length === 0 ? (
                                     <div className="p-6 bg-gray-950 border-2 border-amber-500/30 rounded-md">
                                         <div className="flex items-start">
                                             <Code className="w-5 h-5 text-amber-400 mr-3 mt-0.5" />
-                                            <pre className="text-amber-400 text-base font-mono">
-                                                <span className="text-blue-400">throw</span> <span className="text-red-400">new</span> <span className="text-green-400">TeamError</span>("No accepted applicants found");
-                                            </pre>
+                                            <p className="text-amber-400 text-base">
+                                                No team members found
+                                            </p>
                                         </div>
-                                        <p className="text-gray-500 text-sm mt-3 ml-8 font-mono">
-                                            // Accept team members before assigning tasks
+                                        <p className="text-gray-500 text-sm mt-3 ml-8">
+                                            You need to accept team members before you can assign tasks
                                         </p>
                                     </div>
                                 ) : (
@@ -268,12 +267,12 @@ export default function CreateTaskPage() {
                                             name="assignedToUserId"
                                             value={taskDetails.assignedToUserId}
                                             onChange={handleInputChange}
-                                            className="w-full p-4 pl-12 text-base rounded-md bg-gray-950 text-white border-2 border-amber-500/40 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono appearance-none"
+                                            className="w-full p-4 pl-12 text-base rounded-md bg-gray-950 text-white border-2 border-amber-500/40 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 appearance-none"
                                         >
-                                            <option value="">selectTeamMember()</option>
+                                            <option value="">Select team member</option>
                                             {applicants.map((applicant) => (
                                                 <option key={applicant.id} value={applicant.id}>
-                                                    user::{applicant.username}
+                                                    {applicant.username}
                                                 </option>
                                             ))}
                                         </select>
@@ -291,36 +290,22 @@ export default function CreateTaskPage() {
                                 <div className="absolute left-0 top-1/2 h-px bg-amber-500/30 w-1/3 transform -translate-y-1/2"></div>
                                 <div className="absolute right-0 top-1/2 h-px bg-amber-500/30 w-1/3 transform -translate-y-1/2"></div>
                                 <button
-                                    className={`px-10 py-4 text-lg rounded-lg transition-all transform active:scale-95 font-mono
+                                    className={`px-10 py-4 text-lg rounded-lg transition-all transform active:scale-95
                                         ${applicants.length === 0 
                                             ? "bg-gray-700 text-gray-400 cursor-not-allowed" 
                                             : "bg-amber-500 hover:bg-amber-400 text-black shadow-lg hover:shadow-amber-500/30"}`}
                                     onClick={handleCreateTask}
                                     disabled={applicants.length === 0}
                                 >
-                                    task.save()
+                                    Create Task
                                 </button>
                                 {applicants.length === 0 && (
-                                    <p className="mt-3 text-gray-500 text-sm font-mono">// Method disabled: no team members available</p>
+                                    <p className="mt-3 text-gray-500 text-sm">You need team members before creating tasks</p>
                                 )}
                             </div>
                         </div>
                     )}
                 </div>
-            </div>
-
-            {/* Code-style decorative element */}
-            <div className="fixed top-10 right-10 opacity-10 pointer-events-none hidden lg:block">
-                <pre className="text-amber-500 text-sm font-mono">
-                    {`function Task(title, assignee) {
-  this.status = "TODO";
-  this.created = new Date();
-  this.notify = () => {
-    sendAlert(assignee);
-  };
-  // ... 
-}`}
-                </pre>
             </div>
 
             {/* Background pattern */}
