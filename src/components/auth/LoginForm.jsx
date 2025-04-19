@@ -21,19 +21,47 @@ const LoginForm = () => {
     const navigate = useNavigate();
     const { loginHandler } = useAuth();
 
+    // Function to check if input is an email
+    const isEmail = (input) => {
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailPattern.test(input);
+    };
+
     async function onSubmit(event) {
         event.preventDefault();
         setIsLoading(true);
         setError(null);
         
         try {
-            await loginHandler(formData);
+            const userInput = formData.username.trim();
+            
+            // Prepare login payload based on whether input is email or username
+            const loginPayload = {
+                password: formData.password
+            };
+            
+            if (isEmail(userInput)) {
+                // If input is an email, set it as email field
+                loginPayload.email = userInput;
+                // Still include username for backward compatibility
+                loginPayload.username = "";
+            } else {
+                // If input is a username, set it as username field
+                loginPayload.username = userInput;
+                // Include empty email for consistency
+                loginPayload.email = "";
+            }
+            
+            // Send structured login request
+            await loginHandler(loginPayload);
             navigate("/dashboard");
         } catch (err) {
             if (err.response?.status === 400 && 
                 err.response?.data?.includes("verify")) {
+                // Use extracted email for verification if available
+                const inputValue = formData.username.trim();
+                setUserEmail(isEmail(inputValue) ? inputValue : "");
                 setNeedsVerification(true);
-                setUserEmail(formData.username);
             } else {
                 setError(err.response?.data || "Authentication failed");
             }
@@ -211,7 +239,7 @@ const LoginForm = () => {
                             </label>
                             <input
                                 id="username"
-                                placeholder="Enter your username"
+                                placeholder="Enter your username or email"
                                 type="text"
                                 autoCapitalize="none"
                                 autoComplete="username"
