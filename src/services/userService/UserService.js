@@ -61,7 +61,7 @@ export const updateUserProfile = async (updatedUserProfile) => {
     }
 };
 
-export const deleteMyProject = async (projectId) => {
+export const deleteProject = async (projectId) => {
     try {
         const response = await apiClient.delete(`/project/${projectId}`);
         return response.data;
@@ -73,7 +73,7 @@ export const deleteMyProject = async (projectId) => {
 
 export const updateProject = async (projectId, projectData) => {
     try {
-        const response = await apiClient.put(`/project/${projjectId}`, projectData);
+        const response = await apiClient.put(`/project/${projectId}`, projectData);
         return response.data;
     } catch (error) {
         console.error("Error updating project", error);
